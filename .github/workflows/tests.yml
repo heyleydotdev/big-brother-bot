@@ -1,0 +1,76 @@
+# GitHub Actions workflow which runs the B3 test suite.
+#
+# This replaces the legacy TravisCI setup (.travis.yml). Since this codebase is Python 2.7
+# only, and GitHub hosted runners no longer provide Python 2.7, tests are executed inside
+# a python:2.7 docker container.
+#
+# The core/plugins jobs mirror the old TravisCI matrix and reuse the scripts in ./scripts,
+# while MySQL and PostgreSQL services are provided for the storage tests.
+
+name: tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: ${{ matrix.test }} tests
+    runs-on: ubuntu-latest
+    container: python:2.7.18-buster
+
+    strategy:
+      fail-fast: false
+      matrix:
+        test: [core, plugins]
+
+    env:
+      MYSQL_TEST_HOST: mysql
+      MYSQL_TEST_USER: root
+      MYSQL_TEST_PASSWORD: root
+      MYSQL_TEST_DB: b3_test
+      POSTGRESQL_TEST_HOST: postgres
+      POSTGRESQL_TEST_USER: postgres
+      POSTGRESQL_TEST_PASSWORD: ''
+      POSTGRESQL_TEST_DB: b3_test
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+      postgres:
+        image: postgres:9.3
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends libpq-dev
+
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade "pip<21"
+          pip install -r requirements.txt
+          pip install -r optional-requirements.txt
+          pip install -r test-requirements.txt
+
+      - name: Run ${{ matrix.test }} tests
+        run: ./scripts/start-tests-${{ matrix.test }}.sh
