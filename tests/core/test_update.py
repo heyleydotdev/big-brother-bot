@@ -151,6 +151,7 @@ class TestCheckUpdateUrl(unittest.TestCase):
         ms = ((time.time() - self._time_start)*1000)
         self.assertTrue(ms < 10000, "Test exceeded timeout : %s ms" % ms)
 
+    @unittest.skip("relies on the availability of the historical B3 update URL which is no longer guaranteed")
     def test_official_url(self):
         result = update.checkUpdate('1.2', singleLine=False, showErrormsg=True)
         self.assertIsNotNone(result)
