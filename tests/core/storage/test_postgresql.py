@@ -91,6 +91,21 @@ class Test_PostgreSQL(B3TestCase, StorageAPITest):
         B3TestCase.setUp(self)
 
         try:
+            # create a fresh database like Test_MySQL does, since the PostgreSQL server
+            # may not have the test database ready (e.g., fresh CI service container)
+            connection = psycopg2.connect(host=POSTGRESQL_TEST_HOST,
+                                          user=POSTGRESQL_TEST_USER,
+                                          password=POSTGRESQL_TEST_PASSWORD,
+                                          database='postgres')
+            connection.autocommit = True
+            cursor = connection.cursor()
+            cursor.execute('DROP DATABASE IF EXISTS "%s"' % POSTGRESQL_TEST_DB)
+            cursor.execute('CREATE DATABASE "%s" ENCODING \'utf8\'' % POSTGRESQL_TEST_DB)
+            connection.close()
+        except psycopg2.Error, e:
+            self.fail("Error: %r" % e)
+
+        try:
             dsn = "postgresql://%s:%s@%s/%s" % (POSTGRESQL_TEST_USER, POSTGRESQL_TEST_PASSWORD, POSTGRESQL_TEST_HOST, POSTGRESQL_TEST_DB)
             self.storage = self.console.storage = PostgresqlStorage(dsn, splitDSN(dsn), self.console)
             self.storage.connect()
