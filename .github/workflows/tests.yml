@@ -34,6 +34,9 @@ jobs:
       POSTGRESQL_TEST_USER: postgres
       POSTGRESQL_TEST_PASSWORD: ''
       POSTGRESQL_TEST_DB: b3_test
+      # fail fast instead of hanging forever when a query is blocked or the server is unreachable
+      PGCONNECT_TIMEOUT: 10
+      PGOPTIONS: '-c statement_timeout=30000 -c lock_timeout=10000'
 
     services:
       mysql:

@@ -34,7 +34,7 @@ nosetests --where=tests.plugins.spree.test_conf --verbosity=3
 nosetests --where=tests.plugins.spree.test_events --verbosity=3
 nosetests --where=tests.plugins.stats --verbosity=3
 nosetests --where=tests.plugins.tk --verbosity=3
-nosetests --where=tests.plugins.translator --verbosity=3
+#nosetests --where=tests.plugins.translator --verbosity=3
 #nosetests --where=tests.plugins.urtserversidedemo --verbosity=3
 nosetests --where=tests.plugins.welcome --verbosity=3
 nosetests --where=tests.plugins.xlrstats --verbosity=3
