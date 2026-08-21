@@ -212,6 +212,8 @@ class Test_parser_API(RavagedTestCase):
 11 Thrust_Oilrig
 12 Thrust_Rooftop
 """)
+        when(self.parser.output).write("addmap Thrust_Oilrig 1").thenReturn(None)
+        when(self.parser.output).write("nextmap").thenReturn(None)
         # WHEN
         with patch.object(self.parser.output, 'write', wraps=self.parser.output.write) as write_mock:
             rv = self.parser.changeMap('oil')
@@ -709,6 +711,8 @@ class test_functional(unittest.TestCase):
 11 Thrust_Oilrig
 12 Thrust_Rooftop
 """.encode('UTF-8'))
+        when(self.parser.output).write("addmap Thrust_Chasm 1").thenReturn(None)
+        when(self.parser.output).write("nextmap").thenReturn(None)
         admin = FakeClient(console=self.parser, name="admin", guid="guid_admin", groupBits=128)
         admin.connects("guid_admin")
         # WHEN

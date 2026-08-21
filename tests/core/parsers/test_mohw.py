@@ -142,6 +142,8 @@ class Test_events(MohwTestCase):
     def test_cmd_rotateMap_generate_EVT_GAME_ROUND_END(self):
         # GIVEN
         when(self.parser).write(('mapList.getMapIndices', )).thenReturn([0, 1])
+        when(self.parser).write(('mapList.setNextMapIndex', 1)).thenReturn(None)
+        when(self.parser).write(('mapList.runNextRound', )).thenReturn(None)
         when(self.parser).getFullMapRotationList().thenReturn(
             NewMapListBlock(['4', 'CustomPL', '3', 'MP_03', 'CombatMission', '1', 'MP_05', 'BombSquad', '1', 'MP_10',
                              'Sport', '4', 'MP_013', 'SectorControl', '4']))
