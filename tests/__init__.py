@@ -77,7 +77,11 @@ def flush_console_streams():
 class B3TestCase(unittest.TestCase):
 
     def setUp(self):
-        testcase_lock.acquire()
+        if not testcase_lock.acquire(False):
+            # a previous test failed during its setUp leaving the lock acquired:
+            # recover instead of hanging the whole test suite
+            testcase_lock.release()
+            testcase_lock.acquire()
         flush_console_streams()
 
         # create a FakeConsole parser
