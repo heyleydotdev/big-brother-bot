@@ -53,13 +53,13 @@ class Geolocator(object):
         :return: string
         """
         if isinstance(data, basestring):
-            if not re.match(r'''^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}''', str(data)):
+            if not re.match(r'''^\d{1,3}(?:\.\d{1,3}){3}$''', str(data)):
                 raise GeolocalizationError('invalid ip address string supplied: %s' % data)
         elif isinstance(data, b3.clients.Client):
             client = data
             if not client.ip:
                 raise GeolocalizationError('b3.clients.Client object instance has not ip attribute set')
-            elif not re.match(r'''^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}''', client.ip):
+            elif not re.match(r'''^\d{1,3}(?:\.\d{1,3}){3}$''', client.ip):
                 raise GeolocalizationError('b3.clients.Client object instance has an invalid ip address string: %s' % client.ip)
         else:
             raise GeolocalizationError('invalid argument supplied: %s' % type(data).__name__)
@@ -100,9 +100,9 @@ class IpApiGeolocator(Geolocator):
                         zipcode=rt.get('zip', None))
 
 
-class TelizeGeolocator(Geolocator):
+class IpWhoIsGeolocator(Geolocator):
 
-    _url = 'http://www.telize.com/geoip/%s'
+    _url = 'https://ipwho.is/%s'
 
     def getLocation(self, data):
         """
@@ -113,20 +113,23 @@ class TelizeGeolocator(Geolocator):
         """
         ip = self._getIp(data)
         rt = requests.get(self._url % ip, timeout=self._timeout).json()
-        if 'code' in rt and int(rt['code']) == 401:
-            raise GeolocalizationError('input string is not a valid ip address: %s' % ip)
-        if 'country' not in rt:
-            raise GeolocalizationError('could not establish in which country is ip %s' % ip)
+
+        if not rt.get('success', False):
+            raise GeolocalizationError('could not geolocate ip %s: %s' % (ip, rt.get('message', 'unknown error')))
+
+        connection = rt.get('connection') or {}
+        timezone = rt.get('timezone') or {}
 
         return Location(country=rt.get('country', None), region=rt.get('region', None), city=rt.get('city', None),
-                        cc=rt.get('country_code', None), rc=rt.get('region_code', None), isp=rt.get('isp', None),
-                        lat=rt.get('latitude', None), lon=rt.get('longitude', None), timezone=rt.get('timezone', None),
-                        zipcode=rt.get('postal_code', None))
+                        cc=rt.get('country_code', None), rc=rt.get('region_code', None),
+                        isp=connection.get('isp', None), lat=rt.get('latitude', None),
+                        lon=rt.get('longitude', None), timezone=timezone.get('id', None),
+                        zipcode=rt.get('postal', None))
 
 
-class FreeGeoIpGeolocator(Geolocator):
+class FreeIpApiGeolocator(Geolocator):
 
-    _url = 'https://freegeoip.net/json/%s'
+    _url = 'https://freeipapi.com/api/json/%s'
 
     def getLocation(self, data):
         """
@@ -136,19 +139,15 @@ class FreeGeoIpGeolocator(Geolocator):
         :return: A Location object initialized with location data
         """
         ip = self._getIp(data)
-        rq = requests.get(self._url % ip, timeout=self._timeout)
-        if rq.text.strip() == '404 page not found':
-            raise GeolocalizationError('input string is not a valid ip address: %s' % ip)
+        rt = requests.get(self._url % ip, timeout=self._timeout).json()
 
-        rt = rq.json()
+        if 'countryName' not in rt:
+            raise GeolocalizationError('could not establish in which country is ip %s' % ip)
 
-        if rt['status'] == 'fail':
-            raise GeolocalizationError('invalid data returned by the api: %r' % rt)
-
-        return Location(country=rt.get('country_name', None), region=rt.get('region_name', None), city=rt.get('city', None),
-                        cc=rt.get('country_code', None), rc=rt.get('region_code', None), lat=rt.get('latitude', None),
-                        lon=rt.get('longitude', None), timezone=rt.get('time_zone', None),
-                        zipcode=rt.get('zip_code', None))
+        return Location(country=rt.get('countryName', None), region=rt.get('regionName', None),
+                        city=rt.get('cityName', None), cc=rt.get('countryCode', None),
+                        lat=rt.get('latitude', None), lon=rt.get('longitude', None),
+                        timezone=rt.get('timeZone', None), zipcode=rt.get('zipCode', None))
 
 
 class MaxMindGeolocator(Geolocator):

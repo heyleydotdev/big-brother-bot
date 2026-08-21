@@ -5,12 +5,15 @@ Description
 -----------
 A [BigBrotherBot][B3] plugin which introduces geolocation capabilities. This plugin is meant to be used as subplugin 
 since it doesn't provide commands or visual reaction to B3 events. The plugin intercepts new clients connection and
-retrieve geolocation data using multiple data sources:
+retrieve geolocation data using multiple data sources (tried in order until one succeeds):
 
 * [IP api](http://ip-api.com/)
-* [Telize](http://www.telize.com/)
-* [Free GeoIP](https://freegeoip.net/)
+* [IP WhoIs](https://ipwho.is/)
+* [Free IP API](https://freeipapi.com/)
 * [MaxMind GeoIP](http://dev.maxmind.com/geoip/legacy/install/country/)
+
+Retrieved geolocation data is cached per ip address for 24 hours: reconnecting players won't generate new requests
+and the same client is never geolocated by two events at the same time.
 
 For plugin developers
 ---------------------

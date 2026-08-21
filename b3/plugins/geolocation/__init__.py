@@ -22,25 +22,28 @@
 #                                                                     #
 # ################################################################### #
 
-__author__ = 'Fenix'
-__version__ = '1.5'
+__author__ = 'Fenix, heyleydotdev'
+__version__ = '1.6'
 
 import b3
 import b3.clients
 import b3.plugin
 import b3.events
 import threading
+import time
 
 from .exceptions import GeolocalizationError
-from .geolocators import FreeGeoIpGeolocator
+from .geolocators import FreeIpApiGeolocator
 from .geolocators import IpApiGeolocator
+from .geolocators import IpWhoIsGeolocator
 from .geolocators import MaxMindGeolocator
-from .geolocators import TelizeGeolocator
 
 
 class GeolocationPlugin(b3.plugin.Plugin):
 
     requiresConfigFile = False
+
+    _cache_ttl = 86400  # number of seconds a Location object is kept in the cache
 
     def __init__(self, console, config=None):
         """
@@ -49,12 +52,17 @@ class GeolocationPlugin(b3.plugin.Plugin):
         b3.plugin.Plugin.__init__(self, console, config)
         # create geolocators instances
         self.info('creating geolocators object instances...')
-        self._geolocators = [IpApiGeolocator(), TelizeGeolocator(), FreeGeoIpGeolocator()]
+        self._geolocators = [IpApiGeolocator(), IpWhoIsGeolocator(), FreeIpApiGeolocator()]
         try:
             # append this one separately since db may be missing
             self._geolocators.append(MaxMindGeolocator())
         except IOError, e:
             self.debug('MaxMind geolocation not available: %s' % e)
+        # cache of already retrieved geolocation data: {ip address string: (timestamp, Location)}
+        self._cache_lock = threading.Lock()
+        self._cache = {}
+        # client ids for which a geolocation task is currently running
+        self._in_progress = set()
 
     def onStartup(self):
         """
@@ -82,16 +90,63 @@ class GeolocationPlugin(b3.plugin.Plugin):
         """
         Handle EVT_CLIENT_AUTH and EVT_CLIENT_UPDATE.
         """
-        def _threaded_geolocate(client):
+        client = event.client
+        ip = getattr(client, 'ip', None)
 
-            client.location = None
+        # make sure to launch geolocation only if we have a valid ip address
+        if not ip:
+            return
+
+        # do not use hasattr or try except here: we'd better try to get geodata also when a previous attempt failed
+        # and we ended up with NoneType object in client.location (so we have an attribute but it's not useful)
+        if getattr(client, 'location', None):
+            return
+
+        client_id = getattr(client, 'id', None)
+
+        with self._cache_lock:
+            cached = self._cache.get(ip, None)
+            if cached is not None:
+                timestamp, location = cached
+                if time.time() - timestamp <= self._cache_ttl:
+                    self.debug('using cached geolocation data for %s <@%s>', client.name, client.id)
+                    client.location = location
+                    self.console.queueEvent(self.console.getEvent('EVT_CLIENT_GEOLOCATION_SUCCESS', client=client))
+                    return
+                del self._cache[ip]
+
+            if client_id in self._in_progress:
+                self.debug('geolocation of %s <@%s> is already in progress: skipping', client.name, client_id)
+                return
+
+            self._in_progress.add(client_id)
+
+        t = threading.Thread(target=self._geolocate_worker, args=(client, ip, client_id))
+        t.daemon = True  # won't prevent B3 from exiting
+        t.start()
+
+    ####################################################################################################################
+    #                                                                                                                  #
+    #   OTHER METHODS                                                                                                  #
+    #                                                                                                                  #
+    ####################################################################################################################
+
+    def _geolocate_worker(self, client, ip, client_id):
+        """
+        Retrieve geolocation data from the geolocators and fire the proper event.
+        :param client: The client object to geolocate
+        :param ip: The ip address string to geolocate
+        :param client_id: The id of the client object to geolocate
+        """
+        try:
+            location = None
 
             for geotool in self._geolocators:
 
                 try:
                     self.debug('retrieving geolocation data for %s <@%s>...', client.name, client.id)
-                    client.location = geotool.getLocation(client)
-                    self.debug('retrieved geolocation data for %s <@%s>: %r', client.name, client.id, client.location)
+                    location = geotool.getLocation(client)
+                    self.debug('retrieved geolocation data for %s <@%s>: %r', client.name, client.id, location)
                     break # stop iterating if we collect valid data
                 except GeolocalizationError, e:
                     self.warning('could not retrieve geolocation data %s <@%s>: %s', client.name, client.id, e)
@@ -99,15 +154,25 @@ class GeolocationPlugin(b3.plugin.Plugin):
                     self.error('client %s <@%s> geolocation terminated unexpectedtly when using %s service: %s',
                                client.name, client.id, geotool.__class__.__name__, e)
 
-            if client.location is not None:
+            if location is not None:
+                with self._cache_lock:
+                    self._cache_prune()
+                    self._cache[ip] = (time.time(), location)
+                client.location = location
                 self.console.queueEvent(self.console.getEvent('EVT_CLIENT_GEOLOCATION_SUCCESS', client=client))
             else:
+                client.location = None
                 self.console.queueEvent(self.console.getEvent('EVT_CLIENT_GEOLOCATION_FAILURE', client=client))
 
-        # do not use hasattr or try except here: we'd better try to get geodata also when a previous attempt failed
-        # and we ended up with NoneType object in client.location (so we have an attribute but it's not useful).
-        # also make sure to launch geolocation only if we have a valid ip address.
-        if not getattr(event.client, 'location', None) and event.client.ip:
-            t = threading.Thread(target=_threaded_geolocate, args=(event.client,))
-            t.daemon = True  # won't prevent B3 from exiting
-            t.start()
+        finally:
+            with self._cache_lock:
+                self._in_progress.discard(client_id)
+
+    def _cache_prune(self):
+        """
+        Remove expired entries from the cache. Must be called while holding the cache lock.
+        """
+        now = time.time()
+        expired = [ip for ip, (timestamp, _) in self._cache.items() if now - timestamp > self._cache_ttl]
+        for ip in expired:
+            del self._cache[ip]
