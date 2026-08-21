@@ -49,7 +49,7 @@ jobs:
           --health-timeout=5s
           --health-retries=10
       postgres:
-        image: postgres:9.3
+        image: postgres:11
         env:
           POSTGRES_USER: postgres
           POSTGRES_HOST_AUTH_METHOD: trust

@@ -6,4 +6,4 @@ set -ev
 nosetests --where=tests.core --verbosity=3 --with-cov --cov b3 --cov-report term-missing --cov-config .coveragerc
 nosetests --where=tests.core.clients --verbosity=3 --with-cov --cov b3.clients --cov-report term-missing --cov-config .coveragerc
 nosetests --where=tests.core.parsers --verbosity=3 --with-cov --cov b3.parsers --cov-report term-missing --cov-config .coveragerc
-nosetests --where=tests.core.storage --verbosity=3 --with-cov --cov b3.storage --cov-report term-missing --cov-config .coveragerc
+python scripts/test_watchdog.py 300 --where=tests.core.storage --verbosity=3 --with-cov --cov b3.storage --cov-report term-missing --cov-config .coveragerc
