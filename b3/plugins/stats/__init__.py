@@ -25,7 +25,6 @@
 import b3
 import b3.events
 import b3.plugin
-import string
 
 from b3.functions import getCmd
 from configparser import NoOptionError, NoSectionError
@@ -392,7 +391,7 @@ class StatsPlugin(b3.plugin.Plugin):
                       (sclient.exactName, sclient.var(self, 'kills', 0).value, sclient.var(self, 'deaths', 0).value,
                        sclient.var(self, 'assists', 0).value ,sclient.var(self, 'teamKills', 0).value, sclient.var(self, 'damageHit', 0).value,
                        round(sclient.var(self, 'points', self.startPoints).value, 2),
-                       round(sclient.var(self, 'oldexperience', 0).value + sclient.var(self, 'experience', 0).value, 2))
+                       round(float(sclient.var(self, 'oldexperience', 0).value + sclient.var(self, 'experience', 0).value), 2))
 					   
         else:
 
@@ -400,7 +399,7 @@ class StatsPlugin(b3.plugin.Plugin):
                       (sclient.exactName, sclient.var(self, 'kills', 0).value, sclient.var(self, 'deaths', 0).value,
                        sclient.var(self, 'teamKills', 0).value, sclient.var(self, 'damageHit', 0).value,
                        round(sclient.var(self, 'points', self.startPoints).value, 2),
-                       round(sclient.var(self, 'oldexperience', 0).value + sclient.var(self, 'experience', 0).value, 2))
+                       round(float(sclient.var(self, 'oldexperience', 0).value + sclient.var(self, 'experience', 0).value), 2))
 
         cmd.sayLoudOrPM(client, message)
 
@@ -431,7 +430,7 @@ class StatsPlugin(b3.plugin.Plugin):
         scores = []
         for c in self.console.clients.getList():
             if c.isvar(self, 'points'):
-                scores.append((c.exactName, round(c.var(self, 'points', self.startPoints).value, 2)))
+                scores.append((c.exactName, round(float(c.var(self, 'points', self.startPoints).value), 2)))
         
         if len(scores):
             tmplist = [(x[1], x) for x in scores]
@@ -449,9 +448,9 @@ class StatsPlugin(b3.plugin.Plugin):
                 results.append('^3#%s^7 %s ^7[^3%s^7]' % (i, name, score))
                 
             if client:        
-                client.message('^3Top Stats:^7 %s' % string.join(results,', '))
+                client.message('^3Top Stats:^7 %s' % ', '.join(results))
             else:
-                self.console.say('^3Top Stats:^7 %s' % string.join(results,', '))
+                self.console.say('^3Top Stats:^7 %s' % ', '.join(results))
         else:
             client.message('^3Stats: ^7No top players')
 
@@ -462,7 +461,7 @@ class StatsPlugin(b3.plugin.Plugin):
         scores = []
         for c in self.console.clients.getList():
             if c.isvar(self, 'experience'):
-                scores.append((c.exactName, round(c.var(self, 'experience', self.startPoints).value, 2)))
+                scores.append((c.exactName, round(float(c.var(self, 'experience', self.startPoints).value), 2)))
 
         if len(scores):
             tmplist = [(x[1], x) for x in scores]
@@ -480,8 +479,8 @@ class StatsPlugin(b3.plugin.Plugin):
                 results.append('^3#%s^7 %s ^7[^3%s^7]' % (i, name, score))
 
             if client:
-                client.message('^3Top Experienced Players:^7 %s' % string.join(results, ', '))
+                client.message('^3Top Experienced Players:^7 %s' % ', '.join(results))
             else:
-                self.console.say('^3Top Experienced Players:^7 %s' % string.join(results, ', '))
+                self.console.say('^3Top Experienced Players:^7 %s' % ', '.join(results))
         else:
             client.message('^3Stats: ^7No top experienced players')

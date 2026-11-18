@@ -198,7 +198,7 @@ class vip_commands_mixin(object):
             try:
                 self.console.write(('reservedSlotsList.add', name))
             except CommandFailedError as err:
-                client.message('Error: %s' % err.message)
+                client.message('Error: %s' % err.args[0])
             else:
                 client.message('%s is now a VIP' % name)
 
@@ -239,10 +239,10 @@ class vip_commands_mixin(object):
             try:
                 self.console.write(('reservedSlotsList.remove', name))
             except CommandFailedError as err:
-                if err.message[0] == 'PlayerNotInList':
+                if err.args[0][0] == 'PlayerNotInList':
                     client.message("There is no VIP named '%s'" % name)
                 else:
-                    client.message('Error: %s' % err.message[0])
+                    client.message('Error: %s' % err.args[0][0])
             else:
                 client.message('VIP privileges removed for %s' % name)
 
@@ -253,7 +253,7 @@ class vip_commands_mixin(object):
         try:
             self.console.write(('reservedSlotsList.clear',))
         except CommandFailedError as err:
-            client.message('Error: %s' % err.message[0])
+            client.message('Error: %s' % err.args[0][0])
         else:
             client.message('VIP list is now empty')
 
@@ -265,7 +265,7 @@ class vip_commands_mixin(object):
             self.console.write(('reservedSlotsList.load',))
             vips = self.getFullreservedSlotsList()
         except CommandFailedError as err:
-            client.message('Error: %s' % err.message[0])
+            client.message('Error: %s' % err.args[0][0])
         else:
             client.message('VIP list loaded from disk (%s name%s loaded)' % (len(vips), 's' if len(vips) else ''))
 
@@ -277,7 +277,7 @@ class vip_commands_mixin(object):
             vips = self.getFullreservedSlotsList()
             self.console.write(('reservedSlotsList.save',))
         except CommandFailedError as err:
-            client.message('Error: %s' % err.message[0])
+            client.message('Error: %s' % err.args[0][0])
         else:
             client.message('VIP list saved to disk (%s name%s written)' % (len(vips), 's' if len(vips) else ''))
 
@@ -473,7 +473,7 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
         try:
             self.console.write(('mapList.runNextRound',))
         except CommandFailedError as err:
-            client.message('Error: %s' % err.message)
+            client.message('Error: %s' % err.args[0])
 
     def cmd_serverreboot(self, data, client, cmd=None):
         """
@@ -485,7 +485,7 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
             time.sleep(1)
             self.console.write(('admin.shutDown',))
         except CommandFailedError as err:
-            client.message('Error: %s' % err.message[0])
+            client.message('Error: %s' % err.args[0][0])
 
     def cmd_endround(self, data, client, cmd=None):
         """
@@ -507,7 +507,7 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
                 time.sleep(1)
                 self.console.write(('mapList.endRound', winnerTeamID))
             except CommandFailedError as err:
-                client.message('Error: %s' % err.message[0])
+                client.message('Error: %s' % err.args[0][0])
 
     def cmd_roundrestart(self, data, client, cmd=None):
         """
@@ -518,7 +518,7 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
         try:
             self.console.write(('mapList.restartRound',))
         except CommandFailedError as err:
-            client.message('Error: %s' % err.message)
+            client.message('Error: %s' % err.args[0])
 
     def cmd_kill(self, data, client, cmd=None):
         """
@@ -545,10 +545,10 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
                     else:
                         sclient.message("Killed by admin")
                 except CommandFailedError as err:
-                    if err.message[0] == "SoldierNotAlive":
+                    if err.args[0][0] == "SoldierNotAlive":
                         client.message("%s is already dead" % sclient.name)
                     else:
-                        client.message('Error: %s' % err.message)
+                        client.message('Error: %s' % err.args[0])
 
     def cmd_changeteam(self, data, client, cmd=None):
         """
@@ -653,7 +653,7 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
 
             cmd.sayLoudOrPM(client, 'swapped player %s with %s' % (sclientA.cid, sclientB.cid))
         except CommandFailedError as e:
-            client.message("Error while trying to swap %s with %s. (%s)" % (sclientA.cid, sclientB.cid, e.message[0]))
+            client.message("Error while trying to swap %s with %s. (%s)" % (sclientA.cid, sclientB.cid, e.args[0][0]))
 
         self._autoassign = temp_autoassign
 
@@ -677,7 +677,7 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
                 self.console.write(('punkBuster.pb_sv_command', '%s' % data))
             except CommandFailedError as err:
                 self.error(err)
-                client.message('Error: %s' % err.message)
+                client.message('Error: %s' % err.args[0])
 
     def cmd_setnextmap(self, data, client=None, cmd=None):
         """
@@ -854,7 +854,7 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
             try:
                 self.console.setCvar('vehicleSpawnAllowed', new_value)
             except CommandFailedError as err:
-                client.message("could not change vehicle spawn mode : %s" % err.message)
+                client.message("could not change vehicle spawn mode : %s" % err.args[0])
             else:
                 self.console.game['vehicleSpawnAllowed'] = new_value
                 cmd.sayLoudOrPM(client=client, message="vehicle spawn is now [%s]" % data.upper())
@@ -922,7 +922,7 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
             try:
                 self.console.setCvar('idleTimeout', new_value)
             except CommandFailedError as err:
-                client.message("could not change idle timeout : %s" % err.message)
+                client.message("could not change idle timeout : %s" % err.args[0])
             else:
                 self.console.game['idleTimeout'] = str(new_value)
                 cmd.sayLoudOrPM(client=client, message="Idle kick is now [%s]" % human_readable_value( str(new_value)))
@@ -1063,10 +1063,10 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
                     else:
                         sclient.message("Nuked by admin")
                 except CommandFailedError as err:
-                    if err.message[0] == "SoldierNotAlive":
+                    if err.args[0][0] == "SoldierNotAlive":
                         client.message("%s is already dead" % sclient.name)
                     else:
-                        client.message('Error: %s' % err.message)
+                        client.message('Error: %s' % err.args[0])
 
             players = self.console.clients.getList()
             if clean_team_name == 'all':
@@ -1313,7 +1313,7 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
         Loads a preset config file to send to the server
         """
         self.info('Loading %s' % file_path)
-        with file(file_path, 'r') as f:
+        with open(file_path, 'r') as f:
             lines = f.readlines()
         #self.verbose(repr(lines))
         if threaded:
@@ -1352,7 +1352,7 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
                 try:
                     self.console.write((m.group('cvar'), m.group('value')))
                 except CommandFailedError as err:
-                    self._sendMessage(client, 'Error "%s" received at line %s when sending "%s" to server' % (err.message, line_index, line))
+                    self._sendMessage(client, 'Error "%s" received at line %s when sending "%s" to server' % (err.args[0], line_index, line))
             else:
                 # read cvar
                 try:
@@ -1360,7 +1360,7 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
                     if len(result):
                         self._sendMessage(client, ("%s is \"%s\"" % (m.group('cvar'), result[0])))
                 except CommandFailedError as err:
-                    self._sendMessage(client, 'Error "%s" received at line %s when sending "%s" to server' % (err.message, line_index, m.group('cvar')))
+                    self._sendMessage(client, 'Error "%s" received at line %s when sending "%s" to server' % (err.args[0], line_index, m.group('cvar')))
 
         if len(map_item_matches):
             self.console.write(('mapList.clear',)) # clear current in-memory map rotation list
@@ -1368,12 +1368,12 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
                 try:
                     self.console.write(('mapList.add', m.group('map_id'), m.group('gamemode'), m.group('num_rounds')))
                 except CommandFailedError as err:
-                    self._sendMessage(client, "Error adding map \"%s\" on line %s : %s" % (line, line_index, err.message))
+                    self._sendMessage(client, "Error adding map \"%s\" on line %s : %s" % (line, line_index, err.args[0]))
             try:
                 self.console.write(('mapList.save',)) # write current in-memory map list to server config file so if the server restarts our list is recovered.
                 self._sendMessage(client, "New map rotation list written to disk.")
             except CommandFailedError as err:
-                self._sendMessage(client, "Error writing map rotation list to disk. %s" % err.message)
+                self._sendMessage(client, "Error writing map rotation list to disk. %s" % err.args[0])
 
         self._sendMessage(client, ("config \"%s\" loaded" % config_name))
 

@@ -31,7 +31,7 @@ import time
 import threading
 
 from b3.functions import getCmd
-from b3.config import ConfigParser
+import configparser as ConfigParser
 from b3.plugin import Plugin
 from configparser import NoOptionError
 

@@ -57,7 +57,7 @@ class Location(object):
         :param value: The attribute value
         """
         if value:
-            value = unicodedata.normalize('NFKD', str(value)).encode('ascii','ignore').strip()
+            value = unicodedata.normalize('NFKD', str(value)).encode('ascii','ignore').decode('ascii').strip()
         self.__dict__[key] = value
 
     def __repr__(self):

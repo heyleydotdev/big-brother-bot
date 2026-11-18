@@ -145,7 +145,7 @@ class Cod7HttpPlugin(b3.plugin.Plugin):
         """
         Test whether processData thread is still running.
         """
-        return self.httpthreadinst.isAlive()
+        return self.httpthreadinst.is_alive()
 
     def writeCompletelog(self, locallog, remotelog):
         """

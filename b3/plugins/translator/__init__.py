@@ -30,18 +30,13 @@ import b3.plugin
 import b3.events
 import importlib
 
-# translate utility that utilize google translator, support python2 & python3
-# Note that the order or arguments in the URL matters.
+# translate utility that utilize google translator
+# Note that the order of arguments in the URL matters.
 
-try:
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib.parse import urlencode
-
-try:
-    import urllib.request, urllib.error, urllib.parse
-except ImportError:
-    import urllib.request as urllib2
+from urllib.parse import urlencode
+import urllib.request
+import urllib.error
+import urllib.parse
 
 try:
     # only necessary if using exclude_language setting
@@ -53,8 +48,6 @@ import json
 import re
 import sys
 import time
-importlib.reload(sys)
-sys.setdefaultencoding('utf-8')
 
 try:
     # import the getCmd function
@@ -174,22 +167,20 @@ class TranslatorPlugin(b3.plugin.Plugin):
         if len(message) < self.settings['min_sentence_length']:
             return
 
-        # check if we are not spamming requests
-        curTime = time.time()
-        if self.lastTime and curTime - self.lastTime <= self.settings['min_time_between']:
-            return
-        else:
-            # update last time with current time
-            self.lastTime = curTime
-
         # if it's not a B3 command
         if message[0] not in self.cmdPrefix:
+
+            # check if we are not spamming requests (commands do not count as chat spam)
+            curTime = time.time()
+            if self.lastTime and curTime - self.lastTime <= self.settings['min_time_between']:
+                return
+            self.lastTime = curTime
 
             # save for future use
             self.last_message_said.append(message)
             # remove old messages
-            if len(self.last_message) > self.settings['max_history']:
-                self.last_message.pop(0)
+            if len(self.last_message_said) > self.settings['max_history']:
+                self.last_message_said.pop(0)
 
             # we have now to send a translation to all the
             # clients that enabled the automatic translation
@@ -232,7 +223,7 @@ class TranslatorPlugin(b3.plugin.Plugin):
         Sanitize the given string.
         Will remove color codes, XML tags and substitute unprintable characters with their alphabetical representation.
         """
-        return re.sub('\^[0-9]', '', re.sub(r'<[^>]*>', '', s)).replace('ß', 'ss').replace('ü', 'ue').\
+        return re.sub(r'\^[0-9]', '', re.sub(r'<[^>]*>', '', s)).replace('ß', 'ss').replace('ü', 'ue').\
                replace('ö', 'oe').replace('ä', 'ae').replace('à', 'a').replace('è', 'e').replace('é', 'e').\
                replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('ç', 'c').replace('€', 'euro').\
                replace('$', 'dollar').replace('£', 'pound').replace('%', 'pc').replace('"', "''").strip()

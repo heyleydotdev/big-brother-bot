@@ -26,7 +26,7 @@ import logging
 
 from b3.cron import PluginCronTab
 from b3.plugin import Plugin
-from b3.config import ConfigParser
+import configparser as ConfigParser
 from b3.timezones import timezones
 from logging.handlers import TimedRotatingFileHandler
 

@@ -33,7 +33,7 @@ import threading
 import re
 import os
 import random
-import string
+from functools import cmp_to_key
 
 from b3.functions import getCmd
 from b3.functions import clamp
@@ -727,7 +727,7 @@ class Poweradminurt41Plugin(b3.plugin.Plugin):
 
         # distribute nonforced players
         random.shuffle(nonforced)
-        n = (len(nonforced) + len(blue) + len(red)) / 2 - len(blue)
+        n = (len(nonforced) + len(blue) + len(red)) // 2 - len(blue)
         blue.extend(nonforced[:n])
         red.extend(nonforced[n:])
         return blue, red
@@ -808,8 +808,8 @@ class Poweradminurt41Plugin(b3.plugin.Plugin):
         def contribcmp(a, b):
             return cmp(recentcontrib[b.id], recentcontrib[a.id])
 
-        blue = sorted(blue, cmp=contribcmp)
-        red = sorted(red, cmp=contribcmp)
+        blue = sorted(blue, key=cmp_to_key(contribcmp))
+        red = sorted(red, key=cmp_to_key(contribcmp))
         n = min(len(blue), len(red))
         if n > 3:
             n = 3 + int((n-3)/2)
@@ -1181,7 +1181,7 @@ class Poweradminurt41Plugin(b3.plugin.Plugin):
         decorated = [(scores.get(c.id, 0), c) for c in clients if c.team in (b3.TEAM_BLUE, b3.TEAM_RED)]
         decorated.sort()
         players = [c for score, c in decorated]
-        n = len(players) / 2
+        n = len(players) // 2
         blue = players[:n]
         red = players[n:]
         self.console.write('bigtext "Unskuffling! Noobs beware!"')
@@ -2619,7 +2619,7 @@ class Poweradminurt41Plugin(b3.plugin.Plugin):
                 if client:
                     client.message('^7nextmap set to %s' % mapname)
             elif isinstance(match, list):
-                client.message('do you mean : %s ?' % string.join(match[:5], ', '))
+                client.message('do you mean : %s ?' % ', '.join(match[:5]))
             else:
                 client.message('^7cannot find any map like [^4%s^7]' % data)
 

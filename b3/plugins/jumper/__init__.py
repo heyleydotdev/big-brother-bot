@@ -592,11 +592,11 @@ class JumperPlugin(b3.plugin.Plugin):
         """
         Return a time string given it's value expressed in milliseconds [H:mm:ss:ms]
         """
-        secs = msec / 1000
+        secs = msec // 1000
         msec -= secs * 1000
-        mins = secs / 60
+        mins = secs // 60
         secs -= mins * 60
-        hour = mins / 60
+        hour = mins // 60
         mins -= hour * 60
         return "%01d:%02d:%02d.%03d" % (hour, mins, secs, msec)
 
