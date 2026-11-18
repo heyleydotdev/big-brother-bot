@@ -181,10 +181,10 @@ class AbstractParser(b3.parser.Parser):
         Parse a log line returning extracted tokens.
         :param line: The line to be parsed
         """
-        line = re.sub(self._lineClear, '', line, 1)
+        line = self._lineClear.sub('', line, 1)
         m = None
         for f in self._lineFormats:
-            m = re.match(f, line)
+            m = f.match(line)
             if m:
                 #self.debug('line matched %s' % f.pattern)
                 break
