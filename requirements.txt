@@ -1,5 +1,0 @@
-# Python modules needed to run B3 (Python 3.11+)
-pymysql>=1.1
-python-dateutil>=2.9
-feedparser>=6.0
-requests>=2.32

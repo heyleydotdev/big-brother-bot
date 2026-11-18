@@ -39,6 +39,17 @@ classifiers = [
 [project.optional-dependencies]
 postgresql = ["psycopg[binary]>=3.2"]
 sftp = ["paramiko>=3.4"]
+test = [
+    "pytest",
+    "pytest-cov",
+    "mockito",
+    # pymysql needs this to authenticate against MySQL 8 default auth plugin (caching_sha2_password)
+    "cryptography",
+]
+build = [
+    "bump2version",
+    "wheel",
+]
 
 [project.urls]
 Homepage = "http://www.bigbrotherbot.net"

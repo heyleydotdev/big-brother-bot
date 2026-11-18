@@ -1,6 +1,0 @@
-# Python modules needed to run the B3 test suite
-pytest
-pytest-cov
-mockito
-# pymysql needs this to authenticate against MySQL 8 default auth plugin (caching_sha2_password)
-cryptography
