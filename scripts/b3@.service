@@ -1,0 +1,36 @@
+# systemd template unit for Big Brother Bot (B3) 2.x
+#
+# Each instance is keyed by its config file name, using the same convention as
+# scripts/b3.sh: b3@myinstance runs b3/conf/b3_myinstance.ini.
+#
+# Install (adjust the user and paths first):
+#   sudo useradd --system --home /opt/b3 --shell /usr/sbin/nologin b3
+#   sudo cp scripts/b3@.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now b3@myinstance
+#
+# Unlike scripts/b3.sh there is no screen and no PID file: systemd supervises
+# the process and restarts it on failure, so do NOT pass --restart.
+
+[Unit]
+Description=Big Brother Bot (B3) instance %i
+Documentation=http://www.bigbrotherbot.net
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# TODO: adjust to the user/group and checkout location on your host
+User=b3
+Group=b3
+WorkingDirectory=/opt/b3
+# Use the console script from the virtualenv so the right interpreter is used
+ExecStart=/opt/b3/.venv/bin/b3_run --config /opt/b3/b3/conf/b3_%i.ini
+# B3 shuts down cleanly on SIGINT (its Ctrl+C path)
+KillSignal=SIGINT
+TimeoutStopSec=30
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

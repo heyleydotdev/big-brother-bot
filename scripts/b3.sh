@@ -56,6 +56,7 @@ DATE_FORMAT="%a, %b %d %Y - %r"     # data format to be used when logging consol
 LOG_ENABLED="${B3_LOG:-0}"          # if set to 1, will log console output to file
 DEVELOPER="${B3_DEV:-0}"            # if set to 1, will activate developer mode
 USE_COLORS="1"                      # if set to 1, will make use of bash color codes in the console output
+PYTHON="${B3_PYTHON:-}"             # python interpreter (empty = auto-detect: .venv, python3, python)
 
 ### DO NOT MODIFY!!!
 B3_DIR=""                   # will be set to the directory containing b3 source code (where we can find b3_run.py)
@@ -264,9 +265,9 @@ function b3_start() {
     local PID_FILE="${SCRIPT_DIR}/${PID_DIR}/${COMMON_PREFIX}${B3}.pid"
 
     if [ ${AUTO_RESTART} -eq 1 ]; then
-        screen -DmS "${SCREEN}" python "${PROCESS}" --restart --console --config "${CONFIG_FILE}" &
+        screen -DmS "${SCREEN}" "${PYTHON}" "${PROCESS}" --restart --console --config "${CONFIG_FILE}" &
     else
-        screen -DmS "${SCREEN}" python "${PROCESS}" --console --config "${CONFIG_FILE}" &
+        screen -DmS "${SCREEN}" "${PYTHON}" "${PROCESS}" --console --config "${CONFIG_FILE}" &
     fi
 
     echo "${!}" > "${PID_FILE}"
@@ -392,7 +393,8 @@ function b3_clean() {
     local B3_RUNNING_LIST=$(join ' ' "${B3_RUNNING[@]}")
     find "${B3_DIR}" -type f \( -name "*.pyc" -o -name "*.pid" \) \
                                 -exec rm {} \; \
-                                -exec printf "." \; \
+                                -exec printf "." \;
+    find "${B3_DIR}" -type d -name "__pycache__" -prune -exec rm -rf {} \;
 
     echo " DONE!"
 
@@ -437,24 +439,23 @@ if [ ! "${DEVELOPER}" -eq 0 ]; then # allow developers to use root to start b3
     fi
 fi
 
-# check for python to be installed in the system
-if [ -z $(which python) ]; then
-    p_out "^1ERROR^0: The Python interpreter seems to be missing on your system"
-    p_out "You need to install Python ^22.7 ^0to run B3"
+# locate the python interpreter: B3_PYTHON override, project venv, then python3/python
+if [ -n "${B3_PYTHON}" ] && [ -x "${B3_PYTHON}" ]; then
+    PYTHON="${B3_PYTHON}"
+elif [ -x "${B3_DIR}/.venv/bin/python" ]; then
+    PYTHON="${B3_DIR}/.venv/bin/python"
+elif command -v python3 > /dev/null 2>&1; then
+    PYTHON="$(command -v python3)"
+elif command -v python > /dev/null 2>&1; then
+    PYTHON="$(command -v python)"
+else
+    p_out "^1ERROR^0: no Python interpreter found (set B3_PYTHON to a Python 3.11+ binary)"
     exit 1
 fi
 
-# check for correct python version to be installed on the system
-VERSION=($(python -c 'import sys; print("%s %s" % (sys.version_info.major, sys.version_info.minor));'))
-if [ ${VERSION[0]} -eq 3 ]; then
-    p_out "^1ERROR^0: B3 is not yet compatible with Python ^33^0"
-    p_out "You need to install Python ^22.7 ^0to run B3"
-    exit 1
-fi
-
-if [ ${VERSION[1]} -lt 7 ]; then
-    p_out "^1ERROR^0: B3 can't run under Python ^3${VERSION[0]}.${VERSION[1]}^0"
-    p_out "You need to install Python ^22.7 ^0to run B3"
+# B3 2.x requires Python 3.11+
+if ! "${PYTHON}" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)'; then
+    p_out "^1ERROR^0: B3 requires Python ^23.11 or newer^0 [$("${PYTHON}" -V 2>&1)]"
     exit 1
 fi
 
