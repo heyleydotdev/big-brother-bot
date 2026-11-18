@@ -302,8 +302,10 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         # options/sections in .ini files (last one wins) instead of raising
         # interpolation=None keeps the python2 behavior of passing raw '%'
         # characters through (b3 configs are full of printf-style templates)
+        # inline_comment_prefixes keeps the python2 behavior of stripping a
+        # ';' comment placed after a value (python3 disables it by default)
         configparser.ConfigParser.__init__(self, allow_no_value=allow_no_value, strict=False,
-                                            interpolation=None)
+                                            interpolation=None, inline_comment_prefixes=(';',))
 
     def add_comment(self, section, comment):
         """

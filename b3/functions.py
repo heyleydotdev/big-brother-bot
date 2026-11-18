@@ -232,7 +232,7 @@ def escape(text, esc):
     :param esc: The character to escape
     :return: string
     """
-    return string.replace(text, esc, '\\%s' % esc)
+    return text.replace(esc, '\\%s' % esc)
 
 
 def decode(text):
@@ -452,6 +452,9 @@ def hash_password(password):
     """
     Calculate the MD5 digest of a given string.
     """
+    # py3 hashlib needs bytes: encode text here so callers can pass str
+    if isinstance(password, str):
+        password = password.encode('utf-8')
     return md5(password).hexdigest()
 
 
