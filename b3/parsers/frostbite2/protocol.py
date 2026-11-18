@@ -314,16 +314,18 @@ class FrostbiteDispatcher(asyncore.dispatcher_with_send):
             self.send(EncodePacket(originServer, True, sequence, ("OK",)))
         if originServer:
             if isResponse:
-                self.getLogger().warn("received a bad packet from frosbite server pretending being a "
-                                      "response for a server request: %s" % repr(packet))
+                self.getLogger().warning(
+                    "received a bad packet from frosbite server pretending being a "
+                    "response for a server request: %s" % repr(packet))
             else:
                 self.handle_frostbite_event(words)
         else:
             if isResponse:
                 self.handle_frostbite_command_response(sequence, words)
             else:
-                self.getLogger().warn("received a bad packet from frosbite server pretending "
-                                      "being a request from us: %s" % repr(DecodePacket(packet)))
+                self.getLogger().warning(
+                    "received a bad packet from frosbite server pretending "
+                    "being a request from us: %s" % repr(DecodePacket(packet)))
 
     def handle_frostbite_event(self, words):
         self.getLogger().debug("received a game event from frosbite server: %s" % repr(words))
@@ -470,7 +472,7 @@ class FrostbiteServer(threading.Thread):
     def _on_command_response(self, command_id, words):
         self.getLogger().debug("received Frostbite command #%i response: %s" % (command_id, repr(words)))
         if command_id not in self.pending_commands:
-            self.getLogger().warn("dropping Frostbite command #%i response as we are not waiting for it anymore" % command_id)
+            self.getLogger().warning("dropping Frostbite command #%i response as we are not waiting for it anymore" % command_id)
         else:
             self.pending_commands[command_id] = words
             self.__command_reply_event.set()

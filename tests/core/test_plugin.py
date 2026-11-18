@@ -23,7 +23,6 @@
 
 
 import b3
-import imp
 import logging
 import os
 from configparser import NoOptionError
@@ -34,6 +33,7 @@ from unittest.mock import ANY
 from mockito import when
 
 from b3.config import CfgConfigParser
+from b3.parser import Parser
 from b3.plugin import Plugin
 from b3.events import Event
 from tests import B3TestCase
@@ -42,6 +42,15 @@ from textwrap import dedent
 
 external_plugins_dir = os.path.dirname(external_plugins__file__)
 testplugin_config_file = os.path.join(external_plugins_dir, "testplugin/conf/plugin_testplugin.ini")
+
+
+def load_external_plugin(name):
+    """Load a plugin module the way the parser does (importlib, no removed imp module)."""
+    return Parser._load_plugin_module(name, external_plugins_dir)
+
+
+def load_builtin_plugin(name):
+    return Parser._load_plugin_module(name, os.path.join(b3.getB3Path(True), 'plugins'))
 
 
 class MyPlugin(Plugin):
@@ -397,20 +406,9 @@ class Test_Plugin_requiresParser(B3TestCase):
             {'name': 'admin', 'conf': '@b3/conf/plugin_admin.ini', 'path': None, 'disabled': False},
         ]
 
-        fp, pathname, description = imp.find_module('testplugin1', [os.path.join(b3.getB3Path(True), '..', 'tests', 'plugins', 'fakeplugins')])
-        pluginModule1 = imp.load_module('testplugin1', fp, pathname, description)
-        if fp:
-            fp.close()
-
-        fp, pathname, description = imp.find_module('testplugin2', [os.path.join(b3.getB3Path(True), '..', 'tests', 'plugins', 'fakeplugins')])
-        pluginModule2 = imp.load_module('testplugin2', fp, pathname, description)
-        if fp:
-            fp.close()
-
-        fp, pathname, description = imp.find_module('admin', [os.path.join(b3.getB3Path(True), 'plugins')])
-        adminModule = imp.load_module('admin', fp, pathname, description)
-        if fp:
-            fp.close()
+        pluginModule1 = load_external_plugin('testplugin1')
+        pluginModule2 = load_external_plugin('testplugin2')
+        adminModule = load_builtin_plugin('admin')
 
         when(self.console.config).get_plugins().thenReturn(self.plugin_list)
         when(self.console).pluginImport('admin', ANY).thenReturn(adminModule)
@@ -518,20 +516,9 @@ class Test_Plugin_requiresStorage(B3TestCase):
             {'name': 'admin', 'conf': '@b3/conf/plugin_admin.ini', 'path': None, 'disabled': False},
         ]
 
-        fp, pathname, description = imp.find_module('testplugin1', [os.path.join(b3.getB3Path(True), '..', 'tests', 'plugins', 'fakeplugins')])
-        pluginModule1 = imp.load_module('testplugin1', fp, pathname, description)
-        if fp:
-            fp.close()
-
-        fp, pathname, description = imp.find_module('testplugin3', [os.path.join(b3.getB3Path(True), '..', 'tests', 'plugins', 'fakeplugins')])
-        pluginModule3 = imp.load_module('testplugin3', fp, pathname, description)
-        if fp:
-            fp.close()
-
-        fp, pathname, description = imp.find_module('admin', [os.path.join(b3.getB3Path(True), 'plugins')])
-        adminModule = imp.load_module('admin', fp, pathname, description)
-        if fp:
-            fp.close()
+        pluginModule1 = load_external_plugin('testplugin1')
+        pluginModule3 = load_external_plugin('testplugin3')
+        adminModule = load_builtin_plugin('admin')
 
         when(self.console.config).get_plugins().thenReturn(self.plugin_list)
         when(self.console).pluginImport('admin', ANY).thenReturn(adminModule)
