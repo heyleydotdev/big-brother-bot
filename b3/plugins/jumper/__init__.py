@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -324,7 +323,7 @@ class JumperPlugin(b3.plugin.Plugin):
         'jw2': """INSERT INTO jumpways VALUES (NULL, '%s', '%d', '%s')""",
         'jw3': """UPDATE jumpways SET way_name = '%s' WHERE mapname = '%s' AND way_id = '%d'""",
     }
-    
+
     _demo_record = True
     _skip_standard_maps = True
     _min_level_delete = 80
@@ -337,7 +336,7 @@ class JumperPlugin(b3.plugin.Plugin):
     #   STARTUP                                                                                                        #
     #                                                                                                                  #
     ####################################################################################################################
-     
+
     def onLoadConfig(self):
         """
         Load plugin configuration.
@@ -1077,16 +1076,16 @@ class JumperPlugin(b3.plugin.Plugin):
         if not self.adminPlugin.aquireCmdLock(cmd, client, 60, True):
             client.message('^7do not spam commands')
             return
-        
+
         maps = self.console.getMaps()
         if maps is None:
             client.message('^1ERROR: ^7could not get map list')
             return
-    
+
         if not len(maps):
             cmd.sayLoudOrPM(client, '^7map rotation list is empty')
             return
-        
+
         maplist = []
         for m in maps:
             if self._skip_standard_maps:
@@ -1097,6 +1096,6 @@ class JumperPlugin(b3.plugin.Plugin):
         if not len(maplist):
             cmd.sayLoudOrPM(client, '^7map rotation list is empty')
             return
-            
+
         # display the map rotation
         cmd.sayLoudOrPM(client, '^7map rotation: %s' % ', '.join(maplist))

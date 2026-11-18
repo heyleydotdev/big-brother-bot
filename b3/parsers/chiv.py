@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -65,10 +64,10 @@ class MessageType(object):
 
 
 class ChivParser(Parser):
-    
+
     ## parser code name to use in b3.ini
     gameName = 'chiv'
-    
+
     _client = None
     _currentMap = None
     _currentMapIndex = None
@@ -102,7 +101,7 @@ class ChivParser(Parser):
             else:
                 if self._client is None:
                     self._client = Client(self, self._rconIp, self._rconPort, self._rconPassword, self.handlePacket)
-                
+
                 asyncore.loop(timeout=3, use_poll=True, count=1)
 
         with self.exiting:
@@ -127,10 +126,10 @@ class ChivParser(Parser):
         elif packet.msgType == MessageType.SERVER_CONNECT_SUCCESS:
             self._mapList = None
             self._client.isAuthed = True
-            
+
         if not self._client.isAuthed:
             return
-            
+
         if packet.msgType == MessageType.PLAYER_CHAT:
             playerId = packet.getGUID()
             message = packet.getString()
@@ -184,7 +183,7 @@ class ChivParser(Parser):
             name = packet.getString()
             client = self.clients.getByGUID(playerId)
             if client:
-                client.name = name            
+                client.name = name
 
         elif packet.msgType == MessageType.KILL:
             attackerId = packet.getGUID()
@@ -205,10 +204,10 @@ class ChivParser(Parser):
 
             if attacker.team != b3.TEAM_UNKNOWN and attacker.team == victim.team:
                 eventkey = 'EVT_CLIENT_KILL_TEAM'
-                
+
             if attacker and victim:
                 event = self.getEvent(eventkey, (100, weapon, hitloc), attacker, victim)
-                self.queueEvent(event)            
+                self.queueEvent(event)
 
         elif packet.msgType == MessageType.SUICIDE:
             victimId = packet.getGUID()
@@ -216,7 +215,7 @@ class ChivParser(Parser):
             if victim:
                 weapon = None
                 hitloc = None
-                event = self.getEvent('EVT_CLIENT_SUICIDE', (100, weapon, hitloc), victim, victim)    
+                event = self.getEvent('EVT_CLIENT_SUICIDE', (100, weapon, hitloc), victim, victim)
                 self.queueEvent(event)
 
         elif packet.msgType == MessageType.ROUND_END:
@@ -265,7 +264,7 @@ class ChivParser(Parser):
         Client.auth() method 
         """
         pass  # No need as every rcon packet about a player gives the guid
-    
+
     def sync(self):
         """
         For all connected players returned by self.getPlayerList(), get the matching Client
@@ -274,7 +273,7 @@ class ChivParser(Parser):
         a client from self.clients.
         """
         pass
-    
+
     def say(self, msg, *args):
         """
         Broadcast a message to all players.
@@ -309,7 +308,7 @@ class ChivParser(Parser):
         packet.addGUID(client.guid)
         packet.addString(text)
         self.sendPacket(packet)
-        
+
     def kick(self, client, reason='', admin=None, silent=False, *kwargs):
         """
         Kick a given client.
@@ -325,7 +324,7 @@ class ChivParser(Parser):
         packet.addString(reason)
         self.sendPacket(packet)
         self.queueEvent(self.getEvent(self.getEventID('EVT_CLIENT_KICK'), {'reason': reason, 'admin': admin}, client))
-        
+
     def ban(self, client, reason='', admin=None, silent=False, *kwargs):
         """
         Ban a given client.
@@ -373,7 +372,7 @@ class ChivParser(Parser):
         packet.addString(reason)
         packet.addInt(duration * 60)
         self.sendPacket(packet)
-        
+
         banid = client.guid
         if banid is None:
             banid = client.cid
@@ -383,7 +382,7 @@ class ChivParser(Parser):
             # TODO See if another location than the name column could be better suited for storing the banid
             client._name = banid
             client.save()
-        
+
         self.queueEvent(self.getEvent('EVT_CLIENT_BAN_TEMP', {'reason': reason,
                                                               'duration': duration,
                                                               'admin': admin}, client))
@@ -414,7 +413,7 @@ class ChivParser(Parser):
                 nextmap = self._mapList[0]
         else:
             nextmap = "Unknown"
-        
+
         return nextmap
 
     def getMaps(self):
@@ -431,7 +430,7 @@ class ChivParser(Parser):
         packet = Packet()
         packet.msgType = MessageType.ROTATE_MAP
         self.sendPacket(packet)
-        
+
     def changeMap(self, map_name):
         """
         Load a given map/level
@@ -525,10 +524,10 @@ class Packet(object):
         s += pack('>i', len(self.data))
         s += self.data
         return s
-        
+
     def addGUID(self, playerId):
         self.data += pack('>Q', int(playerId))
-    
+
     def addString(self, s):
         encodedData = s.encode('utf-8')
         self.data += pack('>i', len(encodedData))
@@ -542,12 +541,12 @@ class Packet(object):
         playerId = str(playerId)
         self.data = self.data[8:]
         return playerId
-    
+
     def getInt(self):
         num = unpack('>i', self.data[0:4])[0]
         self.data = self.data[4:]
         return num
-    
+
     def getString(self):
         length = self.getInt()
         data = self.data[0:length]
@@ -561,11 +560,11 @@ class Packet(object):
                                                                                            self.dataLength,
                                                                                            self.data)
         return "Packet(%r)" % self.__dict__
-    
+
     @staticmethod
     def getHeaderSize():
         return 6
-        
+
     @staticmethod
     def getPacketSize(packet):
         return unpack('>i', packet[2:6])[0] + Packet.getHeaderSize()
@@ -630,7 +629,7 @@ class Client(asyncore.dispatcher_with_send):
                 except Exception as e:
                     self.error("Failed to handle game server %r" % packet, exc_info=e)
                 self.readBuffer = self.readBuffer[packetSize:]
-       
+
     def sendPacket(self, packet):
         try:
             self.console.verbose2("RCON< %r" % packet)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -41,10 +40,10 @@ class Rcon(object):
     def __init__(self, console, *args):
         self.console = console
         self.hfclient = None
-        
+
     def set_homefront_client(self, hfclient):
         self.hfclient = hfclient
-    
+
     def writelines(self, lines):
         for line in lines:
             self.write(line)
@@ -54,13 +53,13 @@ class Rcon(object):
             return
         self.console.verbose('RCON :\t %s' % cmd)
         self.hfclient.command(cmd)
-        
+
     def flush(self):
         pass
 
     def close(self):
         pass
-            
+
 ########################################################################################################################
 # EXAMPLE PROGRAM                                                                                                      #
 ########################################################################################################################

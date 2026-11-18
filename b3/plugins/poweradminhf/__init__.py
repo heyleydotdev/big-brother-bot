@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -38,13 +37,13 @@ class PoweradminhfPlugin(b3.plugin.Plugin):
 
     _adminPlugin = None
     _enableTeamBalancer = None
-    
+
     _matchmode = False
     _match_plugin_disable = []
     _matchManager = None
-    
+
     _ignoreBalancingTill = 0
-    
+
     _currentVote = None
     _auto_unban_level = None
 
@@ -209,7 +208,7 @@ class PoweradminhfPlugin(b3.plugin.Plugin):
         """
         # store the time of teamjoin for autobalancing purposes
         event.client.setvar(self, 'teamtime', self.console.time())
-        
+
     def onRoundStart(self, _):
         """
         Handle EVT_GAME_ROUND_START.
@@ -349,7 +348,7 @@ class PoweradminhfPlugin(b3.plugin.Plugin):
             sclient = self._adminPlugin.findClientPrompt(x[0], client)
             if sclient:
                 cmd.sayLoudOrPM(client, '%s: %s' % (sclient.name, sclient.guid))
-        
+
     def cmd_pakill(self, data, client, cmd=None):
         """
         <name> [<reason>] - kill a player
@@ -395,8 +394,8 @@ class PoweradminhfPlugin(b3.plugin.Plugin):
             if sclient:
                 self.console.write('admin makespectate "%s"' % sclient.guid )
                 cmd.sayLoudOrPM(client, '%s forced to spectate' % sclient.name)
-        
-    def cmd_pamatch(self, data, client, cmd=None): 
+
+    def cmd_pamatch(self, data, client, cmd=None):
         """
         <on/off> - set server match mode on/off
         (You can safely use the command without the 'pa' at the beginning)
@@ -407,14 +406,14 @@ class PoweradminhfPlugin(b3.plugin.Plugin):
             if data.lower() == 'on':
                 self._matchmode = True
                 self._enableTeamBalancer = False
-                
+
                 for e in self._match_plugin_disable:
                     self.debug('disabling plugin %s' %e)
                     plugin = self.console.getPlugin(e)
                     if plugin:
                         plugin.disable()
                         client.message('plugin %s disabled' % e)
-                
+
                 self.console.say('match mode: ON')
                 if self._matchManager:
                     self._matchManager.stop()
@@ -426,7 +425,7 @@ class PoweradminhfPlugin(b3.plugin.Plugin):
                 if self._matchManager:
                     self._matchManager.stop()
                 self._matchManager = None
-                
+
                 # enable plugins
                 for e in self._match_plugin_disable:
                     self.debug('enabling plugin %s' %e)
@@ -449,20 +448,20 @@ class MatchManager(object):
     running = True
     timer = None
     countdownStarted = None
-    
+
     def __init__(self, plugin):
         self.plugin = plugin
         self.console = plugin.console
         self._adminPlugin = self.console.getPlugin('admin')
         if not self._adminPlugin:
             raise AttributeError('could not find admin plugin')
-    
+
     def stop(self):
         try: self.timer.cancel()
         except: pass
         self.running = False
         self.unregisterCommandReady()
-        
+
     def initMatch(self):
         for c in self.console.clients.getList():
             c.setvar(self.plugin, 'ready', False)
@@ -473,10 +472,10 @@ class MatchManager(object):
         self.console.saybig('ALL PLAYERS : type !ready when you are ready')
         self.timer = threading.Timer(10.0, self._checkIfEveryoneIsReady)
         self.timer.start()
-    
+
     def registerCommandReady(self):
         self._adminPlugin.registerCommand(self.plugin, 'ready', 0, self.cmd_ready)
-    
+
     def unregisterCommandReady(self):
         try:
             cmd = self._adminPlugin._commands['ready']
@@ -485,7 +484,7 @@ class MatchManager(object):
                 del self._adminPlugin._commands['ready']
         except KeyError:
             pass
-    
+
     def yellToClient(self, message, duration, client):
         """
         We need this to bypass the message queue managed by the HF parser.
@@ -503,15 +502,15 @@ class MatchManager(object):
                 waitingForPlayers.append(c)
                 self.yellToClient('we are waiting for you. type !ready', 10000, c)
                 isAllPlayersReady = False
-    
+
         if 0 < len(waitingForPlayers) <= 6:
             self.console.say('waiting for %s' % ', '.join([c.cid for c in waitingForPlayers]))
-        
+
         try:
             self.timer.cancel()
         except:
             pass
-        
+
         if isAllPlayersReady is True:
             self.console.say('All players are ready, starting count down')
             self.countDown = 10
@@ -519,7 +518,7 @@ class MatchManager(object):
             self.timer = threading.Timer(0.9, self._countDown)
         else:
             self.timer = threading.Timer(10.0, self._checkIfEveryoneIsReady)
-            
+
         if self.running:
             self.timer.start()
 
@@ -531,14 +530,14 @@ class MatchManager(object):
             if self.running:
                 self.timer = threading.Timer(1.0, self._countDown)
                 self.timer.start()
-        else:    
+        else:
             # make sure to have a brief big text
             self.console.write(('admin.yell', 'FIGHT !!!', 6000, 'all'))
             self.console.say('Match started. GL & HF')
             self.console.write(('admin.restartMap',))
             self.stop()
 
-    def cmd_ready(self, data, client, cmd=None): 
+    def cmd_ready(self, data, client, cmd=None):
         """
         Notify other teams you are ready to start the match
         """

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -58,5 +57,4 @@ class Test_sqlite(B3TestCase, StorageAPITest):
 if __name__ == '__main__':
     import unittest
     unittest.main()
-    
-    
+

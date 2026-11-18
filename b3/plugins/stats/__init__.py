@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -326,13 +325,13 @@ class StatsPlugin(b3.plugin.Plugin):
 
         self.updateXP(killer)
         self.updateXP(victim)
-		
+
     def onAssist(self, event):
 
         client = event.client
         victim = event.target
         attacker = event.data
-        
+
         client.var(self, 'assists', 0).value += 1
 
     def updateXP(self, sclient):
@@ -384,7 +383,7 @@ class StatsPlugin(b3.plugin.Plugin):
                 return
         else:
             sclient = client
-			
+
         if self.console.gameName == "iourt43":
 
             message = '^3Stats ^7[ %s ^7] K ^2%s ^7D ^3%s ^7A ^5%s ^7TK ^1%s ^7Dmg ^5%s ^7Skill ^3%1.02f ^7XP ^6%s' % \
@@ -392,7 +391,7 @@ class StatsPlugin(b3.plugin.Plugin):
                        sclient.var(self, 'assists', 0).value ,sclient.var(self, 'teamKills', 0).value, sclient.var(self, 'damageHit', 0).value,
                        round(sclient.var(self, 'points', self.startPoints).value, 2),
                        round(float(sclient.var(self, 'oldexperience', 0).value + sclient.var(self, 'experience', 0).value), 2))
-					   
+
         else:
 
             message = '^3Stats ^7[ %s ^7] K ^2%s ^7D ^3%s ^7TK ^1%s ^7Dmg ^5%s ^7Skill ^3%1.02f ^7XP ^6%s' % \
@@ -431,7 +430,7 @@ class StatsPlugin(b3.plugin.Plugin):
         for c in self.console.clients.getList():
             if c.isvar(self, 'points'):
                 scores.append((c.exactName, round(float(c.var(self, 'points', self.startPoints).value), 2)))
-        
+
         if len(scores):
             tmplist = [(x[1], x) for x in scores]
             tmplist.sort()
@@ -446,8 +445,8 @@ class StatsPlugin(b3.plugin.Plugin):
                     break
 
                 results.append('^3#%s^7 %s ^7[^3%s^7]' % (i, name, score))
-                
-            if client:        
+
+            if client:
                 client.message('^3Top Stats:^7 %s' % ', '.join(results))
             else:
                 self.console.say('^3Top Stats:^7 %s' % ', '.join(results))

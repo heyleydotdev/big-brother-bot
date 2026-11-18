@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -182,7 +181,7 @@ class NickregPlugin(b3.plugin.Plugin):
     #   COMMANDS                                                                                                       #
     #                                                                                                                  #
     ####################################################################################################################
-                            
+
     def cmd_listnick(self, data, client, cmd=None):
         """
         [<client>] - list registered nicknames
@@ -210,7 +209,7 @@ class NickregPlugin(b3.plugin.Plugin):
                 cursor.moveNext()
             cmd.sayLoudOrPM(client, '^7%s ^7has registered nickname(s): %s' % (sclient.name, ', '.join(registered)))
             cursor.close()
-        
+
     def cmd_regnick(self, data, client, cmd=None):
         """
         - register current name as yours

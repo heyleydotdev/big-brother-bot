@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -181,7 +180,7 @@ class Iourt42Client(Client):
 
 
 class Iourt42Parser(Iourt41Parser):
-   
+
     gameName = 'iourt42'
     spamcontrolPlugin = None
 
@@ -518,7 +517,7 @@ class Iourt42Parser(Iourt41Parser):
         UT_MOD_COLT1911: [100, 60, 37, 27, 15, 15, 32, 29, 22, 22, 15, 15, 11, 11],
         UT_MOD_MAC11: [34, 29, 20, 15, 11, 11, 18, 17, 15, 15, 13, 13, 11, 11],
         UT_MOD_GOOMBA: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
-    }   
+    }
 
     ####################################################################################################################
     #                                                                                                                  #
@@ -675,7 +674,7 @@ class Iourt42Parser(Iourt41Parser):
     #   EVENT HANDLERS                                                                                                 #
     #                                                                                                                  #
     ####################################################################################################################
-    
+
     def OnClientuserinfo(self, action, data, match=None):
         # 2 \ip\145.99.135.227:27960\challenge\-232198920\qport\2781\protocol\68\battleye\1\name\[SNT]^1XLR^78or..
         # 0 \gear\GMIORAA\team\blue\skill\5.000000\characterfile\bots/ut_chicken_c.c\color\4\sex\male\race\2\snaps\20\..
@@ -901,7 +900,7 @@ class Iourt42Parser(Iourt41Parser):
                                                                               'way_time': way_time,
                                                                               'attempt_num': attempt_num,
                                                                               'attempt_max': attempt_max})
-    
+
     def OnClientjumpruncanceled(self, action, data, match=None):
         cid = match.group('cid')
         way_id = match.group('way_id')
@@ -914,7 +913,7 @@ class Iourt42Parser(Iourt41Parser):
         return self.getEvent('EVT_CLIENT_JUMP_RUN_CANCEL', client=client, data={'way_id': way_id,
                                                                                 'attempt_num': attempt_num,
                                                                                 'attempt_max': attempt_max})
-    
+
     def OnClientsaveposition(self, action, data, match=None):
         cid = match.group('cid')
         position = float(match.group('x')), float(match.group('y')), float(match.group('z'))
@@ -932,7 +931,7 @@ class Iourt42Parser(Iourt41Parser):
             self.debug('No client found')
             return None
         return self.getEvent('EVT_CLIENT_POS_LOAD', client=client, data={'position': position})
-    
+
     def OnClientgoto(self, action, data, match=None):
         cid = match.group('cid')
         tcid = match.group('tcid')
@@ -941,12 +940,12 @@ class Iourt42Parser(Iourt41Parser):
         if not client:
             self.debug('No client found')
             return None
-        
+
         target = self.getByCidOrJoinPlayer(tcid)
         if not target:
             self.debug('No target client found')
             return None
-            
+
         return self.getEvent('EVT_CLIENT_GOTO', client=client, target=target, data={'position': position})
 
     def OnClientspawn(self, action, data, match=None):

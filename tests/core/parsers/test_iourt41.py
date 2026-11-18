@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -416,7 +415,7 @@ num score ping name            lastmsg  address              qport rate
         self.assertDictEqual({'10': 5, '12': 27}, pings)
 
     def test_inflictCustomPenalty(self):
-        """
+        r"""
         Called if b3.admin.penalizeClient() does not know a given penalty type.
         Overwrite this to add customized penalties for your game like 'slap', 'nuke',
         'mute', 'kill' or anything you want.

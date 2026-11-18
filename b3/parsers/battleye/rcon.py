@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -43,10 +42,10 @@ class Rcon(object):
     def __init__(self, console, *args):
         self.console = console
         self.battleye_server = None
-        
+
     def set_battleye_server(self, battleye_server):
         self.battleye_server = battleye_server
-    
+
     def writelines(self, lines):
         for line in lines:
             self.write(line)
@@ -64,7 +63,7 @@ class Rcon(object):
         except CommandError as err:
             self.console.error("RCON ERROR : %s" % err, exc_info=err)
         return response
-        
+
     def flush(self):
         pass
 

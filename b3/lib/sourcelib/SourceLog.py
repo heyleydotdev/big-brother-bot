@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 
 #------------------------------------------------------------------------------
 # SourceLog - Python class for parsing logs of Source Dedicated Servers
@@ -48,8 +47,8 @@ TOKEN = {
     'numplayers': '(?P<numplayers>[0-9]+)',
     'player': '(?P<player_name>.*?)<(?P<player_uid>[0-9]*)><(?P<player_steamid>(Console|BOT|STEAM_[01]:[01]:[0-9]{1,12}))><(?P<player_team>[^<>"]*)>',
     'position': '^(?P<x>-?[0-9]+) (?P<y>-?[0-9]+) (?P<z>-?[0-9]+)',
-    'property': ' \((?P<property_key>[^() ]+) "(?P<property_value>[^"]*)"\)',
-    'propertybug': '(?P<rest>.*" disconnected) \((?P<property_key>reason) "(?P<proprety_value>[^"]*)',
+    'property': r' \((?P<property_key>[^() ]+) "(?P<property_value>[^"]*)"\)',
+    'propertybug': r'(?P<rest>.*" disconnected) \((?P<property_key>reason) "(?P<proprety_value>[^"]*)',
     'reason': '(?P<reason>.*)',
     'rest': '(?P<rest>.*)',
     'score': '(?P<score>-?[0-9]+)',

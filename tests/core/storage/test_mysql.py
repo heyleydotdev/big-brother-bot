@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -45,7 +44,7 @@ MYSQL_TEST_PASSWORD = os.environ.get('MYSQL_TEST_PASSWORD', 'test')
 MYSQL_TEST_DB = os.environ.get('MYSQL_TEST_DB', 'b3_test')
 
 #===============================================================================
-# 
+#
 # Test if we can run the MySQL tests
 #
 #===============================================================================
@@ -73,9 +72,9 @@ if is_mysql_ready:
         no_mysql_reason = "%s" % err
 
 #===============================================================================
-# 
+#
 # Load the tests
-# 
+#
 #===============================================================================
 
 @unittest.skipIf(not is_mysql_ready, no_mysql_reason)
@@ -117,5 +116,5 @@ class Test_MySQL(B3TestCase, StorageAPITest):
 if __name__ == '__main__':
     import unittest
     unittest.main()
-    
-    
+
+

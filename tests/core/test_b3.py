@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -24,7 +23,7 @@
 
 from tests import B3TestCase
 import b3
-    
+
 class Test_getConfPath(B3TestCase):
 
     def test_getConfPath(self):

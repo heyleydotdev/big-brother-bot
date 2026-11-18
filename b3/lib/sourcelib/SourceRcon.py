@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 
 #------------------------------------------------------------------------------
 # SourceRcon - Python class for executing commands on Source Dedicated Servers

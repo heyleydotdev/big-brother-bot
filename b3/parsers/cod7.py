@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -133,7 +132,7 @@ class Cod7Parser(b3.parsers.cod5.Cod5Parser):
             self._regPlayer, self._regPlayerWithDemoclient = self._regPlayerWithDemoclient, self._regPlayer
             playerList = self.getPlayerList()
             self._regPlayer, self._regPlayerWithDemoclient = self._regPlayerWithDemoclient, self._regPlayer
-        
+
             if len(playerList) >= 4:
                 self.verbose('PREMATCH OFF: PlayerCount >=4: not a Pre-Match')
                 self._preMatch = False
@@ -290,7 +289,7 @@ class Cod7Parser(b3.parsers.cod5.Cod5Parser):
             self.verbose('Authentication not required for [3arc]democlient: aborting join...')
             self._preMatch = 0
             return None
-        
+
         if len(codguid) < self._guidLength:
             # invalid guid
             self.verbose2('Invalid GUID: %s' %codguid)
@@ -388,17 +387,17 @@ def newLoadArbPlugins(self):
     unload the httpytail plugin then load the cod7http plugin instead.
     """
     print("running newLoadArbPlugins ")
-    
+
     ## first, run usual loadArbPlugins
     originalLoadArbPlugins(self)
-    
+
     if self.config.has_option('server','game_log') and self.config.get('server','game_log')[0:7] == 'http://':
 
         if 'httpytail' in self._plugins:
             self.screen.write('Unloading        : http Plugin\n')
             del self._plugins['httpytail']
 
-        # load cod7http        
+        # load cod7http
         p = 'cod7http'
         self.bot('Loading %s', p)
         try:

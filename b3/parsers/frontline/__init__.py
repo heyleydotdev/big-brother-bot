@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -689,7 +688,7 @@ class FrontlineParser(b3.parser.Parser):
         return pings
 
     def inflictCustomPenalty(self, penalty_type, client, reason=None, duration=None, admin=None, data=None):
-        """
+        r"""
         Called if b3.admin.penalizeClient() does not know a given penalty type. 
         Overwrite this to add customized penalties for your game like 'slap', 'nuke', 
         'mute' or anything you want.

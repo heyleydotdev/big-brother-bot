@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -447,8 +446,8 @@ class Banlist(object):
                 result = io.StringIO(result)
                 gzipper = gzip.GzipFile(fileobj=result)
                 result = gzipper.read()
-            self.remote_lastmodified = webFile.headers.get('Last-Modified') 
-            self.remote_etag = webFile.headers.get('ETag') 
+            self.remote_lastmodified = webFile.headers.get('Last-Modified')
+            self.remote_etag = webFile.headers.get('ETag')
             self.plugin.debug('received headers : %s', webFile.info())
             self.plugin.debug("received %s bytes", len(result))
             localFile = open(self.file, 'w')

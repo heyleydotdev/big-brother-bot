@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -36,7 +35,7 @@ class SpreeStats(object):
     deaths = 0
     endLoosingSpreeMessage = None
     endKillSpreeMessage = None
-    
+
 
 class SpreePlugin(b3.plugin.Plugin):
 
@@ -110,7 +109,7 @@ class SpreePlugin(b3.plugin.Plugin):
     #   OTHER METHODS                                                                                                  #
     #                                                                                                                  #
     ####################################################################################################################
-              
+
     def init_spreemessage_list(self):
         # get the spree messages from the config
         # split the start and end spree messages and save it in the dictionary
@@ -131,7 +130,7 @@ class SpreePlugin(b3.plugin.Plugin):
     def init_spree_stats(self, client):
         # initialize the clients spree stats
         client.setvar(self, self._clientvar_name, SpreeStats())
-    
+
     def get_spree_stats(self, client):
         # get the clients stats
         # pass the plugin reference first
@@ -143,7 +142,7 @@ class SpreePlugin(b3.plugin.Plugin):
             # don't create a new SpreeStats object for no reason every call
             client.setvar(self, self._clientvar_name, SpreeStats())
         return client.var(self, self._clientvar_name).value
-    
+
     def handle_kills(self, client=None, victim=None):
         """
         A kill was made. Add 1 to the client and set his deaths to 0.
@@ -155,7 +154,7 @@ class SpreePlugin(b3.plugin.Plugin):
             # any changes to its values will be saved "automagically"
             spreeStats = self.get_spree_stats(client)
             spreeStats.kills += 1
-            
+
             # Check if the client was on a loosing spree. If so then show his end loosing spree msg.
             if spreeStats.endLoosingSpreeMessage:
                 self.show_message(client, victim, spreeStats.endLoosingSpreeMessage)
@@ -177,7 +176,7 @@ class SpreePlugin(b3.plugin.Plugin):
         if victim:
             spreeStats = self.get_spree_stats(victim)
             spreeStats.deaths += 1
-            
+
             # check if the victim had a killing spree and show a end_killing_spree message
             if spreeStats.endKillSpreeMessage:
                 self.show_message(client, victim, spreeStats.endKillSpreeMessage)
@@ -189,9 +188,9 @@ class SpreePlugin(b3.plugin.Plugin):
             if message:
                 #Save the 'loosing'spree message in the client.
                 spreeStats.endLoosingSpreeMessage = message[1]
-                
+
                 self.show_message(victim, client, message[0])
-                
+
             # kill spree is over, reset kills
             spreeStats.kills = 0
 
@@ -220,7 +219,7 @@ class SpreePlugin(b3.plugin.Plugin):
             message = message.replace('%player%', client.name)
             if victim:
                 message = message.replace('%victim%', victim.name)
-            self.console.say(message)        
+            self.console.say(message)
 
     ####################################################################################################################
     #                                                                                                                  #
@@ -231,7 +230,7 @@ class SpreePlugin(b3.plugin.Plugin):
     def cmd_spree(self, data, client, cmd=None):
         """
         <player> - show a players' winning/loosing spree
-        """        
+        """
         targm = '^7You have'
         targmns = '^7You are'
         if not data:

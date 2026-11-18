@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -142,7 +141,7 @@ class Test_log_lines_parsing(Iourt42TestCase):
         self.bot.connects('0')
         self.assertEqual(self.bot.team, b3.TEAM_RED)
         self.assertTrue(self.bot.bot)
-        self.console.parseLine('''InitRound: \sv_allowdownload\0\g_matchmode\0\g_gametype\4\sv_maxclients\16\sv_floodprotect\1\g_warmup\5\capturelimit\0''')
+        self.console.parseLine('''InitRound: \\sv_allowdownload\0\\g_matchmode\0\\g_gametype\4\\sv_maxclients\16\\sv_floodprotect\1\\g_warmup\5\\capturelimit\0''')
         self.assertEqual(self.bot.team, b3.TEAM_RED)
         self.assertTrue(self.bot.bot)
 
@@ -300,7 +299,7 @@ class Test_log_lines_parsing(Iourt42TestCase):
             event_type='EVT_CLIENT_POS_LOAD',
             event_client=marcel,
             event_data={'position': (335.384887, 67.469154, -23.875)})
-        
+
     def test_ClientGoto(self):
         patate = FakeClient(self.console, name="Patate", guid="Patate_guid")
         psyp = FakeClient(self.console, name="psyp", guid="psyp_guid")
@@ -1064,7 +1063,7 @@ num score ping name            lastmsg address               qport rate
 
 
 class Test_inflictCustomPenalty(Iourt42TestCase):
-    """
+    r"""
     Called if b3.admin.penalizeClient() does not know a given penalty type.
     Overwrite this to add customized penalties for your game like 'slap', 'nuke',
     'mute', 'kill' or anything you want.

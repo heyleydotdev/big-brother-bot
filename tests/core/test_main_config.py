@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -135,7 +134,7 @@ class TestConfig(unittest.TestCase):
         conf_cfg = MainConfig(cfg_parser)
 
         return conf_xml, conf_cfg
-    
+
     def test_empty_conf(self):
         self.init(r"""<configuration/>""", "")
 

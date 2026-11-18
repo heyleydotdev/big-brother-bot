@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -272,7 +271,7 @@ class StatusPlugin(b3.plugin.Plugin):
         """
         clients = self.console.clients.getList()
         score_list = self.console.getPlayerScores()
-                 
+
         self.verbose('building XML status')
         xml = Document()
 
@@ -355,7 +354,7 @@ class StatusPlugin(b3.plugin.Plugin):
             game.appendChild(data)
             self.storeServerinfo(k, v)
 
-        # --- End Game section        
+        # --- End Game section
 
         # --- Clients section
         b3clients = xml.createElement("Clients")
@@ -446,12 +445,12 @@ class StatusPlugin(b3.plugin.Plugin):
                         data.setAttribute("Value", clean_data)
 
                     client.appendChild(data)
-                        
+
                 if self._tkPlugin:
                     if hasattr(c, 'tkplugin_points'):
                         tkplugin = xml.createElement("TkPlugin")
                         tkplugin.setAttribute("Points", str(c.var(self, 'points')))
-                        client.appendChild(tkplugin)            
+                        client.appendChild(tkplugin)
                         if hasattr(c, 'tkplugin_attackers'):
                             for acid, points in list(c.var(self, 'attackers').value.items()):
                                 try:
@@ -463,7 +462,7 @@ class StatusPlugin(b3.plugin.Plugin):
                                 except Exception as e:
                                     self.warning('could not append child node in XML tree: %s' % e)
                                     pass
-                                
+
             except Exception as err:
                 self.error('XML Failed: %r' % err, exc_info=err)
                 pass

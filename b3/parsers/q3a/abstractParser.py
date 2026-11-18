@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -104,7 +103,7 @@ class AbstractParser(b3.parser.Parser):
         re.compile(r'^(?P<action>[a-z]+):\s*(?P<data>(?P<cid>[0-9]+)\s(?P<text>.*))$', re.IGNORECASE),
         re.compile(r'^(?P<action>[a-z]+):\s*(?P<data>.*)$', re.IGNORECASE)
     )
-    
+
     # num score ping guid   name            lastmsg address               qport rate
     # --- ----- ---- ------ --------------- ------- --------------------- ----- -----
     # 2     0   29 465030   ThorN                50 68.63.6.62:-32085      6597  5000
@@ -206,7 +205,7 @@ class AbstractParser(b3.parser.Parser):
 
         match, action, data, client, target = m
         func = 'On%s' % ''.join(word.capitalize() for word in action.split())
-        
+
         if hasattr(self, func):
             func = getattr(self, func)
             event = func(action, data, match)
@@ -447,7 +446,7 @@ class AbstractParser(b3.parser.Parser):
         for line in self.getWrap(message):
             lines.append(self.getCommand('say', message=line))
         self.writelines(lines)
-    
+
     def saybig(self, text):
         """
         Broadcast a message to all players in a way that will catch their attention.
@@ -479,7 +478,7 @@ class AbstractParser(b3.parser.Parser):
         message = message.strip()
         wrapped = self.getWrap(message)
         for client in self.clients.getClientsByState(b3.STATE_DEAD):
-            if client.cid:                
+            if client.cid:
                 for line in wrapped:
                     lines.append(self.getCommand('message', cid=client.cid, message=line))
         self.writelines(lines)
@@ -586,9 +585,9 @@ class AbstractParser(b3.parser.Parser):
             if client.pbid:
                 result = self.PunkBuster.unBanGUID(client)
 
-                if result:                    
+                if result:
                     admin.message('^3Unbanned^7: %s^7: %s' % (client.exactName, result))
-                
+
                 if admin:
                     variables = self.getMessageVariables(client=client, reason=reason, admin=admin)
                     fullreason = self.getMessage('unbanned_by', variables)
@@ -655,7 +654,7 @@ class AbstractParser(b3.parser.Parser):
         self.say('^7Changing map to next map')
         time.sleep(1)
         self.write('map_rotate 0')
-        
+
     def changeMap(self, mapname):
         """
         Load a given map/level.
@@ -678,12 +677,12 @@ class AbstractParser(b3.parser.Parser):
             m = re.match(self._regPlayerShort, line)
             if not m:
                 m = re.match(self._regPlayer, line.strip())
-            
+
             if m:
                 players[str(m.group('slot'))] = int(m.group('ping'))
-        
+
         return players
-        
+
     def getPlayerScores(self):
         """
         Returns a dict having players' id for keys and players' scores for values.
@@ -698,12 +697,12 @@ class AbstractParser(b3.parser.Parser):
             m = re.match(self._regPlayerShort, line)
             if not m:
                 m = re.match(self._regPlayer, line.strip())
-            
-            if m:  
+
+            if m:
                 players[str(m.group('slot'))] = int(m.group('score'))
             #elif '------' not in line and 'map: ' not in line and 'num score ping' not in line:
                 #self.verbose('getPlayerScores() = Line did not match format: %s' % line)
-        
+
         return players
 
     def getPlayerList(self, maxRetries=None):
@@ -728,7 +727,7 @@ class AbstractParser(b3.parser.Parser):
                         lastslot = int(m.group('slot'))
                         d['pbid'] = None
                         players[str(m.group('slot'))] = d
-                        
+
                     else:
                         self.debug('Duplicate or incorrect slot number - '
                                    'client ignored %s last slot %s' % (m.group('slot'), lastslot))
@@ -836,7 +835,7 @@ class AbstractParser(b3.parser.Parser):
                         client.disconnect()
                 else:
                     self.debug('no-sync: no guid or ip found')
-        
+
         return mlist
 
     def authorizeClients(self):

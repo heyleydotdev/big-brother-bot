@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -55,7 +54,7 @@ class AfkPlugin(Plugin):
 
         self.last_chance_delay = None
         """:type : int"""
-        
+
         self.kick_reason = None
         """:type : str"""
 

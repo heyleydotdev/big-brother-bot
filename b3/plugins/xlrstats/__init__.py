@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -1825,7 +1824,7 @@ class XlrstatsPlugin(b3.plugin.Plugin):
             attr_val = getattr(self, attr)
             if attr.endswith('_table') and attr_val not in {'clients', 'penalties'}:
                 xlr_tables.append(attr_val)
-                
+
         current_tables = self.console.storage.getTables()
 
         # truncate database tables
@@ -2208,13 +2207,13 @@ class BattlestatsPlugin(b3.plugin.Plugin):
     This is a helper class/plugin that saves last played matches
     It can not be called directly or separately from the XLRstats plugin!
     """
-    
+
     ####################################################################################################################
     #                                                                                                                  #
     #   PLUGIN STARTUP                                                                                                 #
     #                                                                                                                  #
     ####################################################################################################################
-    
+
     def __init__(self, console, battlelogGamesTable, battlelogClientsTable):
         """
         Object constructor.

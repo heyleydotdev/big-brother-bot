@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -55,8 +54,8 @@ def EncodeInt32(size):
 
 def DecodeInt32(data):
     return unpack('<I', data[0 : 4])[0]
-    
-    
+
+
 def EncodeWords(words):
     size = 0
     encodedWords = b''
@@ -121,7 +120,7 @@ def EncodeClientRequest(words):
     clientSequenceNr = (clientSequenceNr + 1) & 0x3fffffff
     return packet
 
-    
+
 def EncodeClientResponse(sequence, words):
     """
     Encode a response packet.
@@ -137,7 +136,7 @@ def printPacket(packet):
         print("IsFromServer, ", end=' ')
     else:
         print("IsFromClient, ", end=' ')
-    
+
     if packet[1]:
         print("Response, ", end=' ')
     else:
@@ -249,7 +248,7 @@ class FrostbiteDispatcher(asyncore.dispatcher_with_send):
         Register a function that will be called when the Frosbite server sends us a command reply.
         """
         self._frostbite_command_response_handler = func
-        
+
     def send_command(self, *command):
         """
         Send a command to the Frosbite server and return the command
@@ -277,10 +276,10 @@ class FrostbiteDispatcher(asyncore.dispatcher_with_send):
 
     def getLogger(self):
         return logging.getLogger("FrostbiteDispatcher")
-    
+
     def handle_connect(self):
         self.getLogger().debug("handle_connect")
-    
+
     def handle_close(self):
         """
         Called when the socket is closed.
@@ -303,7 +302,7 @@ class FrostbiteDispatcher(asyncore.dispatcher_with_send):
             packet = self._buffer_in[0:packetSize]
             self._buffer_in = self._buffer_in[packetSize:len(self._buffer_in)]
             self.handle_packet(packet)
-            
+
     def handle_packet(self, packet):
         """
         Called when a full Frosbite packet has been received.
@@ -335,7 +334,7 @@ class FrostbiteDispatcher(asyncore.dispatcher_with_send):
         self.getLogger().debug("received a response for command #%i from frosbite server: %s" % (command_id, repr(words)))
         if self._frostbite_command_response_handler is not None:
             self._frostbite_command_response_handler(command_id, words)
-    
+
 
 class FrostbiteServer(threading.Thread):
     """
@@ -370,7 +369,7 @@ class FrostbiteServer(threading.Thread):
         Add func from Frosbite events listeners.
         """
         self.observers.add(func)
-        
+
     def unsubscribe(self, func):
         """
         Remove func from Frosbite events listeners.
@@ -385,7 +384,7 @@ class FrostbiteServer(threading.Thread):
         """
         if not self.connected:
             raise NetworkError("not connected")
-        
+
         self.getLogger().info("command : %s " % repr(command))
         if command is None:
             return None
@@ -393,7 +392,7 @@ class FrostbiteServer(threading.Thread):
         command_id = self.frostbite_dispatcher.send_command(*command)
         self.pending_commands[command_id] = None
         self.getLogger().debug("command #%i sent. %s " % (command_id, repr(command)))
-        
+
         response = self._wait_for_response(command_id)
         if response[0] in ('CommandDisallowedOnRanked', 'CommandDisallowedOnOfficial'):
             raise CommandDisallowedError(response)
@@ -425,7 +424,7 @@ class FrostbiteServer(threading.Thread):
     def stop(self):
         self._stopEvent.set()
         self.close()
-    
+
     ####################################################################################################################
     #                                                                                                                  #
     #   OTHER METHODS                                                                                                  #
@@ -436,7 +435,7 @@ class FrostbiteServer(threading.Thread):
     def test_connectivity(host, port):
         sock = socket.create_connection((host, port), timeout=2)
         sock.close()
-    
+
     def __getattr__(self, name):
         if name == 'connected':
             return self.frostbite_dispatcher.connected
@@ -698,4 +697,3 @@ class FrostbiteServer(threading.Thread):
 #
 #     #run_low_level()
 #     run_FrosbiteServer()
-    

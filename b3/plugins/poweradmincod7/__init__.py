@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -44,8 +43,8 @@ class Poweradmincod7Plugin(b3.plugin.Plugin):
     _issetmap = False
     _isplaylist_enabled = True
     _admin_excluded_maps = None
-    
-    _cod7maps = { 
+
+    _cod7maps = {
         'mp_array': 'array',
         'mp_cracked': 'cracked',
         'mp_crisis': 'crisis',
@@ -362,7 +361,7 @@ class Poweradmincod7Plugin(b3.plugin.Plugin):
             client.message('This command is not available on ranked servers!')
             return
 
-        gametypes = { 
+        gametypes = {
             'dm' : 'Free-For-All',
             'tdm' : 'Team Deathmatch',
             'sd' : 'Search and Destroy',

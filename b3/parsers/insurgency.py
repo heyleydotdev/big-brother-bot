@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -75,7 +74,7 @@ RE_HL_LOG_LINE = r'''^L [01]\d/[0-3]\d/\d+ - [0-2]\d:[0-5]\d:[0-5]\d:\s*(?P<data
 
 # Regular expression able to extract properties from HalfLife game engine log line as described at
 # https://developer.valvesoftware.com/wiki/HL_Log_Standard#Notes
-RE_HL_LOG_PROPERTY = re.compile('''\((?P<key>[^\s\(\)]+)(?P<data>| "(?P<value>[^"]*)")\)''')
+RE_HL_LOG_PROPERTY = re.compile(r'''\((?P<key>[^\s\(\)]+)(?P<data>| "(?P<value>[^"]*)")\)''')
 
 # Regular expression to parse cvar queries responses
 RE_CVAR = re.compile(r'''^"(?P<cvar>\S+?)" = "(?P<value>.*?)" \( def. "(?P<default>.*?)".*$''', re.MULTILINE)
@@ -904,7 +903,7 @@ class InsurgencyParser(Parser):
         return dict()
 
     def inflictCustomPenalty(self, penalty_type, client, reason=None, duration=None, admin=None, data=None):
-        """
+        r"""
         Called if b3.admin.penalizeClient() does not know a given penalty type.
         Overwrite this to add customized penalties for your game like 'slap', 'nuke',
         'mute', 'kill' or anything you want.

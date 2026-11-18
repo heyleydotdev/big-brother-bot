@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 
 #------------------------------------------------------------------------------
 # SourceLib - Python implementation of Source Server Query/RCON/Log protocols.

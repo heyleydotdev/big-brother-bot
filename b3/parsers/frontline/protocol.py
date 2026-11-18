@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -57,7 +56,7 @@ class Client(asyncore.dispatcher_with_send):
         self.lastResponseTime = None
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect( (self._host, self._port) )
-        
+
     def handle_connect(self):
         self.console.info('now connected to Frontline gameserver: waiting for challenge')
         self.authed = False
@@ -92,14 +91,14 @@ class Client(asyncore.dispatcher_with_send):
     def add_listener(self, handler_func):
         self._handlers.add(handler_func)
         return self
-    
+
     def remove_listener(self, handler_func):
         try:
             self._handlers.remove(handler_func)
         except:
             raise ValueError("handler is not handling this event, so cannot unhandle it")
-        return self            
-            
+        return self
+
     def login(self, challenge):
         """
         Authenticate to the server
@@ -141,7 +140,7 @@ class Client(asyncore.dispatcher_with_send):
         After 10 seconds of inactivity the server will drop the connection.
         """
         self.command("ECHONET PING")
-    
+
     def command(self, text):
         """
         Send command to server.
@@ -158,7 +157,7 @@ class Client(asyncore.dispatcher_with_send):
             self.send(packet)
         except socket.error as e:
             self.console.error(repr(e))
-        
+
     def _readPacket(self):
         if CMD_TERMINATOR in self._buffer_in:
             p = self._buffer_in.split(CMD_TERMINATOR, 1)[0]
@@ -176,7 +175,7 @@ class Client(asyncore.dispatcher_with_send):
             match = RE_CHALLENGE.match(p)
             if match:
                 self.login(match.group('challenge'))
-            
+
 ########################################################################################################################
 # EXAMPLE PROGRAM                                                                                                      #
 ########################################################################################################################

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -283,7 +282,7 @@ class Plugin(object):
 
         def _get_list(value):
             """process the given value by extracting tokens"""
-            return [x for x in re.split('\W+', value) if x]
+            return [x for x in re.split(r'\W+', value) if x]
 
         handlers = {
             b3.STRING: _get_string,
@@ -475,19 +474,19 @@ class Plugin(object):
     def warning(self, msg, *args, **kwargs):
         """
         Log a WARNING message to the main log.
-        """        
+        """
         self.console.warning('%s: %s' % (self.__class__.__name__, msg), *args, **kwargs)
 
     def info(self, msg, *args, **kwargs):
         """
         Log an INFO message to the main log.
-        """        
+        """
         self.console.info('%s: %s' % (self.__class__.__name__, msg), *args, **kwargs)
 
     def exception(self, msg, *args, **kwargs):
         """
         Log an EXCEPTION message to the main log.
-        """        
+        """
         self.console.exception('%s: %s' % (self.__class__.__name__, msg), *args, **kwargs)
 
     def critical(self, msg, *args, **kwargs):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -139,15 +138,15 @@ class SpawnkillPlugin(b3.plugin.Plugin):
         """
         client = event.client
         target = event.target
-        
+
         if client.maxLevel >= self.settings['hit']['maxlevel']:
             self.verbose('bypassing spawnhit check: %s <@%s> is a high group level player', client.name, client.id)
             return
-        
+
         if not target.isvar(self, 'spawntime'):
             self.verbose('bypassing spawnhit check: %s <@%s> has no spawntime marked', target.name, target.id)
             return
-        
+
         if self.console.time() - target.var(self, 'spawntime').toInt() < self.settings['hit']['delay']:
             func = self.penalties[self.settings['hit']['penalty']]
             func('hit', client)
@@ -158,15 +157,15 @@ class SpawnkillPlugin(b3.plugin.Plugin):
         """
         client = event.client
         target = event.target
-        
+
         if client.maxLevel >= self.settings['kill']['maxlevel']:
             self.verbose('bypassing spawnkill check: %s <@%s> is a high group level player', client.name, client.id)
             return
-        
+
         if not target.isvar(self, 'spawntime'):
             self.verbose('bypassing spawnkill check: %s <@%s> has no spawntime marked', target.name, target.id)
             return
-        
+
         if self.console.time() - target.var(self, 'spawntime').toInt() < self.settings['kill']['delay']:
             func = self.penalties[self.settings['kill']['penalty']]
             func('kill', client)

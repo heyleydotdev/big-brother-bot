@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -21,7 +20,7 @@
 #  02110-1301, USA.                                                   #
 #                                                                     #
 # ################################################################### #
- 
+
 __version__ = '1.10'
 __author__ = 'Bakes, Courgette'
 
@@ -62,7 +61,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
     _nbConsecutiveConnFailure = 0
     _logAppend = False
     _ftplib_debug_level = 0         # 0: no debug, 1: normal debug, 2: extended debug
-    
+
     _gamelog_read_delay = 0.150
     _use_windows_cache_fix = False
     _cache_refresh_delay = 1
@@ -79,7 +78,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
         """
         if self.console.config.has_option('server', 'delay'):
             self._gamelog_read_delay = self.console.config.getfloat('server', 'delay')
-        
+
         if self.console.config.has_option('server', 'local_game_log'):
             self.lgame_log = self.console.config.getpath('server', 'local_game_log')
         else:
@@ -90,12 +89,12 @@ class FtpytailPlugin(b3.plugin.Plugin):
 
         if self.console.config.get('server', 'game_log')[0:6] == 'ftp://':
             self.init_thread(self.console.config.get('server', 'game_log'))
-            
+
         if self.console.config.has_option('server', 'log_append'):
             self._logAppend = self.console.config.getboolean('server', 'log_append')
         else:
             self._logAppend = False
-    
+
     def onLoadConfig(self):
         """
         Load plugin configuration.
@@ -206,11 +205,11 @@ class FtpytailPlugin(b3.plugin.Plugin):
                 self.buffer = block
             else:
                 self.buffer = self.buffer + block
-        
+
         def force_windows_cache_reload(_):
             # no need to do anything here so
             return
-            
+
         ftp = None
         self.file = open(self.lgame_log, 'ab')
         self.file.write('\r\n')
@@ -235,13 +234,13 @@ class FtpytailPlugin(b3.plugin.Plugin):
                         self.verbose("connection successful: remote file size is %s" % remotesize)
                         if self._remoteFileOffset is None:
                             self._remoteFileOffset = remotesize
-                        
+
                 if self._use_windows_cache_fix:
                     time.sleep(self._cache_refresh_delay)
                     ftp.retrbinary('RETR ' + os.path.basename(self.url_path),
                                    force_windows_cache_reload, 1,
                                    rest=self._remoteFileOffset)
-                    
+
                 remotesize = ftp.size(os.path.basename(self.url_path))
                 if remotesize < self._remoteFileOffset:
                     self.debug("remote file rotation detected")
@@ -295,7 +294,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
                     pass
 
                 ftp = None
-                
+
                 if self._nbConsecutiveConnFailure <= self._maxConsecutiveConnFailure:
                     time.sleep(self._short_delay)
                 else:
@@ -313,7 +312,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
             self.file.close()
         except Exception:
             pass
-    
+
     def ftpconnect(self):
         self.verbose('connecting to %s:%s ...' % (self.ftpconfig["host"], self.ftpconfig["port"]))
         ftp = FTP()
@@ -326,11 +325,11 @@ class FtpytailPlugin(b3.plugin.Plugin):
         ftp.cwd(d)
         self.console.clients.sync()
         return ftp
-    
-    
+
+
 if __name__ == '__main__':
     from b3.fake import fakeConsole
-    
+
     print("------------------------------------")
     config = b3.config.XmlConfigParser()
     config.setXml("""

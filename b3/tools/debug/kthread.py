@@ -68,7 +68,7 @@ class KThread(threading.Thread):
     self.killed = True
 
 if __name__ == '__main__':
-    
+
     def func():
         print('Function started')
         for i in range(1000000):

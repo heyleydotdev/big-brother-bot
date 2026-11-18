@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -208,7 +207,7 @@ class QueryBuilder(object):
 
         return " ".join(sql)
 
-    def UpdateQuery(self, data, table, where, delayed=None): 
+    def UpdateQuery(self, data, table, where, delayed=None):
         """
         Construct a SQL update query.
         :param data: A dictionary of key-value pairs for the update.
@@ -232,7 +231,7 @@ class QueryBuilder(object):
 
         return sql
 
-    def InsertQuery(self, data, table, delayed=None): 
+    def InsertQuery(self, data, table, delayed=None):
         """
         Construct a SQL insert query.
         :param data: A dictionary of key-value pairs for the update.
@@ -256,7 +255,7 @@ class QueryBuilder(object):
 
         return sql
 
-    def ReplaceQuery(self, data, table, delayed=None): 
+    def ReplaceQuery(self, data, table, delayed=None):
         """
         Construct a SQL replace query.
         :param data: A dictionary of key-value pairs for the update.

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -225,7 +224,7 @@ class WelcomePlugin(b3.plugin.Plugin):
             self.debug('lastVisit not available: must be the first time')
             _timeDiff = 1000000  # big enough so it will welcome new players
 
-        # don't need to welcome people who got kicked or where already 
+        # don't need to welcome people who got kicked or where already
         # welcomed in before _min_gap s ago
         if client.connected and _timeDiff > self._min_gap:
             info = self.get_client_info(client)

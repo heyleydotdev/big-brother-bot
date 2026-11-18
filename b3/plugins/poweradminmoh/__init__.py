@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -44,7 +43,7 @@ class Scrambler(object):
     _plugin = None
     _getClients_method = None
     _last_round_scores = PlayerInfoBlock([0, 0])
-    
+
     def __init__(self):
         self._getClients_method = self._getClients_randomly
 
@@ -63,7 +62,7 @@ class Scrambler(object):
             self._getClients_method = self._getClients_randomly
         elif strategy.lower() == 'score':
             self._getClients_method = self._getClients_by_scores
-        else: 
+        else:
             raise ValueError
 
     def onRoundOverTeamScores(self, playerInfoBlock):
@@ -116,18 +115,18 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
     requiresParsers = ['moh']
 
     _adminPlugin = None
-    
+
     _enableTeamBalancer = False
     _ignoreBalancingTill = 0
     _tinterval = 0
     _teamdiff = 1
     _tcronTab = None
     _tmaxlevel = 100
-    
+
     _matchmode = False
     _match_plugin_disable = []
     _matchManager = None
-    
+
     _scrambling_planned = False
     _autoscramble_rounds = False
     _autoscramble_maps = False
@@ -167,10 +166,10 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
                 func = getCmd(self, cmd)
                 if func:
                     self._adminPlugin.registerCommand(self, cmd, level, func, alias)
-    
+
         # do not balance on the 1st minute after bot start
         self._ignoreBalancingTill = self.console.time() + 60
-        
+
         # register our events
         self.registerEvent('EVT_CLIENT_TEAM_CHANGE', self.onTeamChange)
         self.registerEvent('EVT_GAME_ROUND_START', self.onRoundStart)
@@ -213,7 +212,7 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
         except Exception:
             self._teamdiff = 1
             self.debug('using default value (%s) for teamdiff', self._teamdiff)
-        
+
         self.debug('teambalancer enabled: %s' % self._tinterval)
         self.debug('teambalancer maxlevel: %s' % self._tmaxlevel)
         self.debug('teambalancer check interval (in minute): %s' % self._tinterval)
@@ -333,29 +332,29 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
             client.delvar(self, 'movedByBot')
             return
         else:
-            #store the time of teamjoin for autobalancing purposes 
+            #store the time of teamjoin for autobalancing purposes
             client.setvar(self, 'teamtime', self.console.time())
             self.verbose('client variable teamtime set to: %s' % client.var(self, 'teamtime').value)
-        
+
         if self._enableTeamBalancer:
             if self.console.time() < self._ignoreBalancingTill:
                 self.debug('ignoring team balancing right now')
                 return
-            
+
             if client.team in (b3.TEAM_SPEC, b3.TEAM_UNKNOWN):
                 return
-            
+
             # get teams
             team1players, team2players = self.getTeams()
-            
+
             # if teams are uneven by one or even, then stop here
             if abs(len(team1players) - len(team2players)) <= 1:
                 return
-            
+
             biggestteam = team1players
             if len(team2players) > len(team1players):
                 biggestteam = team2players
-            
+
             # has the current player gone contributed to making teams uneven ?
             if client.cid in biggestteam:
                 self.debug('%s has contributed to unbalance the teams')
@@ -363,7 +362,7 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
                 if client.teamId == 1:
                     newteam = '2'
                 else:
-                    newteam = '1' 
+                    newteam = '1'
                 self._movePlayer(client, newteam)
                 # do not autobalance right after that
                 self._ignoreBalancingTill = self.console.time() + 10
@@ -373,7 +372,7 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
     #    COMMANDS                                                                                                      #
     #                                                                                                                  #
     ####################################################################################################################
-    
+
     def cmd_pb_sv_command(self, data, client, cmd=None):
         """
         <punkbuster command> - Execute a punkbuster command
@@ -399,7 +398,7 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
             self.console.write(('admin.runNextRound',))
         except FrostbiteCommandFailedError as err:
             client.message('Error: %s' % err.message)
-        
+
     def cmd_restartround(self, data, client, cmd=None):
         """
         Restart current round
@@ -511,7 +510,7 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
                 if sclient.teamId == 1:
                     newteam = '2'
                 else:
-                    newteam = '1' 
+                    newteam = '1'
                 self._movePlayer(sclient, newteam)
                 cmd.sayLoudOrPM(client, '%s forced to the other team' % sclient.cid)
 
@@ -578,14 +577,14 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
         if len(x) == 1 or x[1] is None:
             client.message('Invalid data, try !help swap')
             return
-                
+
         x = self._adminPlugin.parseUserCmd(x[1])
         if not x:
             client.message('Invalid data, try !help swap')
             return
 
         pB = x[0]
-        
+
         sclientA = self._adminPlugin.findClientPrompt(pA, client)
         if not sclientA:
             return
@@ -651,7 +650,7 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
                 else:
                     self.debug('Invalid data sent to cmd_teambalance : %s' % data)
 
-    def cmd_match(self, data, client, cmd=None): 
+    def cmd_match(self, data, client, cmd=None):
         """
         <on/off> - Set server match mode on/off
         """
@@ -660,17 +659,17 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
         else:
 
             if data.lower() == 'on':
-                
+
                 self._matchmode = True
                 self._enableTeamBalancer = False
-                
+
                 for e in self._match_plugin_disable:
                     self.debug('Disabling plugin %s' %e)
                     plugin = self.console.getPlugin(e)
                     if plugin:
                         plugin.disable()
                         client.message('Plugin %s disabled' % e)
-                
+
                 self.console.say('match mode: ON')
                 if self._matchManager:
                     self._matchManager.stop()
@@ -682,7 +681,7 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
                 if self._matchManager:
                     self._matchManager.stop()
                 self._matchManager = None
-                
+
                 # enable plugins
                 for e in self._match_plugin_disable:
                     self.debug('Enabling plugin %s' %e)
@@ -692,7 +691,7 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
                         client.message('Plugin %s enabled' % e)
 
                 self.console.say('Match mode: OFF')
-        
+
     def cmd_setnextmap(self, data, client=None, cmd=None):
         """
         <mapname> - Set the nextmap (partial map name works)
@@ -706,7 +705,7 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
                 return
             if len(match) == 1:
                 levelname = match[0]
-                
+
                 currentLevelCycle = self.console.write(('mapList.list',))
                 try:
                     newIndex = currentLevelCycle.index(levelname)
@@ -720,7 +719,7 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
                     cmd.sayLoudOrPM(client, 'nextmap set to %s' % self.console.getEasyName(levelname))
             else:
                 client.message('Do you mean: %s.' % ", ".join(data))
-      
+
     ####################################################################################################################
     #                                                                                                                  #
     #    OTHER METHODS                                                                                                 #
@@ -750,27 +749,27 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
             self.debug('ignoring team balancing as the round started less than 1 minute ago')
             return
         self.teambalance()
-        
+
     def teambalance(self):
         """
         Balance teams.
         """
         team1players, team2players = self.getTeams()
-        
+
         # if teams are uneven by one or even, then stop here
         gap = abs(len(team1players) - len(team2players))
         if gap <= self._teamdiff:
             self.verbose('Teambalancer: Teams are balanced, T1: %s, T2: %s '
                          '(diff: %s, tolerance: %s)' % (len(team1players), len(team2players), gap, self._teamdiff))
             return
-        
+
         howManyMustSwitch = int(gap / 2)
         bigTeam = 1
         smallTeam = 2
         if len(team2players) > len(team1players):
             bigTeam = 2
             smallTeam = 1
-            
+
         self.verbose('Teambalance: Teams are NOT balanced, '
                      'T1: %s, T2: %s (diff: %s)' %(len(team1players), len(team2players), gap))
 
@@ -789,8 +788,8 @@ class PoweradminmohPlugin(b3.plugin.Plugin):
         self.console.say('forcing %s to the other team' % (', '.join([c.name for c in playersToMove])))
         for c in playersToMove:
             self._movePlayer(c, smallTeam)
-             
-                
+
+
     def _movePlayer(self, client, newTeamId):
         """
         Move a player into a different team
@@ -812,7 +811,7 @@ class MatchManager(object):
     running = True
     timer = None
     countdownStarted = None
-    
+
     def __init__(self, plugin):
         self.plugin = plugin
         self.console = plugin.console
@@ -820,7 +819,7 @@ class MatchManager(object):
         if not self._adminPlugin:
             # something is wrong, can't start without admin plugin
             raise AttributeError('could not find admin plugin')
-    
+
     def stop(self):
         try:
             self.timer.cancel()
@@ -828,7 +827,7 @@ class MatchManager(object):
             pass
         self.running = False
         self.unregisterCommandReady()
-        
+
     def initMatch(self):
         for c in self.console.clients.getList():
             c.setvar(self.plugin, 'ready', False)
@@ -838,10 +837,10 @@ class MatchManager(object):
         self.console.say('ALL PLAYERS : type !ready when you are ready')
         self.timer = threading.Timer(10.0, self._checkIfEveryoneIsReady)
         self.timer.start()
-    
+
     def registerCommandReady(self):
         self._adminPlugin.registerCommand(self.plugin, 'ready', 0, self.cmd_ready)
-    
+
     def unregisterCommandReady(self):
         # unregister the !ready command
         try:
@@ -851,7 +850,7 @@ class MatchManager(object):
                 del self._adminPlugin._commands['ready']
         except KeyError:
             pass
-    
+
     def sayToClient(self, message, client):
         """
         We need this to bypass the message queue managed by the frostbite parser.
@@ -869,15 +868,15 @@ class MatchManager(object):
                 waitingForPlayers.append(c)
                 self.sayToClient('we are waiting for you. type !ready', c)
                 isAllPlayersReady = False
-    
+
         if 0 < len(waitingForPlayers) <= 6:
             self.console.say('waiting for %s' % ', '.join([c.cid for c in waitingForPlayers]))
-        
+
         try:
             self.timer.cancel()
         except:
             pass
-        
+
         if isAllPlayersReady is True:
             self.console.say('All players are ready, starting count down')
             self.countDown = 10
@@ -885,7 +884,7 @@ class MatchManager(object):
             self.timer = threading.Timer(0.9, self._countDown)
         else:
             self.timer = threading.Timer(10.0, self._checkIfEveryoneIsReady)
-            
+
         if self.running:
             self.timer.start()
 
@@ -897,14 +896,14 @@ class MatchManager(object):
             if self.running:
                 self.timer = threading.Timer(1.0, self._countDown)
                 self.timer.start()
-        else:    
+        else:
             # make sure to have a brief big text
             self.console.write(('admin.say', 'FIGHT !!!', 'all'))
             self.console.say('Match started. GL & HF')
             self.console.write(('admin.restartRound',))
             self.stop()
 
-    def cmd_ready(self, data, client, cmd=None): 
+    def cmd_ready(self, data, client, cmd=None):
         """
         Notify other teams you are ready to start the match
         """

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # BigBrotherBot documentation build configuration file, created by
 # sphinx-quickstart on Wed Feb 06 16:56:27 2013.

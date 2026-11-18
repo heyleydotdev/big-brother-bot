@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -490,7 +489,7 @@ class Poweradminurt42Plugin(Poweradminurt41Plugin):
     def getTime(self):
         """ just to ease automated tests """
         return self.console.time()
-    
+
     def get_weapon_code(self, name):
         """
         try its best to guess the weapon code given a name.

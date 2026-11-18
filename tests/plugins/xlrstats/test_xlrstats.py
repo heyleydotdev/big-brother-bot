@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -361,7 +360,7 @@ class Test_storage(XlrstatsTestCase):
         client = mock()
         client.id = 43
         client.maxLevel = 1
-        
+
         # getting empty stats
         s = self.p.get_PlayerStats(client)
         self.assertIsNotNone(s)

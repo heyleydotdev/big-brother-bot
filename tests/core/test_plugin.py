@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -70,7 +69,7 @@ class MyPlugin(Plugin):
 
 
 class Test_Plugin_getMessage(B3TestCase):
-    
+
     def setUp(self):
         B3TestCase.setUp(self)
         self.conf = CfgConfigParser()

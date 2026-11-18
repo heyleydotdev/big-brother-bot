@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -103,7 +102,7 @@ class WopParser(AbstractParser):
         # Item: 3 ammo_spray_n
         re.compile(r'^(?P<action>[a-z]+):\s*(?P<data>.*)$', re.IGNORECASE)
     )
-    
+
     # status
     # map: wop_huette
     # num score ping name            lastmsg address               qport rate
@@ -122,7 +121,7 @@ class WopParser(AbstractParser):
                             r'(?P<port>[0-9-]+)\s+'
                             r'(?P<qport>[0-9]+)\s+'
                             r'(?P<rate>[0-9]+)$', re.IGNORECASE)
-    
+
     _reColor = re.compile(r'(\^.)|[\x00-\x20]|[\x7E-\xff]')
 
     MOD_UNKNOWN = '0'
@@ -291,10 +290,10 @@ class WopParser(AbstractParser):
                 self._clientConnectGuid = None
                 bclient['ip'] = self._clientConnectIp
                 self._clientConnectIp = None
-            
+
             if client:
                 # update existing client
-                bclient['cl_guid'] = client.guid 
+                bclient['cl_guid'] = client.guid
                 bclient['ip'] = client.ip
                 for k, v in bclient.items():
                     setattr(client, k, v)
@@ -388,7 +387,7 @@ class WopParser(AbstractParser):
         24:   MOD_GRAPPLE, Killed by grapple, not used in WoP
         """
         self.debug('OnKill: %s (%s)' % (match.group('aweap'), match.group('text')))
-        
+
         victim = self.clients.getByCID(match.group('cid'))
         if not victim:
             self.debug('No victim')
@@ -408,7 +407,7 @@ class WopParser(AbstractParser):
         else:
             attacker = self.clients.getByCID(match.group('acid'))
         ## end fix attacker
-          
+
         if not attacker:
             self.debug('No attacker')
             return None
@@ -435,7 +434,7 @@ class WopParser(AbstractParser):
         # if not logging damage we need a general hitloc (for xlrstats)
         if not hasattr(victim, 'hitloc'):
             victim.hitloc = 'body'
-        
+
         victim.state = b3.STATE_DEAD
         # need to pass some amount of damage for the teamkill plugin - 100 is a kill
         return self.getEvent(eventkey, (100, weapon, victim.hitloc, damagetype), attacker, victim)

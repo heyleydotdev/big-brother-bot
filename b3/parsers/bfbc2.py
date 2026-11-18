@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -182,7 +181,7 @@ class Bfbc2Parser(AbstractParser):
         if version[0] != 'BFBC2':
             raise Exception("the bfbc2 parser can only work with BattleField Bad Company 2")
         if int(version[1]) < BUILD_NUMBER_R9:
-            raise SystemExit("this bfbc2 parser requires a BFBC2 server R9 or later") 
+            raise SystemExit("this bfbc2 parser requires a BFBC2 server R9 or later")
 
     def getEasyName(self, mapname):
         """
@@ -494,7 +493,7 @@ class Bfbc2Parser(AbstractParser):
         2) if we got a level name
             if the level is not in the current rotation list, then add it to 
             the map list and load it
-        """        
+        """
         supportedMaps = self.getSupportedMaps()
         if mapname not in supportedMaps:
             match = self.getMapsSoundingLike(mapname)
@@ -502,7 +501,7 @@ class Bfbc2Parser(AbstractParser):
                 mapname = match[0]
             else:
                 return match
-            
+
         if mapname in supportedMaps:
             levelnames = self.write(('mapList.list',))
             if mapname not in levelnames:
@@ -520,7 +519,7 @@ class Bfbc2Parser(AbstractParser):
                 nextIndex = 0
                 while nextIndex < len(levelnames) and levelnames[nextIndex] != mapname:
                     nextIndex += 1
-            
+
             self.say('Changing map to %s' % mapname)
             time.sleep(1)
             self.write(('mapList.nextLevelIndex', nextIndex))

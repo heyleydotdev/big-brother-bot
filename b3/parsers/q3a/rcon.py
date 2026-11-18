@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -102,7 +101,7 @@ class Rcon(object):
             data = b'Encoding error'
 
         return data
-        
+
     def send(self, data, maxRetries=None, socketTimeout=None):
         """
         Send data over the socket.
@@ -260,11 +259,11 @@ class Rcon(object):
                         self.status_cache_expired = time.time() + self.status_cache_expire_time
                         self.console.verbose2('Using Status: Fresh %s' % cmd)
                     else:
-                        # if no data returned set the cached status to empty, but don't update the expired timer so next attempt will try 
+                        # if no data returned set the cached status to empty, but don't update the expired timer so next attempt will try
                         # to read a new value
                         self.status_cache_data = ''
                 return self.status_cache_data
-        
+
         with self.lock:
             data = self.sendRcon(cmd, maxRetries=maxRetries, socketTimeout=socketTimeout)
         return data if data else ''

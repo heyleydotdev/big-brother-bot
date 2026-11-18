@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -87,7 +86,7 @@ class Events:
             ('EVT_GAME_WARMUP', 'Game Warmup'),
             ('EVT_GAME_EXIT', 'Game Exit'),
             ('EVT_GAME_MAP_CHANGE', 'map changed'),
-        ))        
+        ))
 
     def createEvent(self, key, name=None):
         """
@@ -194,7 +193,7 @@ class EventsStats(object):
         self._max_samples = max_samples
         self._handling_timers = {}
         self._queue_wait = deque(maxlen=max_samples)
-        
+
     def add_event_handled(self, plugin_name, event_name, milliseconds_elapsed):
         """
         Add an event to the dict of handled ones.
@@ -215,7 +214,7 @@ class EventsStats(object):
         :param milliseconds_wait: The amount of milliseconds to wait
         """
         self._queue_wait.append(milliseconds_wait)
-        
+
     def dumpStats(self):
         """
         Print event stats in the log file.
@@ -234,7 +233,7 @@ class EventsStats(object):
             if len(self._queue_wait):
                 self.console.debug("Events waiting in queue stats : (ms) min(%0.1f), max(%0.1f), mean(%0.1f), "
                                    "stddev(%0.1f)", min(self._queue_wait), max(self._queue_wait), mean, stdv)
-    
+
 
 class VetoEvent(Exception):
     """

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -37,7 +36,7 @@ class Cod4Parser(b3.parsers.cod2.Cod2Parser):
     IpsOnly = False
 
     _guidLength = 32
-    
+
     _commands = {
         'message': 'tell %(cid)s %(message)s',
         'say': 'say %(message)s',
@@ -159,7 +158,7 @@ class Cod4Parser(b3.parsers.cod2.Cod2Parser):
             if client.pbid:
                 result = self.PunkBuster.unBanGUID(client)
 
-                if result:                    
+                if result:
                     admin.message('^3Unbanned^7: %s^7: %s' % (client.exactName, result))
 
                 if admin:
@@ -216,7 +215,7 @@ class Cod4Parser(b3.parsers.cod2.Cod2Parser):
                     self.debug('no-sync: no guid or ip found')
             else:
                 self.verbose2('no client found for cid: %s' % cid)
-        
+
         return mlist
 
     def authorizeClients(self):

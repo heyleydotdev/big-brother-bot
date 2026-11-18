@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -53,7 +52,7 @@ class Test_Client(B3TestCase):
         m = Mock()
         self.client.team = m
         self.assertEqual(self.client.team, m)
-        
+
     def test_team_change(self):
         # GIVEN
         self.client._team = TEAM_RED
@@ -117,7 +116,7 @@ class Test_Client(B3TestCase):
         self.assertEqual(self.client._ip, "1.2.3.4")
         self.client.ip = "5.6.7.8:27960"
         self.assertEqual(self.client._ip, "5.6.7.8")
-        
+
     def test_makeIpAlias_new(self):
         self.client.id = 123
         self.console.storage.getClientIpAddress = Mock(side_effect = KeyError())
@@ -217,16 +216,16 @@ class Test_Client_groups(B3TestCase):
 
 
 class Test_Client_events(B3TestCase):
-    
+
     def setUp(self):
         B3TestCase.setUp(self)
         self.queueEvent_patcher = patch.object(self.console, 'queueEvent')
         self.queueEvent_mock = self.queueEvent_patcher.start()
-        
+
         self.admin = Client(console=self.console)
         self.client = Client(console=self.console)
         self.client.save()
-    
+
     def tearDown(self):
         B3TestCase.tearDown(self)
         self.queueEvent_patcher.stop()
@@ -243,11 +242,11 @@ class Test_Client_events(B3TestCase):
 
     def test_notice(self):
         with self.assertRaiseEvent(event_type="EVT_CLIENT_NOTICE", event_client=self.client, event_data={
-            'notice': "keep a eye on this guy", 
+            'notice': "keep a eye on this guy",
             'admin': self.admin,
             'timeAdd': ANY
         }):
             self.client.notice(notice="keep a eye on this guy", spare=None, admin=self.admin)
-        
+
 if __name__ == '__main__':
     unittest.main()

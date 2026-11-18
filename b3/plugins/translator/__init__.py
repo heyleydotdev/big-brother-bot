@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -63,7 +62,7 @@ except ImportError:
 
 
 class TranslatorPlugin(b3.plugin.Plugin):
-    
+
     adminPlugin = None
     cmdPrefix = None
 
@@ -127,18 +126,18 @@ class TranslatorPlugin(b3.plugin.Plugin):
         Initialize plugin settings
         """
         self.adminPlugin = self.console.getPlugin('admin')
-        
+
         # register our commands
         if 'commands' in self.config.sections():
             for cmd in self.config.options('commands'):
                 level = self.config.get('commands', cmd)
                 sp = cmd.split('-')
                 alias = None
-                if len(sp) == 2: 
+                if len(sp) == 2:
                     cmd, alias = sp
 
                 func = getCmd(self, cmd)
-                if func: 
+                if func:
                     self.adminPlugin.registerCommand(self, cmd, level, func, alias)
 
         self.registerEvent('EVT_CLIENT_SAY', self.onSay)
@@ -336,7 +335,7 @@ class TranslatorPlugin(b3.plugin.Plugin):
         """
         [<source>]*[<target>] <message> - translate a message
         """
-        if not data: 
+        if not data:
             client.message('^7missing data, try ^3!^7help translate')
             return
 
@@ -426,12 +425,12 @@ class TranslatorPlugin(b3.plugin.Plugin):
 
         # send the translation to the given client
         self.send_translation(client, message, cmd)
-    
+
     def cmd_transauto(self, data, client, cmd=None):
         """
         <on|off> - turn on/off the automatic translation
         """
-        if not data: 
+        if not data:
             client.message('^7missing data, try ^3!^7help transauto')
             return
 

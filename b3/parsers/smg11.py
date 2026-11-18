@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -42,7 +41,7 @@ class Smg11Parser(AbstractParser):
     _connectingSlots = []
     _logSync = 1
     _maplist = None
-    
+
     _line_length = 65
     _line_color_prefix = ''
 
@@ -235,13 +234,13 @@ class Smg11Parser(AbstractParser):
         if m:
             client = None
             target = None
-            
+
             try:
                 action = m.group('action').lower()
             except IndexError:
                 # special case for damage lines where no action group can be set
                 action = 'damage'
-            
+
             return m, action, m.group('data').strip(), client, target
 
         elif '------' not in line:
@@ -304,7 +303,7 @@ class Smg11Parser(AbstractParser):
             if cid in self._connectingSlots:
                 self.debug('Client on slot %s is already being connected' % cid)
                 return
-            
+
             self._connectingSlots.append(cid)
             client = self.clients.getByCID(cid)
 
@@ -332,23 +331,23 @@ class Smg11Parser(AbstractParser):
 
                     self._connectingSlots.remove(cid)
                     return None
-                
+
                 if 'ip' not in bclient:
                     infoclient = self.parseUserInfo(self.queryClientUserInfoByCid(cid))
                     if 'ip' in infoclient:
                         bclient['ip'] = infoclient['ip']
                     else:
                         self.warning('Failed to get client ip')
-                
+
                 if 'ip' in bclient:
                     self.clients.newClient(cid, name=bclient['name'], ip=bclient['ip'],
                                            state=b3.STATE_ALIVE, guid=guid, data={'guid': guid},
                                            bot=False, money=20)
                 else:
                     self.warning('Failed to get connect client')
-                    
+
             self._connectingSlots.remove(cid)
-                
+
         return None
 
     def OnKill(self, action, data, match=None):
@@ -372,7 +371,7 @@ class Smg11Parser(AbstractParser):
         else:
             attacker = self.getByCidOrJoinPlayer(match.group('acid'))
         ## End fix attacker
-          
+
         if not attacker:
             self.debug('No attacker')
             return None
@@ -717,7 +716,7 @@ class Smg11Parser(AbstractParser):
                         client.disconnect()
                 else:
                     self.debug('no-sync: no guid or ip found')
-        
+
         return mlist
 
 # ---- Documentation ---------------------------------------------------------------------------------------------------

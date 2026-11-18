@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -173,7 +172,7 @@ class PunkBuster(object):
                     d['guid'] = d['pbid']
                     lastslot = int(m.group('slot'))
                     players[str(lastslot - 1)] = d
-                    
+
                 else:
                     self.console.debug('Duplicate or incorrect PB slot number - client ignored %s '
                                        'lastslot %s' % (m.group('slot'), lastslot))
@@ -187,7 +186,7 @@ class PunkBuster(object):
             self.send('PB_SV_%s %s' % (key.title(), value))
 
     def __getattr__(self, key):
-        try:        
+        try:
             return self.__dict__[key]
         except:
             return self.send('PB_SV_%s' % key.title())

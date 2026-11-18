@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -29,7 +28,7 @@ import unittest
 from b3.parsers.homefront import HomefrontParser
 from unittest.mock import Mock, sentinel
 
- 
+
 class Test_HomefrontParser(unittest.TestCase):
 
     def setUp(self):
@@ -40,7 +39,7 @@ class Test_HomefrontParser(unittest.TestCase):
 
         self.courgette = Mock(spec=b3.clients.Client, name="courgette")
         self.freelander = Mock(spec=b3.clients.Client, name="freelander")
-        
+
         def getClient(name):
             if name == 'courgette': return self.courgette
             elif name == 'Freelander': return self.freelander
@@ -127,8 +126,8 @@ class Test_HomefrontParser(unittest.TestCase):
         self.assertEqual('EXP_Frag', getEvent_args[1][1])
         self.assertEqual(self.courgette, getEvent_args[2])
         self.assertEqual(self.courgette, getEvent_args[3])
-        
-        
+
+
 
 if __name__ == '__main__':
     unittest.main()

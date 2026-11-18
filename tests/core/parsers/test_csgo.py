@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -459,7 +458,7 @@ class Test_gamelog_parsing(CsgoTestCase):
         self.assert_has_event("EVT_CLIENT_TEAM_CHANGE", data=TEAM_BLUE, client=bot22)
         self.assertEqual(TEAM_BLUE, bot22.team)
 
-        
+
     def test_player_switched_team(self):
         # GIVEN
         player = FakeClient(self.parser, name="courgette", guid="STEAM_1:0:1111111", team=TEAM_RED)

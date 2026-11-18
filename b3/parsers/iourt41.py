@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -326,7 +325,7 @@ class Iourt41Parser(AbstractParser):
         # force g_logsync
         self.debug('Forcing server cvar g_logsync to %s' % self._logSync)
         self.setCvar('g_logsync', self._logSync)
-        
+
         # get gamepaths/vars
         cvarlist = self.cvarList("fs_")
 
@@ -361,7 +360,7 @@ class Iourt41Parser(AbstractParser):
             userinfostring = self.queryClientUserInfoByCid(cid)
             if userinfostring:
                 self.OnClientuserinfo(None, userinfostring)
-        
+
         player_teams = dict()
         tries = 0
         while tries < 3:
@@ -383,7 +382,7 @@ class Iourt41Parser(AbstractParser):
                 if newteam != client.team:
                     self.debug('Fixing client team for %s : %s is now %s' % (client.name, client.team, newteam))
                     setattr(client, 'team', newteam)
-            
+
     def unpause(self):
         """
         Unpause B3 log parsing.
@@ -836,7 +835,7 @@ class Iourt41Parser(AbstractParser):
         # 2:28 sayteam: 12 New_UrT_Player_v4.1: wokele
         if match is None:
             return
-        
+
         name = self.stripColors(match.group('name'))
         client = self.getByCidOrJoinPlayer(match.group('cid'))
 
@@ -1266,12 +1265,12 @@ class Iourt41Parser(AbstractParser):
         self.debug('g_nextmap: %s' % nmap)
         if nmap != "":
             return nmap
-        
+
         nmap = cvars.get('g_nextcyclemap')
         self.debug('g_nextcyclemap: %s' % nmap)
         if nmap != "":
             return nmap
-        
+
         return None
 
     def getMapsSoundingLike(self, mapname):
@@ -1375,7 +1374,7 @@ class Iourt41Parser(AbstractParser):
         data = self.write('dumpuser %s' % cid)
         if not data:
             return None
-        
+
         if data.split('\n')[0] != "userinfo":
             self.debug("dumpuser %s returned : %s" % (cid, data))
             self.debug('Client %s probably disconnected, but its character is still hanging in game...' % cid)
@@ -1469,7 +1468,7 @@ class Iourt41Parser(AbstractParser):
         except KeyError as err:
             self.warning("_getDamagePoints(%s, %s) cannot find value : %s" % (weapon, hitloc, err))
             return 15
-        
+
     def _convertHitWeaponToKillWeapon(self, hitweapon_id):
         """
         on Hit: lines identifiers for weapons are different than

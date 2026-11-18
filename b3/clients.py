@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -120,12 +119,12 @@ class Client(object):
         """
         self._pluginData = {}
         self.state = b3.STATE_UNKNOWN
-        self._data = {}        
+        self._data = {}
 
         # make sure to set console before anything else
         if 'console' in kwargs:
             self.console = kwargs['console']
-            
+
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -799,7 +798,7 @@ class Client(object):
                     'admin': admin,
                     'timeAdd': notice_object.timeAdd
                 }, client=self))
-            
+
             return notice_object
 
     def makeAlias(self, name):
@@ -1191,7 +1190,7 @@ class IpAlias(Struct):
         if not self.id:
             self.timeAdd = console.time()
         return console.storage.setClientIpAddress(self)
-    
+
     def __str__(self):
         return "IpAlias(id=%s, ip=\"%s\", clientId=%s, numUsed=%s)" % (self.id, self.ip, self.clientId, self.numUsed)
 
@@ -1488,7 +1487,7 @@ class Clients(dict):
             # self.console.debug('found client by CID %s = %s', cid, c.name)
             if c.cid == cid:
                 return c
-            else: 
+            else:
                 return None
         return None
 
@@ -1563,7 +1562,7 @@ class Clients(dict):
                 c.console = self.console
                 c.exactName = c.name
                 clients.append(c)
- 
+
             return clients
 
     def disconnect(self, client):
@@ -1574,7 +1573,7 @@ class Clients(dict):
         client.connected = False
         if client.cid is None:
             return
-        
+
         cid = client.cid
         if cid in self:
             self[cid] = None
@@ -1603,7 +1602,7 @@ class Clients(dict):
         self.console.debug('Client connected: [%s] %s - %s (%s)', self[client.cid].cid,
                            self[client.cid].name, self[client.cid].guid, self[client.cid].data)
         self.console.queueEvent(self.console.getEvent('EVT_CLIENT_CONNECT', data=client, client=client))
-    
+
         if client.guid and not client.bot:
             client.auth()
         elif not client.authed:

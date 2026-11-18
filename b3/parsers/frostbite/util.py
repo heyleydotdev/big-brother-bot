@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -49,7 +48,7 @@ class BanlistContent(object):
     """
     numOfBans = None
     bansData = []
-    
+
     def __init__(self, data):
         """
         Represent a frostbite banList.list response
@@ -62,10 +61,10 @@ class BanlistContent(object):
         """
         self.numOfBans = int(data[0])
         self.bansData = data[1:]
-    
+
     def __len__(self):
         return int(self.numOfBans)
-    
+
     def __getitem__(self, key):
         """
         Returns the ban data, for provided key (int or slice).
@@ -97,8 +96,8 @@ class BanlistContent(object):
         for p in self:
             txt += "%r" % p
         txt += "]"
-        return txt        
-        
+        return txt
+
 
 class PlayerInfoBlock(object):
     """
@@ -122,7 +121,7 @@ class PlayerInfoBlock(object):
     numOfParameters= 0
     numOfPlayers = 0
     parameterTypes = []
-    
+
     def __init__(self, data):
         """
         Represent a frostbite Player info block
@@ -150,10 +149,10 @@ class PlayerInfoBlock(object):
         self.parameterTypes = data[1:1+self.numOfParameters]
         self.numOfPlayers = int(data[1+self.numOfParameters])
         self.playersData = data[1+self.numOfParameters+1:]
-    
+
     def __len__(self):
         return self.numOfPlayers
-    
+
     def __getitem__(self, key):
         """
         Returns the player data, for provided key (int or slice).
@@ -175,7 +174,7 @@ class PlayerInfoBlock(object):
         playerData = self.playersData[index*self.numOfParameters:(index+1)*self.numOfParameters]
         for i in range(self.numOfParameters):
             data[self.parameterTypes[i]] = playerData[i]
-        return data 
+        return data
 
     def __repr__(self):
         txt = "PlayerInfoBlock["

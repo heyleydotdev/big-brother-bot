@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -41,7 +40,7 @@ class CountryfilterPlugin(b3.plugin.Plugin):
     cf_deny_from = ''
     cf_allow_from = 'all'
     maxLevel = 1
-    
+
     ignore_names = []
     ignore_ips = []
     block_ips = []

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -34,7 +33,7 @@ from mockito import any as ANY
 class StorageAPITest(object):
 
     storage = None
-        
+
     def test_setClient(self):
         c1 = Client(ip="1.2.3.4", connections=2, guid="abcdefghijkl", pbid="123546abcdef", name="some dude", greeting="hi!", mask_level=20, group_bits=8, login="test login", password="test password")
         c1_id = self.storage.setClient(c1)
@@ -184,7 +183,7 @@ class StorageAPITest(object):
         self.assertEqual(ipalias_id1 + 1, ipalias_id2)
         ipalias_id3 = self.storage.setClientIpAddress(IpAlias(id=ipalias_id1, ip='0.0.0.0', clientId=1))
         self.assertEqual(ipalias_id1, ipalias_id3)
-    
+
     # def test_setClientIpAddress_no_db(self):
     #     when(self.storage).query(ANY()).thenRaise(KeyError())
     #     ipalias = Mock()
@@ -232,7 +231,7 @@ class StorageAPITest(object):
         self.assertIn('44.44.44.44', ips)
         self.assertIn('55.55.55.55', ips)
         self.assertNotIn('66.66.66.66', ips)
-        
+
     # def test_getClientIpAddresses_no_db(self):
     #     when(self.storage).query(ANY()).thenRaise(KeyError())
     #     client = Mock()
@@ -291,7 +290,7 @@ class StorageAPITest(object):
     #     self.assertRaises(KeyError, self.storage.setClientPenalty, p1)
 
     def test_getClientPenalty(self):
-        tmp = Penalty(type='Kick', 
+        tmp = Penalty(type='Kick',
                       clientId=54,
                       inactive=1,
                       adminId=4,
@@ -453,7 +452,7 @@ class StorageAPITest(object):
         self.assertEqual(8, len(groups))
         for g in groups:
             self.assertIsInstance(g, Group)
-    
+
     # def test_getGroups_unknown(self):
     #     when(self.storage).query(ANY()).thenRaise(KeyError())
     #     self.assertRaises(KeyError, self.storage.getGroups)

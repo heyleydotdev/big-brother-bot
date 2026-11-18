@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -51,7 +50,7 @@ class CensorurtPlugin(CensorPlugin):
     #    STARTUP                                                                                                       #
     #                                                                                                                  #
     ####################################################################################################################
-  
+
     def onLoadConfig(self):
         CensorPlugin.onLoadConfig(self)
         try:
@@ -84,7 +83,7 @@ class CensorurtPlugin(CensorPlugin):
     #    OTHER METHODS                                                                                                 #
     #                                                                                                                  #
     ####################################################################################################################
-      
+
     def penalizeClient(self, penalty, client, data=''):
         # addition to mute players in Urban Terror
         if self._slap:

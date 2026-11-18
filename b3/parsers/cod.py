@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -755,7 +754,7 @@ class CodParser(AbstractParser):
 #--LogLineFormats---------------------------------------------------------------
 
 #===============================================================================
-# 
+#
 # *** CoD:
 # Join:               J;160913;10;PlayerName
 # Quit:               Q;160913;10;PlayerName
@@ -769,7 +768,7 @@ class CodParser(AbstractParser):
 # Private message:    tell;160913;12;PlayerName1;1322833;8;PlayerName2;what message?
 # Winners:            W;axis;160913;PlayerName1;258015;PlayerName2
 # Losers:             L;allies;160913;PlayerName1;763816;PlayerName2
-# 
+#
 # ExitLevel:          ExitLevel: executed
 # Shutdown Engine:    ShutdownGame:
 # Seperator:          ------------------------------------------------------------
@@ -779,8 +778,8 @@ class CodParser(AbstractParser):
 #                    \scr_friendlyfire\3\scr_killcam\1\shortversion\1.0\sv_allowAnonymous\0\sv_floodProtect\1
 #                    \sv_hostname\^5[SNT] #3 ^7Tactical Gaming ^9(^7B3^9) (^1v1.0^9)\sv_maxclients\24\sv_maxPing\220
 #                    \sv_maxRate\20000\sv_minPing\0\sv_privateClients\8\sv_pure\1\sv_voice\1
-# 
-# 
+#
+#
 # *** CoD5 specific lines:
 # JoinTeam:           JT;283895439;17;axis;PlayerName;
 #                    AD;564;allies;580090035;6;axis;PlayerName;stg44_mp;30;MOD_RIFLE_BULLET;right_arm_lower

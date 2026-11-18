@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -42,10 +41,10 @@ class AltitudeParser(Parser):
     """
     ## parser code name to use in b3.ini
     gameName = 'altitude'
-    
+
     ## extract the time off a log line
     _lineTime  = re.compile(r'^{"port":[0-9]+, "time":(?P<seconds>[0-9]+),.*')
-    
+
     ## Direct event mapping between Altitude events type and B3 event types.
     ## B3 event will be created with their data parameter set to the full
     ## altitude event object
@@ -53,11 +52,11 @@ class AltitudeParser(Parser):
         #'serverStart' : EVT_CUSTOM,
         #'mapLoading' : EVT_CUSTOM,
     }
-    
+
     # store the last ping values received for all players in a dict where
     # keys are player slot IDs and values their ping
     _last_ping_report = {}
-    
+
     # store the last stats received for all players in a dict where
     # keys are player slot IDs and values their score
     _last_endround_report = {}
@@ -98,7 +97,7 @@ class AltitudeParser(Parser):
         if not self.config.has_option('server', 'command_file'):
             self.critical("the B3 config file for Altitude must provide the location of the command file")
             self.die()
-        
+
         # open the command file
         commandfile_name = self.config.getpath('server', 'command_file')
         self.output = AltitudeRcon(console=self, commandfile=commandfile_name)
@@ -119,12 +118,12 @@ class AltitudeParser(Parser):
         # {"port":27276,"time":103344,"map":"ball_cave","type":"mapLoading"}
         # {"port":27276,"time":103682,"type":"serverStart"}
         altitude_event = json.loads(line)
-        
+
         if altitude_event['port'] != self._port:
             # One Altitude log file can contain info from multiple servers
             return
-        
-        ## we will route the handling of that altitude_event to a method dedicated 
+
+        ## we will route the handling of that altitude_event to a method dedicated
         ## to an alititude event type. The method will be name after the event type
         ## capitalized name prefixed by 'OnAltitude'.
         ## I.E.: type 'clientAdd' would route to 'OnAltitudeClientAdd' method
@@ -142,7 +141,7 @@ class AltitudeParser(Parser):
         else:
             func = getattr(self, method_name)
             event = func(altitude_event)
-        
+
         # if we came up with a B3 event, then queue it up so it can be dispatched
         # to the listening plugins
         if event:
@@ -180,7 +179,7 @@ class AltitudeParser(Parser):
             ## we do not want bots to get authenticated
             vaporId = None
 
-        client = self.newClient(altitude_event['player'], guid=vaporId, 
+        client = self.newClient(altitude_event['player'], guid=vaporId,
                                 name=altitude_event['nickname'], team=b3.TEAM_UNKNOWN,
                                 ip=altitude_event['ip'].split(':')[0])
         client.data = {
@@ -318,7 +317,7 @@ class AltitudeParser(Parser):
 
             client.team = self.getTeam(altitude_event['team'])
             return self.getEvent("EVT_CLIENT_JOIN", data=altitude_event, client=client)
-    
+
     def OnAltitudeRoundEnd(self, altitude_event):
         """
         Handle log lines of type roundEnd
@@ -384,7 +383,7 @@ class AltitudeParser(Parser):
         if client:
             client.lastPosition = (altitude_event['positionX'], altitude_event['positionY'])
             return self.getEvent("EVT_CLIENT_ITEM_PICKUP", data=altitude_event["powerup"], client=client)
-    
+
     def OnAltitudePowerupUse(self, altitude_event):
         """
         Handle log lines of type powerupUse
@@ -482,7 +481,7 @@ class AltitudeParser(Parser):
         else:
             func = getattr(self, method_name)
             event = func(altitude_event)
-        
+
         return event
 
     ####################################################################################################################
@@ -498,7 +497,7 @@ class AltitudeParser(Parser):
             {"port":27276, "time":3250286, "arguments":["kick","Courgette"],
             "source":"c0aaf37d-e56d-4431-aa1e-69d5e18be5e6", "command":"vote",
             "group":"Anonymous", "type":"consoleCommandExecute"}
-        """ 
+        """
         c = self.clients.getByGUID(altitude_event["vaporId"])
         return self.getEvent("EVT_CLIENT_CALL_VOTE", data=altitude_event, client=c)
 
@@ -510,7 +509,7 @@ class AltitudeParser(Parser):
             "source":"86e487de-0190-43ff-8e9e-70a14a1751a2",
             "command":"castBallot", "group":"Anonymous",
             "type":"consoleCommandExecute"}
-        """ 
+        """
         c = self.clients.getByGUID(altitude_event["source"])
         return self.getEvent("EVT_CLIENT_VOTE", data=altitude_event, client=c)
 
@@ -519,7 +518,7 @@ class AltitudeParser(Parser):
     #   B3 PARSER INTERFACE IMPLEMENTATION                                                                             #
     #                                                                                                                  #
     ####################################################################################################################
-    
+
     def getPlayerList(self):
         """
         Query the game server for connected players.
@@ -544,7 +543,7 @@ class AltitudeParser(Parser):
         # we don't need anything special to auth clients as the VaporId is supplied
         # on the clientAdd event
         pass
-    
+
     def sync(self):
         """
         For all connected players returned by self.getPlayerList(), get the matching Client
@@ -561,7 +560,7 @@ class AltitudeParser(Parser):
             if c.cid not in connected_clients:
                 c.disconnect()
         return connected_clients
-    
+
     def say(self, msg, *args):
         """
         Broadcast a message to all players.
@@ -631,9 +630,9 @@ class AltitudeParser(Parser):
         if not silent and fullreason != '':
             self.say(fullreason)
         self.write("addBan %(vaporId)s %(duration)s %(timeunit)s %(reason)s" % {
-                            'vaporId': client.guid, 
-                            'duration': 1, 
-                            'timeunit':'forever', 
+                            'vaporId': client.guid,
+                            'duration': 1,
+                            'timeunit':'forever',
                             'reason': reason})
 
         self.write("kick %s" % client.name)
@@ -675,13 +674,13 @@ class AltitudeParser(Parser):
         if not silent and fullreason != '':
             self.say(fullreason)
         self.write("addBan %(vaporId)s %(duration)s %(timeunit)s %(reason)s" % {
-                            'vaporId': client.guid, 
-                            'duration': int(duration), 
-                            'timeunit':'minute', 
+                            'vaporId': client.guid,
+                            'duration': int(duration),
+                            'timeunit':'minute',
                             'reason': reason})
 
         self.write("kick %s" % client.name)
-        self.queueEvent(self.getEvent('EVT_CLIENT_BAN_TEMP', data={'reason': reason, 
+        self.queueEvent(self.getEvent('EVT_CLIENT_BAN_TEMP', data={'reason': reason,
                                                                    'duration': duration,
                                                                    'admin': admin}, client=client))
 
@@ -696,7 +695,7 @@ class AltitudeParser(Parser):
 
     def rotateMap(self):
         pass
-        
+
     def changeMap(self, mapname):
         """
         Load a given map/level
@@ -714,13 +713,13 @@ class AltitudeParser(Parser):
         """
         Returns a dict having players' id for keys and players' scores for values
         """
-        scores = {} 
+        scores = {}
         for cid, client in list(self.getPlayerList().items()):
             scores[cid] = client.kills
         return scores
-        
+
     def inflictCustomPenalty(self, penalty_type, client, reason=None, duration=None, admin=None, data=None):
-        """
+        r"""
         Called if b3.admin.penalizeClient() does not know a given penalty type. 
         Overwrite this to add customized penalties for your game like 'slap', 'nuke', 
         'mute' or anything you want.
@@ -752,7 +751,7 @@ class AltitudeParser(Parser):
                 vote_caller.message("Do not call kick vote against admins")
                 time.sleep(2)
                 vote_caller.tempban(duration="2m", reason="call vote against higher level admin", data=altitude_event)
-    
+
     ####################################################################################################################
     #                                                                                                                  #
     #   OVERWRITING SOME PARSER METHODS                                                                                #
@@ -837,7 +836,7 @@ class AltitudeRcon():
         self.console = console
         self._commandfile_name = commandfile
         self._fh = open(commandfile, 'a')
-        
+
     def writelines(self, lines):
         for line in lines:
             self.write(line)
@@ -849,7 +848,7 @@ class AltitudeRcon():
         """
         self.console.verbose('RCON :\t %s' % cmd)
         self._fh.write("%s,console,%s\n" % (self.console._port, cmd))
-        
+
     def flush(self):
         try:
             self._fh.flush()
@@ -858,12 +857,12 @@ class AltitudeRcon():
 
     def close(self):
         self._fh.close()
-        
+
     def _get_encoding(self):
         return self._fh.encoding
 
     encoding = property(_get_encoding)
-        
+
     def clear(self):
         """
         Delete all content off the command file

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -109,7 +108,7 @@ class AbstractParser(b3.parser.Parser):
         'unlockserver': ('#unlock',),
         'lockserver': ('#lock',)
         }
-        
+
     _eventMap = {}
 
     _regPlayer = re.compile(r'^(?P<cid>[0-9]+)\s+'
@@ -249,7 +248,7 @@ class AbstractParser(b3.parser.Parser):
         self.close_battleye_connection()
         self.info("Stop listening for Battleye events")
         self.output.battleye_server = None
-        
+
         # exiting B3
         with self.exiting:
             # If !die or !restart was called, then  we have the lock only after parser.handleevent Thread releases it
@@ -478,7 +477,7 @@ class AbstractParser(b3.parser.Parser):
                 return self.clients.newClient('Server', guid='Server', name='Server', hide=True)
             client = self.clients.newClient(cid, guid=guid, name=name, ip=ip)
         return client
-    
+
     def getTeam(self, team):
         """
         Return a B3 team given the team value.
@@ -495,7 +494,7 @@ class AbstractParser(b3.parser.Parser):
         else:
             result = b3.TEAM_UNKNOWN
         return result
-    
+
     ####################################################################################################################
     #                                                                                                                  #
     #   EVENT HANDLERS                                                                                                 #
@@ -705,7 +704,7 @@ class AbstractParser(b3.parser.Parser):
             cmd = ' '.join(msg).strip()
             if self.output:
                 return self.output.write(cmd)
-    
+
     def getPlayerList(self, maxRetries=None):
         """
         Query the game server for connected players.
@@ -745,7 +744,7 @@ class AbstractParser(b3.parser.Parser):
                 else:
                     self.debug('Player in lobby GUID status unknown: %s' % pl)
             else:
-        
+
                 p = re.match(self._regPlayer, player_list[i])
                 if p:
                     pl = p.groupdict()
@@ -828,7 +827,7 @@ class AbstractParser(b3.parser.Parser):
                         cl = self.getClient(c['name'], guid=None, cid=c['cid'], ip=c_ip)
                 if cl:
                     mlist[cid] = cl
-                    
+
         # now we need to remove any players that have left
         if self.clients:
             client_cid_list = []
@@ -881,7 +880,7 @@ class AbstractParser(b3.parser.Parser):
         if isinstance(client, str):
             self.write(self.getCommand('kick', cid=client, reason=reason[:80]))
             return
-        
+
         if admin:
             variables = self.getMessageVariables(client=client, reason=reason, admin=admin)
             fullreason = self.getMessage('kicked_by', variables)
@@ -945,7 +944,7 @@ class AbstractParser(b3.parser.Parser):
 
         if not silent and fullreason != '':
             self.say(fullreason)
-        
+
         self.queueEvent(self.getEvent('EVT_CLIENT_BAN', {'reason': reason, 'admin': admin}, client))
 
     def unban(self, client, reason='', admin=None, silent=False, *kwargs):
@@ -1034,7 +1033,7 @@ class AbstractParser(b3.parser.Parser):
             self.say(fullreason)
 
         self.queueEvent(self.getEvent('EVT_CLIENT_BAN_TEMP', {'reason': reason,
-                                                              'duration': duration, 
+                                                              'duration': duration,
                                                               'admin': admin} , client))
 
     def getMap(self):

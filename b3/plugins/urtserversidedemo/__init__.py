@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -298,7 +297,7 @@ class DemoManager(object):
     """
     Class that remembers which demo is being taken, or waiting to be taken
     """
-    
+
     def __init__(self, plugin):
         self.plugin = plugin
         self._demo_starters = {} # dict<guid, DemoStarter>

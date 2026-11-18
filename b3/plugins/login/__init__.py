@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -144,7 +143,7 @@ class LoginPlugin(b3.plugin.Plugin):
         else:
             message = 'Usage (via console): %s %s !login yourpassword' % (self._pmcomm, client.cid)
             client.message(message)
-        
+
     def cmd_setpassword(self, data, client, cmd=None):
         """
         <password> [<client>] - set a password for a client

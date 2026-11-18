@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -102,7 +101,7 @@ class HttpytailPlugin(b3.plugin.Plugin):
         Load plugin configuration.
         """
         if self.config:
-            
+
             try:
                 self._connectionTimeout = self.config.getint('settings', 'timeout')
                 self.debug('loaded settings/timeout: %s' % self._connectionTimeout)
@@ -112,7 +111,7 @@ class HttpytailPlugin(b3.plugin.Plugin):
             except ValueError as e:
                 self.error('could not load settings/timeout config value: %s' % e)
                 self.debug('using default value (%s) for settings/timeout' % self._connectionTimeout)
-    
+
             try:
                 self._maxGap = self.config.getint('settings', 'maxGapBytes')
                 self.debug('loaded settings/maxGapBytes: %s' % self._maxGap)

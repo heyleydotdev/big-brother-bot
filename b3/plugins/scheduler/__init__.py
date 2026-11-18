@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -53,11 +52,11 @@ class SchedulerPlugin(b3.plugin.Plugin):
         if self._tasks:
             for t in self._tasks:
                 t.cancel()
-    
+
         # get time_zone from main B3 config
         tzName = self.console.config.get('b3', 'time_zone').upper()
         self._tzOffset = b3.timezones.timezones[tzName]
-    
+
         # load cron tasks from config
         self._tasks = []
 
@@ -115,7 +114,7 @@ class SchedulerPlugin(b3.plugin.Plugin):
         """
         Works with "*", "*/4", "5" or 9
         """
-        if hourcron.strip() == '*': 
+        if hourcron.strip() == '*':
             return hourcron
         if '/' in hourcron:
             h,divider = hourcron.split('/')
@@ -130,8 +129,8 @@ class SchedulerPlugin(b3.plugin.Plugin):
                 tz = '+' + tz
             self.debug("%s (UTC%s) -> %s UTC", hourcron, tz, UTChour)
             return UTChour
- 
- 
+
+
 class TaskConfigError(Exception):
     pass
 
@@ -141,7 +140,7 @@ class Task(object):
     config = None
     plugin = None
     name = None
-    
+
     def __init__(self, plugin, config):
         """
         Initialize a new Task.
@@ -150,7 +149,7 @@ class Task(object):
         """
         self.plugin = plugin
         self.config = config
-        
+
         self.name = config.attrib['name']
         if not 'name' in config.attrib:
             self.plugin.info("attribute 'name' not found in task")
@@ -305,16 +304,16 @@ class CronTask(Task):
     def __init__(self, plugin, config):
         Task.__init__(self, plugin, config)
         self.schedule()
-        
+
     def schedule(self):
         """
         schedule this task
         """
         self._getScheduledTime(self.config.attrib)
-        self.cronTab = b3.cron.PluginCronTab(self.plugin, self.runcommands, 
+        self.cronTab = b3.cron.PluginCronTab(self.plugin, self.runcommands,
             self.seconds, self.minutes, self.plugin._convertCronHourToUTC(self.hour), self.day, self.month, self.dow)
         self.plugin.console.cron + self.cronTab
-        
+
     def cancel(self):
         """
         remove this task from schedule
@@ -329,34 +328,34 @@ class CronTask(Task):
             self.seconds = 0
         else:
             self.seconds = attrib['seconds']
-                    
+
         if not 'minutes' in attrib:
             self.minutes = '*'
         else:
-            self.minutes = attrib['minutes']        
-            
+            self.minutes = attrib['minutes']
+
         if not 'hour' in attrib:
             self.hour = '*'
         else:
             self.hour = attrib['hour']
-            
+
         if not 'day' in attrib:
             self.day = '*'
         else:
             self.day = attrib['day']
-                        
+
         if not 'month' in attrib:
             self.month = '*'
         else:
             self.month = attrib['month']
-            
+
         if not 'dow' in attrib:
             self.dow = '*'
         else:
             self.dow = attrib['dow']
-        
+
         self.plugin.info('%s %s %s\t%s %s %s', self.seconds, self.minutes, self.hour, self.day, self.month, self.dow)
- 
+
 class HourlyTask(CronTask):
 
     def _getScheduledTime(self, attrib):
@@ -366,13 +365,13 @@ class HourlyTask(CronTask):
             self.plugin.debug("default minutes : 0. Provide a 'minutes' attribute to override")
             self.minutes = 0
         else:
-            self.minutes = attrib['minutes']        
-            
+            self.minutes = attrib['minutes']
+
         self.hour = '*'
         self.day = '*'
         self.month = '*'
         self.dow = '*'
-        
+
 class DaylyTask(CronTask):
 
     def _getScheduledTime(self, attrib):
@@ -382,14 +381,14 @@ class DaylyTask(CronTask):
             self.plugin.debug("default hour : 0. Provide a 'hour' attribute to override")
             self.hour = 0
         else:
-            self.hour = attrib['hour']     
-            
+            self.hour = attrib['hour']
+
         if not 'minutes' in attrib:
             self.plugin.debug("default minutes : 0. Provide a 'minutes' attribute to override")
             self.minutes = 0
         else:
-            self.minutes = attrib['minutes']        
-            
+            self.minutes = attrib['minutes']
+
         self.day = '*'
         self.month = '*'
         self.dow = '*'

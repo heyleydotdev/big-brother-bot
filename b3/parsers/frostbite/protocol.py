@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -55,8 +54,8 @@ def EncodeInt32(size):
 
 def DecodeInt32(data):
     return unpack('<I', data[0 : 4])[0]
-    
-    
+
+
 def EncodeWords(words):
     size = 0
     encodedWords = b''
@@ -67,7 +66,7 @@ def EncodeWords(words):
         encodedWords += encodedWord
         encodedWords += b'\x00'
         size += len(encodedWord) + 5
-    
+
     return size, encodedWords
 
 
@@ -76,7 +75,7 @@ def DecodeWords(size, data):
     words = []
     offset = 0
     while offset < size:
-        wordLen = DecodeInt32(data[offset : offset + 4])        
+        wordLen = DecodeInt32(data[offset : offset + 4])
         word = data[offset + 4 : offset + 4 + wordLen]
         words.append(word.decode('cp1252', 'replace'))
         offset += wordLen + 5
@@ -119,7 +118,7 @@ def EncodeClientRequest(words):
     clientSequenceNr = (clientSequenceNr + 1) & 0x3fffffff
     return packet
 
-    
+
 def EncodeClientResponse(sequence, words):
     """
     Encode a response packet.
@@ -135,7 +134,7 @@ def printPacket(packet):
         print("IsFromServer, ", end=' ')
     else:
         print("IsFromClient, ", end=' ')
-    
+
     if packet[1]:
         print("Response, ", end=' ')
     else:
@@ -156,7 +155,7 @@ def generatePasswordHash(salt, password):
     m.update(salt)
     m.update(password if isinstance(password, bytes) else password.encode('cp1252', 'replace'))
     return m.digest()
-    
+
 
 def containsCompletePacket(data):
     if len(data) < 8:

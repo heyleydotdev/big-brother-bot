@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -146,7 +145,7 @@ idle: 40
         verify(self.console).write(('vars.idleTimeout', '300'))
         self.assertEqual(['Idle kick is now [5 min]'], self.superadmin.message_history)
         self.assertFalse(self.p.error.called)
-        
+
         self.assertEqual('300', self.p._last_idleTimeout)
 
         # 15

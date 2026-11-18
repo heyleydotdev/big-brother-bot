@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -194,7 +193,7 @@ def checkUpdate(currentVersion, channel=None, singleLine=True, showErrormsg=Fals
 
     message = None
     errormessage = None
-    
+
     try:
         json_data = urllib.request.urlopen(URL_B3_LATEST_VERSION, timeout=timeout).read()
         version_info = json.loads(json_data)
@@ -235,7 +234,7 @@ def checkUpdate(currentVersion, channel=None, singleLine=True, showErrormsg=Fals
                 if singleLine:
                     message = 'update available (v%s : %s)' % (latestVersion, latestUrl)
                 else:
-                    message = """
+                    message = r"""
                  _\|/_
                  (o o)    {version:^21}
          +----oOO---OOo-----------------------+
@@ -301,7 +300,7 @@ class DBUpdate(object):
         Run the DB update
         """
         clearscreen()
-        print("""
+        print(r"""
                         _\|/_
                         (o o)    {:>32}
                 +----oOO---OOo----------------------------------+

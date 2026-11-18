@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -1562,8 +1561,8 @@ class Test_conf_settings_auto_purge(Conf_settings_test_case):
         self.init('auto_purge: false')
         # THEN
         self.assertFalse(self.p.auto_purge)
-        
-        
+
+
 class Conf_tables_test_case(XlrstatsTestCase):
 
     def init(self, option_snippet=''):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -191,7 +190,7 @@ class Wop15Parser(AbstractParser):
         if mapname:
             self.game.mapName = mapname
             self.info('map is: %s' % self.game.mapName)
-        
+
         # initialize connected clients
         plist = self.getPlayerList()
         for cid, c in plist.items():
@@ -296,7 +295,7 @@ class Wop15Parser(AbstractParser):
             return self.getEvent('EVT_CLIENT_PRIVATE_SAY', match.group('text'), client, target)
 
     def OnDamage(self, action, data, match=None):
-        # note : do not use getByCidOrJoinPlayer because cid in 
+        # note : do not use getByCidOrJoinPlayer because cid in
         # damage line is sometimes bugged (numbers over 64)
         cid = match.group('cid')
         if not -1 < int(cid) < 64:
@@ -335,7 +334,7 @@ class Wop15Parser(AbstractParser):
         # if not logging damage we need a general hitloc (for xlrstats)
         if not hasattr(victim, 'hitloc'):
             victim.hitloc = 'body'
-        
+
         damagepoints = float(match.group('damage'))
         return self.getEvent(eventkey, (damagepoints, weapon, victim.hitloc), attacker, victim)
 
@@ -394,7 +393,7 @@ class Wop15Parser(AbstractParser):
         if not weapon:
             self.debug('No weapon')
             return None
-        
+
         eventkey = 'EVT_CLIENT_KILL'
         # fix event for team change and suicides and tk
         if attacker.cid == victim.cid:
@@ -406,7 +405,7 @@ class Wop15Parser(AbstractParser):
         # if not logging damage we need a general hitloc (for xlrstats)
         if not hasattr(victim, 'hitloc'):
             victim.hitloc = 'body'
-        
+
         victim.state = b3.STATE_DEAD
         #self.verbose('OnKill Victim: %s, Attacker: %s, Weapon: %s, Hitloc: %s, dType: %s' % (
         # victim.name, attacker.name, weapon, victim.hitloc, dType))
@@ -430,7 +429,7 @@ class Wop15Parser(AbstractParser):
             self.bot('Bot connecting')
             bclient['ip'] = '0.0.0.0'
             bot = True
-            
+
         if 'cl_guid' in bclient:
             bclient['guid'] = bclient['cl_guid']
         if bclient:
@@ -443,7 +442,7 @@ class Wop15Parser(AbstractParser):
                 cid = bclient['cid']
                 del bclient['cid']
                 client = self.clients.newClient(cid, state=b3.STATE_ALIVE, bot=bot, **bclient)
-                
+
             self.debug("Client is now: %s" % client)
 
     ####################################################################################################################
@@ -580,7 +579,7 @@ class Wop15Parser(AbstractParser):
         data = self.write('dumpuser %s' % cid)
         if not data:
             return None
-        
+
         if data.split('\n')[0] != "userinfo":
             self.debug("Dumpuser %s returned : %s" % (cid, data))
             self.debug('Client %s probably disconnected but its character is still hanging in game...' % cid)

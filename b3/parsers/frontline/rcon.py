@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -41,10 +40,10 @@ class Rcon(object):
     def __init__(self, console, *args):
         self.console = console
         self.frontline_client = None
-        
+
     def set_frontline_client(self, frontline_client):
         self.frontline_client = frontline_client
-    
+
     def writelines(self, lines):
         for line in lines:
             self.write(line)
@@ -54,14 +53,14 @@ class Rcon(object):
             return
         self.console.verbose('RCON :\t %s' % cmd)
         self.frontline_client.command(cmd)
-        
+
     def flush(self):
         pass
 
     def close(self):
         pass
-            
-            
+
+
 ########################################################################################################################
 # EXAMPLE PROGRAM                                                                                                      #
 ########################################################################################################################

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -1437,7 +1436,7 @@ class Test_cmd_regulars(Admin_functional_test):
 
 
 class Test_cmd_map(Admin_functional_test):
-    
+
     def setUp(self):
         Admin_functional_test.setUp(self)
         self.init()
@@ -1461,8 +1460,8 @@ class Test_cmd_map(Admin_functional_test):
         when(self.console).changeMap('f00').thenReturn(None)
         self.joe.says('!map f00')
         self.assertEqual(0, self.joe.message.call_count)
-        
-        
+
+
 class Test_cmd_register(Admin_functional_test):
     def setUp(self):
         Admin_functional_test.setUp(self)

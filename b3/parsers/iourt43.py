@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -37,7 +36,7 @@ from b3.plugins.spamcontrol import SpamcontrolPlugin
 __author__ = 'Courgette, Fenix, ptitbigorneau'
 __version__ = '0.2'
 
-    
+
 class Iourt43Client(Client):
 
     def auth_by_guid(self):
@@ -181,7 +180,7 @@ class Iourt43Client(Client):
 
 
 class Iourt43Parser(Iourt41Parser):
-   
+
     gameName = 'iourt43'
     spamcontrolPlugin = None
 
@@ -294,10 +293,10 @@ class Iourt43Parser(Iourt41Parser):
         # ClientSpawn: 0
         # ClientMelted: 1
         re.compile(r'^(?P<action>Client(Melted|Spawn)):\s(?P<cid>[0-9]+)$', re.IGNORECASE),
-        
+
         #Assist: 0 14 15: -[TPF]-PtitBigorneau assisted Bot1 to kill Bot2
         re.compile(r'^(?P<action>Assist):\s(?P<acid>[0-9]+)\s(?P<kcid>[0-9]+)\s(?P<dcid>[0-9]+):\s+(?P<text>.*)$', re.IGNORECASE),
-        
+
         # Generated with ioUrbanTerror v4.1:
         # Hit: 12 7 1 19: BSTHanzo[FR] hit ercan in the Helmet
         # Hit: 13 10 0 8: Grover hit jacobdk92 in the Head
@@ -534,7 +533,7 @@ class Iourt43Parser(Iourt41Parser):
         UT_MOD_BENELLI: [100, 100, 90, 67, 32, 32, 60, 50, 35, 35, 30, 30, 20, 20],
         UT_MOD_P90: [50, 40, 33, 27, 16, 16, 27, 25, 17, 17, 15, 15, 12, 12],
         UT_MOD_MAGNUM: [100, 82, 66, 50, 33, 33, 57, 52, 40, 33, 25, 25],
-    }   
+    }
 
     ####################################################################################################################
     #                                                                                                                  #
@@ -695,7 +694,7 @@ class Iourt43Parser(Iourt41Parser):
     #   EVENT HANDLERS                                                                                                 #
     #                                                                                                                  #
     ####################################################################################################################
-    
+
     def OnClientuserinfo(self, action, data, match=None):
         # 2 \ip\145.99.135.227:27960\challenge\-232198920\qport\2781\protocol\68\battleye\1\name\[SNT]^1XLR^78or..
         # 0 \gear\GMIORAA\team\blue\skill\5.000000\characterfile\bots/ut_chicken_c.c\color\4\sex\male\race\2\snaps\20\..
@@ -926,7 +925,7 @@ class Iourt43Parser(Iourt41Parser):
                                                                               'way_time': way_time,
                                                                               'attempt_num': attempt_num,
                                                                               'attempt_max': attempt_max})
-    
+
     def OnClientjumpruncanceled(self, action, data, match=None):
         cid = match.group('cid')
         way_id = match.group('way_id')
@@ -939,7 +938,7 @@ class Iourt43Parser(Iourt41Parser):
         return self.getEvent('EVT_CLIENT_JUMP_RUN_CANCEL', client=client, data={'way_id': way_id,
                                                                                 'attempt_num': attempt_num,
                                                                                 'attempt_max': attempt_max})
-    
+
     def OnClientsaveposition(self, action, data, match=None):
         cid = match.group('cid')
         position = float(match.group('x')), float(match.group('y')), float(match.group('z'))
@@ -957,7 +956,7 @@ class Iourt43Parser(Iourt41Parser):
             self.debug('No client found')
             return None
         return self.getEvent('EVT_CLIENT_POS_LOAD', client=client, data={'position': position})
-    
+
     def OnClientgoto(self, action, data, match=None):
         cid = match.group('cid')
         tcid = match.group('tcid')
@@ -966,12 +965,12 @@ class Iourt43Parser(Iourt41Parser):
         if not client:
             self.debug('No client found')
             return None
-        
+
         target = self.getByCidOrJoinPlayer(tcid)
         if not target:
             self.debug('No target client found')
             return None
-            
+
         return self.getEvent('EVT_CLIENT_GOTO', client=client, target=target, data={'position': position})
 
     def OnClientspawn(self, action, data, match=None):
@@ -1059,18 +1058,18 @@ class Iourt43Parser(Iourt41Parser):
 
         target.state = b3.STATE_ALIVE
         return self.getEvent('EVT_CLIENT_THAWOUT_FINISHED', client=client, target=target)
-        
+
     def OnAssist(self, action, data, match=None):
         #Assist: 0 14 15: -[TPF]-PtitBigorneau assisted Bot1 to kill Bot2
         cid = match.group('acid')
         vid = match.group('dcid')
         aid = match.group('kcid')
-        
+
         client = self.getByCidOrJoinPlayer(cid)
         if not client:
             self.debug('No client')
             return None
-    
+
         victim = self.getByCidOrJoinPlayer(vid)
         if not victim:
             self.debug('No victim')
@@ -1333,7 +1332,7 @@ class Iourt43Parser(Iourt41Parser):
             return auth != 0
         else:
             return False
-    
+
     def defineGameType(self, gametype_int):
         """
         Translate the gametype to a readable format (also for teamkill plugin!)

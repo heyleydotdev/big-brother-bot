@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -327,7 +326,7 @@ class Parser(object):
             if game_log[0:6] == 'ftp://' or game_log[0:7] == 'sftp://' or game_log[0:7] == 'http://':
                 self.remoteLog = True
                 self.bot('Working in remote-log mode: %s', game_log)
-                
+
                 if self.config.has_option('server', 'local_game_log'):
                     f = self.config.getpath('server', 'local_game_log')
                 else:
@@ -349,7 +348,7 @@ class Parser(object):
                     self.screen.write('Creating gamelog : %s\n' % b3.getShortPath(os.path.abspath(f)))
                     ftptempfile = open(f, "w")
                     ftptempfile.close()
-                    
+
             else:
                 self.bot('Game log is: %s', game_log)
                 f = self.config.getpath('server', 'game_log')
@@ -379,7 +378,7 @@ class Parser(object):
             self.screen.write(">>> Cannot setup RCON: %s\n" % err)
             self.screen.flush()
             self.critical("Cannot setup RCON: %s" % err, exc_info=err)
-        
+
         if self.config.has_option('server', 'rcon_timeout'):
             custom_socket_timeout = self.config.getfloat('server', 'rcon_timeout')
             self.output.socket_timeout = custom_socket_timeout
@@ -1026,7 +1025,7 @@ class Parser(object):
                     variables[obj] = obj
             else:
                 for attr in vars(obj):
-                    pattern = re.compile('[\W_]+')
+                    pattern = re.compile(r'[\W_]+')
                     cleanattr = pattern.sub('', attr)  # trim any underscore or any non alphanumeric character
                     variables[cleanattr] = getattr(obj, attr)
 
@@ -1041,7 +1040,7 @@ class Parser(object):
                 #self.debug('Classname of object %s: %s' % (key, obj.__class__.__name__))
             else:
                 for attr in vars(obj):
-                    pattern = re.compile('[\W_]+')
+                    pattern = re.compile(r'[\W_]+')
                     cleanattr = pattern.sub('', attr)  # trim any underscore or any non alphanumeric character
                     currkey = ''.join([key, cleanattr])
                     variables[currkey] = getattr(obj, attr)
@@ -1183,7 +1182,7 @@ class Parser(object):
                                 raise
                             except Exception as msg:
                                 self.error('Could not parse line %s: %s', msg, extract_tb(sys.exc_info()[2]))
-                            
+
                             time.sleep(self.delay2)
 
             time.sleep(self.delay)
@@ -1280,7 +1279,7 @@ class Parser(object):
                     finally:
                         elapsed = time.clock() - timer_plugin_begin
                         self._eventsStats.add_event_handled(hfunc.__class__.__name__, event_name, elapsed * 1000)
-                    
+
         self.bot('Shutting down event handler')
 
         # releasing lock if it was set by self.shutdown() for instance
@@ -1333,7 +1332,7 @@ class Parser(object):
         # Compare the current cursor position against the current file size,
         # if the cursor is at a number higher than the game log size, then
         # there's a problem
-        if self.input.tell() > filestats.st_size:   
+        if self.input.tell() > filestats.st_size:
             self.debug('Parser: game log is suddenly smaller than it was before (%s bytes, now %s), '
                        'the log was probably either rotated or emptied. B3 will now re-adjust to the new '
                        'size of the log' % (str(self.input.tell()), str(filestats.st_size)))
@@ -1569,7 +1568,7 @@ class Parser(object):
         Client.auth() method 
         """
         raise NotImplementedError
-    
+
     def sync(self):
         """
         For all connected players returned by self.getPlayerList(), get the matching Client
@@ -1581,7 +1580,7 @@ class Parser(object):
         connects on slot 1.
         """
         raise NotImplementedError
-    
+
     def say(self, msg, *args):
         """
         Broadcast a message to all players
@@ -1651,7 +1650,7 @@ class Parser(object):
         Load the next map/level
         """
         raise NotImplementedError
-        
+
     def changeMap(self, map_name):
         """
         Load a given map/level
@@ -1671,9 +1670,9 @@ class Parser(object):
         Returns a dict having players' id for keys and players' scores for values
         """
         raise NotImplementedError
-        
+
     def inflictCustomPenalty(self, penalty_type, client, reason=None, duration=None, admin=None, data=None):
-        """
+        r"""
         Called if b3.admin.penalizeClient() does not know a given penalty type. 
         Overwrite this to add customized penalties for your game like 'slap', 'nuke', 
         'mute', 'kill' or anything you want.

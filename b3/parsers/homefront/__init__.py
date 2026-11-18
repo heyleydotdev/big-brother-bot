@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -56,7 +55,7 @@ class HomefrontParser(Parser):
     gameName = "homefront"
     privateMsg = True
     OutputClass = rcon.Rcon
-    PunkBuster = None 
+    PunkBuster = None
 
     prefix = '%s: '
     ftpconfig = None
@@ -87,7 +86,7 @@ class HomefrontParser(Parser):
         'saybig': 'adminbigsay %(message)s',
         'kick': 'admin kick "%(playerid)s"',
         'ban': 'admin kickban "%(playerid)s" "%(admin)s" "[B3] %(reason)s"',
-        'unban': 'admin unban %(playerId)s', 
+        'unban': 'admin unban %(playerId)s',
         'tempban': 'admin kick "%(playerid)s"',
         'maprotate': 'admin nextmap'
     }
@@ -128,7 +127,7 @@ class HomefrontParser(Parser):
 
         if not self._ini_file:
             self.debug('Incorrect ini file or no ini file specified: map commands other than nextmap not available')
-            
+
         # start crontab to trigger playerlist events
         self.cron.add(b3.cron.CronTab(self.retrievePlayerList, second='*/%s' % self._playerlistInterval))
 
@@ -138,7 +137,7 @@ class HomefrontParser(Parser):
         self.Events.createEvent('EVT_CLIENT_VOTE_START', 'Client Vote Start')
         self.Events.createEvent('EVT_CLIENT_VOTE', 'Client Vote')
         self.Events.createEvent('EVT_SERVER_VOTE_END', 'Server Vote End')
-                
+
         ## read game server info and store as much of it in self.game wich
         ## is an instance of the b3.game.Game class
         sq = SourceQuery.SourceQuery(self._publicIp, self._port, timeout=10)
@@ -222,7 +221,7 @@ class HomefrontParser(Parser):
             self.verbose2("%s" % packet)
         else:
             self.console("%s" % packet)
-        
+
         if packet.message == MessageType.SERVER_TRANSMISSION:
             if packet.channel == ChannelType.SERVER:
                 if packet.data == "PONG":
@@ -233,7 +232,7 @@ class HomefrontParser(Parser):
                     data = match.group('data')
                     #self.debug('DATA: %s' % data)
                     #self.debug("-==== FUNC!!: " + func)
-                    
+
                     if hasattr(self, func):
                         #self.debug('routing ----> %s' % func)
                         func = getattr(self, func)
@@ -245,7 +244,7 @@ class HomefrontParser(Parser):
                 else:
                     self.warning('TODO: handle packet : %s' % packet)
                     self.queueEvent(self.getEvent('EVT_UNKNOWN', packet))
-                    
+
             elif packet.channel == ChannelType.CHATTER:
                 if packet.data.startswith('BROADCAST:'):
                     data = packet.data[10:]
@@ -274,7 +273,7 @@ class HomefrontParser(Parser):
             self.warning("unhandled message type : %s" % packet.getMessageTypeAsStr())
 
     def _handle_connection_close(self):
-        if len(self.clients.getList()): 
+        if len(self.clients.getList()):
             self.debug("clearing player list")
             self.clients.empty()
         self._original_connection_handle_close_method()
@@ -376,7 +375,7 @@ class HomefrontParser(Parser):
     #   GAME EVENTS HANDLERS                                                                                           #
     #                                                                                                                  #
     ####################################################################################################################
-       
+
     def onServerHello(self, data):
         ## [int: Version]
         self.bot("HF server (v %s) says hello to B3" % data)
@@ -417,14 +416,14 @@ class HomefrontParser(Parser):
             self.info("Banned player connecting")
             return
         self.getClientByUidOrCreate(match.group('uid'), match.group('name'))
-    
+
     def onServerLogout(self, data):
         ## [int: SteamID]
         client = self.clients.getByGUID(data)
         if client:
             client.disconnect()
             self.debug('%s (%s) disconnected' % (client.name, data))
-    
+
     def onServerTeam_change(self, data):
         # [int: SteamID] [int: Team ID]
         self.debug('onServerTeam_change: %s' % data)
@@ -518,7 +517,7 @@ class HomefrontParser(Parser):
         # 1 = USA
         # 2 = TIE
         teamid = match.group('team')
-        self.verbose('onServerRound_over: %s, winning team id: %s' % (data, teamid)) 
+        self.verbose('onServerRound_over: %s, winning team id: %s' % (data, teamid))
         return self.getEvent('EVT_GAME_ROUND_END', teamid)
 
     def onServerChange_level(self, data):
@@ -528,7 +527,7 @@ class HomefrontParser(Parser):
         if not match:
             self.error('onServerChange_level failed match')
             return
-        
+
         # resync players to get rid of eventual 'phantom' players
         self.clients.sync()
 
@@ -572,7 +571,7 @@ class HomefrontParser(Parser):
                 return self.getEvent('EVT_CLIENT_SQUAD_SAY', text, client)
             else:
                 return self.getEvent('EVT_CLIENT_SAY', text, client)
-    
+
     def onChatter(self, data):
         """
         Everything that is said by the server or a player is sent over this channel.
@@ -586,7 +585,7 @@ class HomefrontParser(Parser):
         """
         [int: SteamID]
         """
-        # we are using storage instead of self.clients because the player 
+        # we are using storage instead of self.clients because the player
         # is obviously not connected when banned
         client = self.storage.getClient(Client(guid=data))
         if client:
@@ -595,7 +594,7 @@ class HomefrontParser(Parser):
             self.write(self.getCommand('saybig',  prefix='', message="%s unbanned" % data))
         # update banlist
         self.retrieveBanList()
-    
+
     def onServerBan_added(self, data):
         # [string: Name] [int: SteamID]
         match = re.search(r"^(?P<data>(?P<name>[^ ]+)\s+(?P<uid>[0-9]+))$", data)
@@ -619,15 +618,15 @@ class HomefrontParser(Parser):
         if not match:
             self.error("onServerPlayer failed match")
             return
-        
+
         uid = match.group('uid')
         if uid == '0':
             # connecting player with no UID resolved yet --> ignore
             return
-        
+
         if len(uid) != 17:
             self.warning("weird UID : [%s]" % uid)
-        
+
         # try to get the client by guid
         client = self.clients.getByGUID(uid)
         if not client:
@@ -717,7 +716,7 @@ class HomefrontParser(Parser):
         ## in Homefront, there is no synchronous way to obtain a player guid
         ## the onServerUid event will be the one calling Client.auth()
         pass
-    
+
     def sync(self):
         """
         For all connected players returned by self.getPlayerList(), get the matching Client
@@ -740,7 +739,7 @@ class HomefrontParser(Parser):
                 self.info("%s last update is too old" % client)
                 client.disconnect()
         return mlist
-    
+
     def say(self, text):
         """
         Broadcast a message to all players.
@@ -824,7 +823,7 @@ class HomefrontParser(Parser):
 
         if not silent and fullreason != '':
             self.say(fullreason)
-        
+
         banid = client.guid
         if banid is None:
             banid = client.cid
@@ -877,7 +876,7 @@ class HomefrontParser(Parser):
             banduration = b3.functions.minutesStr(duration)
             variables = self.getMessageVariables(client=client, reason=reason, banduration=banduration)
             fullreason = self.getMessage('temp_banned', variables)
-            
+
         fullreason = self.stripColors(fullreason)
         reason = self.stripColors(reason)
 
@@ -888,7 +887,7 @@ class HomefrontParser(Parser):
             self.write(self.getCommand('kick', playerid=client.guid))
         else:
             self.write(self.getCommand('kick', playerid=client.cid))
-            
+
         self.queueEvent(self.getEvent('EVT_CLIENT_BAN_TEMP', {'reason': reason, 'duration': duration, 'admin': admin}, client))
         client.disconnect()
 
@@ -917,7 +916,7 @@ class HomefrontParser(Parser):
         else:
             nextmap = 'Unknown'
         return nextmap
-        
+
     def getMaps(self):
         """
         Return the available maps/levels name
@@ -938,7 +937,7 @@ class HomefrontParser(Parser):
                             mapline[1] = 'GC,BC'
                         self.maplist.append(mapline[0])
                         self.mapgamelist.append(self.getEasyName(mapline[0]) + ' [' + mapline[1] + ']')
-                
+
                 _input.close()
             return self.mapgamelist
 
@@ -957,7 +956,7 @@ class HomefrontParser(Parser):
         """
         #CT admin NextMap
         self.write(self.getCommand('maprotate'))
-        
+
     def changeMap(self, mapname):
         """
         Load a given map/level.
@@ -998,7 +997,7 @@ class HomefrontParser(Parser):
         else:
             self.warning('unknown level name \'%s\' : please report this on B3 forums' % mapname)
             return mapname
-  
+
     def getPlayerPings(self, filter_client_ids=None):
         """
         Returns a dict having players' id for keys and players' ping for values.
@@ -1031,7 +1030,7 @@ class HomefrontParser(Parser):
         return scores
 
     def inflictCustomPenalty(self, penalty_type, client, reason=None, duration=None, admin=None, data=None):
-        """
+        r"""
         Called if b3.admin.penalizeClient() does not know a given penalty type. 
         Overwrite this to add customized penalties for your game like 'slap', 'nuke', 
         'mute' or anything you want.

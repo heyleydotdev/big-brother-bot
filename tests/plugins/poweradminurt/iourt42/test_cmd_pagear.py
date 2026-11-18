@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -63,17 +62,17 @@ weapon_codes = (
     ('beretta', G_BERETTA_92FS),
     ('beret', G_BERETTA_92FS),
     ('ber', G_BERETTA_92FS),
-    
+
     ('desert eagle', G_50_DESERT_EAGLE),
     ('desert', G_50_DESERT_EAGLE),
     ('des', G_50_DESERT_EAGLE),
     ('.50', G_50_DESERT_EAGLE),
     ('deagle', G_50_DESERT_EAGLE),
     ('eagle', G_50_DESERT_EAGLE),
-    
+
     ('spas12', G_SPAS_12),
     ('spas', G_SPAS_12),
-    
+
     ('mp5k', G_MP5K),
     ('mp5', G_MP5K),
     ('mp', G_MP5K),

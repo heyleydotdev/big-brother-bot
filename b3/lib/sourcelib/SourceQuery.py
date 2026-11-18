@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 
 #------------------------------------------------------------------------------
 # SourceQuery - Python class for querying info from Source Dedicated Servers

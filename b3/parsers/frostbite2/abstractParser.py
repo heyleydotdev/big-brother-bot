@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -1648,7 +1647,7 @@ class AbstractParser(b3.parser.Parser):
                     gamemode_data = parts[1]
                     num_rounds = parts[2]
                 elif len(parts) == 2:
-                    if re.match('\d+', parts[1]):
+                    if re.match(r'\d+', parts[1]):
                         # 2nd param is the number of rounds
                         num_rounds = parts[1]
                     else:

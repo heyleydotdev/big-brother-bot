@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -87,7 +86,7 @@ class SftpytailPlugin(b3.plugin.Plugin):
         """
         if self.console.config.has_option('server', 'delay'):
             self._sftpdelay = self.console.config.getfloat('server', 'delay')
-        
+
         if self.console.config.has_option('server', 'local_game_log'):
             self.lgame_log = self.console.config.getpath('server', 'local_game_log')
         else:
@@ -263,7 +262,7 @@ class SftpytailPlugin(b3.plugin.Plugin):
                     pass
                 rfile = None
                 sftp = None
-                
+
                 if self._nbConsecutiveConnFailure <= 30:
                     time.sleep(1)
                 else:
@@ -285,7 +284,7 @@ class SftpytailPlugin(b3.plugin.Plugin):
             self.file.close()
         except IOError:
             pass
-    
+
     def sftpconnect(self):
         """
         Connect to the sFTP server.
@@ -294,7 +293,7 @@ class SftpytailPlugin(b3.plugin.Plugin):
         port = self.sftpconfig['port']
         username = self.sftpconfig['user']
         password = self.sftpconfig['password']
-        
+
         # get host key, if we know one
         hostkey = None
         host_keys = self.get_host_keys()

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -168,7 +167,7 @@ class BattleyeServer(Thread):
         while not self.isStopped():
             #self.getLogger().debug("Is socket ready")
             readable, writable, exception = select.select([self.server],[self.server],[self.server], .5)
-            
+
             if not exception:
                 if readable:
                     try:
@@ -179,7 +178,7 @@ class BattleyeServer(Thread):
                     except socket.timeout:
                         # We've read all the data that there is currently, so move on.
                         pass
-                    except socket.error as err: 
+                    except socket.error as err:
                         self.getLogger().error("socket error %s" % err)
                         self.stop()
                 elif writable:
@@ -257,7 +256,7 @@ class BattleyeServer(Thread):
                 pass
             except Exception as err:
                 self.getLogger().error("error in reading_thread", exc_info=err)
-                
+
         self.getLogger().info("ending reading thread")
 
 

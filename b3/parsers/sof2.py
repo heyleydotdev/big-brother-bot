@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -648,7 +647,7 @@ class Sof2Parser(AbstractParser):
     #   OTHER METHODS                                                                                                  #
     #                                                                                                                  #
     ####################################################################################################################
-    
+
     def defineGameType(self, gametype_int):
         """
         Translate the gametype to a readable format.
@@ -708,7 +707,7 @@ class Sof2Parser(AbstractParser):
         return None
 
     def queryClientUserInfoByName(self, cid, name):
-        """
+        r"""
         ]\dumpuser xlr8or
         Player xlr8or is not on the server
 

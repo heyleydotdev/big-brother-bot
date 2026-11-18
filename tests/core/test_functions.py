@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -24,40 +23,40 @@
 
 from b3 import functions
 import unittest
-    
+
 class TestSplitDSN(unittest.TestCase):
     def assertDsnEqual(self, url, expected):
         tmp = functions.splitDSN(url)
         self.assertEqual(tmp, expected)
 
     def test_sqlite(self):
-        self.assertDsnEqual('sqlite://c|/mydatabase/test.db', 
-        {'protocol': 'sqlite', 'host': 'c|', 'user': None, 
+        self.assertDsnEqual('sqlite://c|/mydatabase/test.db',
+        {'protocol': 'sqlite', 'host': 'c|', 'user': None,
         'path': '/mydatabase/test.db', 'password': None, 'port': None })
 
     def test_ftp(self):
-        self.assertDsnEqual('ftp://username@domain.com/index.html', 
-        {'protocol': 'ftp', 'host': 'domain.com', 'user': 'username', 
+        self.assertDsnEqual('ftp://username@domain.com/index.html',
+        {'protocol': 'ftp', 'host': 'domain.com', 'user': 'username',
          'path': '/index.html', 'password': None, 'port': 21 })
-        
+
     def test_ftp2(self):
-        self.assertDsnEqual('ftp://username:password@domain.com/index.html', 
-        {'protocol': 'ftp', 'host': 'domain.com', 'user': 'username', 
+        self.assertDsnEqual('ftp://username:password@domain.com/index.html',
+        {'protocol': 'ftp', 'host': 'domain.com', 'user': 'username',
          'path': '/index.html', 'password': 'password', 'port': 21 })
-        
+
     def test_ftp3(self):
-        self.assertDsnEqual('ftp://username@domain.com:password@domain.com/index.html', 
-        {'protocol': 'ftp', 'host': 'domain.com', 'user': 'username@domain.com', 
+        self.assertDsnEqual('ftp://username@domain.com:password@domain.com/index.html',
+        {'protocol': 'ftp', 'host': 'domain.com', 'user': 'username@domain.com',
          'path': '/index.html', 'password': 'password', 'port': 21 })
-        
+
     def test_ftp4(self):
-        self.assertDsnEqual('ftp://username@domain.com:password@domain.com:2121/index.html', 
-        {'protocol': 'ftp', 'host': 'domain.com', 'user': 'username@domain.com', 
+        self.assertDsnEqual('ftp://username@domain.com:password@domain.com:2121/index.html',
+        {'protocol': 'ftp', 'host': 'domain.com', 'user': 'username@domain.com',
          'path': '/index.html', 'password': 'password', 'port': 2121 })
-        
+
     def test_mysql(self):
-        self.assertDsnEqual('mysql://b3:password@localhost/b3', 
-        {'protocol': 'mysql', 'host': 'localhost', 'user': 'b3', 
+        self.assertDsnEqual('mysql://b3:password@localhost/b3',
+        {'protocol': 'mysql', 'host': 'localhost', 'user': 'b3',
          'path': '/b3', 'password': 'password', 'port': 3306} )
         self.assertDsnEqual('mysql://b3:password@localhost:3406/b3',
         {'protocol': 'mysql', 'host': 'localhost', 'user': 'b3',
@@ -84,7 +83,7 @@ class TestFuzziGuidMatch(unittest.TestCase):
         self.assertTrue(functions.fuzzyGuidMatch( '098f6bcd4621d373cade4e832627bf6',  '098f6bcd4621d373cade4e832627b4f6'))
         self.assertFalse(functions.fuzzyGuidMatch('098f6bcd4621d373cade4e832627b4f6', '098f6bcd46d373cade4e832627b4f6'))
         self.assertFalse(functions.fuzzyGuidMatch('098f6bcd4621d373cade4832627b4f6',  '098f6bcd4621d73cade4e832627b4f6'))
-    
+
     def test_caseInsensitive(self):
         self.assertTrue(functions.fuzzyGuidMatch( '098F6BCD4621D373CADE4E832627B4F6', '098f6bcd4621d373cade4e832627b4f6'))
         self.assertTrue(functions.fuzzyGuidMatch( '098F6BCD4621D373CADE4E832627B4F6', '098f6bcd4621d373cade4e832627b4f'))
@@ -92,7 +91,7 @@ class TestFuzziGuidMatch(unittest.TestCase):
         self.assertFalse(functions.fuzzyGuidMatch('098F6BCD4621D373CADE4E832627B4F6', '098f6bcd46d373cade4e832627b4f6'))
         self.assertTrue(functions.fuzzyGuidMatch( '098F6BCD4621D373CADE4E832627BF6', '098f6bcd4621d373cade4e832627b4f6'))
         self.assertFalse(functions.fuzzyGuidMatch('098F6BCD4621D373CADE4832627B4F6', '098f6bcd4621d73cade4e832627b4f6'))
-        
+
 class TestMinutes2int(unittest.TestCase):
     def test_NaN(self):
         self.assertEqual(functions.minutes2int('mlkj'), 0)
@@ -101,7 +100,7 @@ class TestMinutes2int(unittest.TestCase):
     def test_int(self):
         self.assertEqual(functions.minutes2int('50'), 50)
         self.assertEqual(functions.minutes2int('50.654'), 50.65)
-      
+
 class TestTime2minutes(unittest.TestCase):
     def test_None(self):
         self.assertEqual(functions.time2minutes(None), 0)

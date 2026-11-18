@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -54,7 +53,7 @@ class Test_DatabaseStorage(unittest.TestCase):
         mock_storage.console = Mock()
         mock_storage.console.config = Mock()
         mock_storage.console.config.get = Mock(return_value="123,myname,100")
-        
+
         mock_storage.console.config.has_option = Mock(return_value=True)
         c1 = Client()
         c2 = mock_storage.getClient(mock_storage, c1)
@@ -62,7 +61,7 @@ class Test_DatabaseStorage(unittest.TestCase):
         self.assertEqual(123, c1.id)
         self.assertEqual("myname", c1.name)
         self.assertEqual(100, c1._tempLevel)
-        
+
         mock_storage.console.config.has_option = Mock(return_value=False)
         self.assertRaises(KeyError, mock_storage.getClient, mock_storage, Mock())
 
