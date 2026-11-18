@@ -282,9 +282,9 @@ class MysqlStorage(DatabaseStorage):
                 self.db = self.__driver.connect(host=self.dsnDict['host'],
                                                 port=self.dsnDict['port'],
                                                 user=self.dsnDict['user'],
-                                                passwd=self.dsnDict['password'],
-                                                db=self.dsnDict['path'][1:],
-                                                charset="utf8")
+                                                password=self.dsnDict['password'],
+                                                database=self.dsnDict['path'][1:],
+                                                charset="utf8mb4")
 
                 self.console.bot('Successfully established a connection with MySQL database')
                 self._lastConnectAttempt = 0

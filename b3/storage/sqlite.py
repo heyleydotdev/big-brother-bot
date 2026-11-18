@@ -109,11 +109,11 @@ class SqliteStorage(DatabaseStorage):
         :return: List of strings.
         """
         tables = []
-        cursor = self.query("SELECT * FROM sqlite_master WHERE type='table'")
+        cursor = self.query("SELECT name FROM sqlite_master WHERE type='table'")
         if cursor and not cursor.EOF:
             while not cursor.EOF:
                 row = cursor.getRow()
-                tables.append(list(row.values())[0])
+                tables.append(row['name'])
                 cursor.moveNext()
         cursor.close()
         return tables

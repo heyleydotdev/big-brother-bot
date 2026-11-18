@@ -128,7 +128,7 @@ class DatabaseStorage(Storage):
         :param client: The client object to fill with fetch data.
         """
         self.console.debug('Storage: getClient %s' % client)
-        where = {'id': client.id} if client.id > 0 else {'guid': client.guid}
+        where = {'id': client.id} if client.id else {'guid': client.guid}
 
         try:
 
@@ -194,14 +194,14 @@ class DatabaseStorage(Storage):
                   'guid', 'pbid', 'name', 'time_add', 'auto_login',
                   'mask_level', 'group_bits', 'login', 'password')
 
-        data = {'id': client.id} if client.id > 0 else {}
+        data = {'id': client.id} if client.id else {}
 
         for f in fields:
             if hasattr(client, self.getVar(f)):
                 data[f] = getattr(client, self.getVar(f))
 
         self.console.debug('Storage: setClient data %s' % data)
-        if client.id > 0:
+        if client.id:
             self.query(QueryBuilder(self.db).UpdateQuery(data, 'clients', {'id': client.id}))
         else:
             cursor = self.query(QueryBuilder(self.db).InsertQuery(data, 'clients'))
@@ -241,7 +241,7 @@ class DatabaseStorage(Storage):
         :return: The alias object given in input with all the fields set.
         """
         self.console.debug('Storage: getClientAlias %s' % alias)
-        if hasattr(alias, 'id') and alias.id > 0:
+        if hasattr(alias, 'id') and alias.id:
             query = QueryBuilder(self.db).SelectQuery('*', 'aliases', {'id': alias.id}, None, 1)
         elif hasattr(alias, 'alias') and hasattr(alias, 'clientId'):
             query = QueryBuilder(self.db).SelectQuery('*', 'aliases', {'alias': alias.alias,
@@ -319,7 +319,7 @@ class DatabaseStorage(Storage):
         :return: The ip alias object given in input with all the fields set.
         """
         self.console.debug('Storage: getClientIpAddress %s' % ipalias)
-        if hasattr(ipalias, 'id') and ipalias.id > 0:
+        if hasattr(ipalias, 'id') and ipalias.id:
             query = QueryBuilder(self.db).SelectQuery('*', 'ipaliases', {'id': ipalias.id}, None, 1)
         elif hasattr(ipalias, 'ip') and hasattr(ipalias, 'clientId'):
             query = QueryBuilder(self.db).SelectQuery('*', 'ipaliases', {'ip': ipalias.ip,

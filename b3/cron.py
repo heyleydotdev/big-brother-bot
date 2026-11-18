@@ -338,7 +338,7 @@ class Cron(object):
         """
         self.console.info("Cron scheduler started")
         nexttime = self.getNextTime()
-        while not self._stopEvent.isSet():
+        while not self._stopEvent.is_set():
             now = self.time()
             if now < nexttime:
                 self._stopEvent.wait(nexttime - now + .1)

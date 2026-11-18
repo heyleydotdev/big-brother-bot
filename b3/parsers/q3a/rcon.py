@@ -224,7 +224,7 @@ class Rcon(object):
         """
         Write multiple RCON commands on the socket.
         """
-        while not self._stopEvent.isSet():
+        while not self._stopEvent.is_set():
             lines = self.queue.get(True)
             for cmd in lines:
                 if not cmd:

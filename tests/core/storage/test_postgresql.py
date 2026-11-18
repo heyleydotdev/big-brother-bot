@@ -24,7 +24,6 @@
 
 import os
 
-import nose
 import unittest
 
 from b3.functions import splitDSN
@@ -124,5 +123,6 @@ class Test_PostgreSQL(B3TestCase, StorageAPITest):
         self.storage.shutdown()
 
 if __name__ == '__main__':
-    nose.main()
+    import unittest
+    unittest.main()
 

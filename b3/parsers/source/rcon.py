@@ -135,7 +135,7 @@ class Rcon(object):
     ####################################################################################################################
 
     def _writelines(self):
-        while not self.stop_event.isSet():
+        while not self.stop_event.is_set():
             lines = self.queue.get(True)
             for cmd in lines:
                 if not cmd:
