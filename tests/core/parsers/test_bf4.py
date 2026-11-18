@@ -394,11 +394,11 @@ class Test_punkbuster_events(BF4TestCase):
 
     def test_PB_UCON_message(self):
         result = self.pb('PunkBuster Server: PB UCON "ggc_85.214.107.154"@85.214.107.154:14516 [admin.say "GGC-Stream.com - Welcome Cucurbitaceae with the GUID 31077c7d to our server." all]\n')
-        self.assertEqual('Event<EVT_PUNKBUSTER_UCON>({\'ip\': \'85.214.107.154\', \'cmd\': \'admin.say "GGC-Stream.com - Welcome Cucurbitaceae with the GUID 31077c7d to our server." all\', \'from\': \'ggc_85.214.107.154\', \'port\': \'14516\'}, None, None)', str(result))
+        self.assertEqual('Event<EVT_PUNKBUSTER_UCON>({\'from\': \'ggc_85.214.107.154\', \'ip\': \'85.214.107.154\', \'port\': \'14516\', \'cmd\': \'admin.say "GGC-Stream.com - Welcome Cucurbitaceae with the GUID 31077c7d to our server." all\'}, None, None)', str(result))
 
     def test_PB_Screenshot_received_message(self):
         result = self.pb('PunkBuster Server: Screenshot C:\\games\\bf3\\173_199_73_213_25200\\862147\\bf3\\pb\\svss\\pb000709.png successfully received (MD5=4576546546546546546546546543E1E1) from 19 Jaffar [da876546546546546546546546547673(-) 111.22.33.111:3659]\n')
-        self.assertEqual(r"Event<EVT_PUNKBUSTER_SCREENSHOT_RECEIVED>({'slot': '19', 'name': 'Jaffar', 'ip': '111.22.33.111', 'pbid': 'da876546546546546546546546547673', 'imgpath': 'C:\\games\\bf3\\173_199_73_213_25200\\862147\\bf3\\pb\\svss\\pb000709.png', 'port': '3659', 'md5': '4576546546546546546546546543E1E1'}, None, None)", str(result))
+        self.assertEqual(r"Event<EVT_PUNKBUSTER_SCREENSHOT_RECEIVED>({'imgpath': 'C:\\games\\bf3\\173_199_73_213_25200\\862147\\bf3\\pb\\svss\\pb000709.png', 'md5': '4576546546546546546546546543E1E1', 'slot': '19', 'name': 'Jaffar', 'pbid': 'da876546546546546546546546547673', 'ip': '111.22.33.111', 'port': '3659'}, None, None)", str(result))
 
     def test_PB_SV_PList(self):
         self.assert_pb_misc_evt("PunkBuster Server: Player List: [Slot #] [GUID] [Address] [Status] [Power] [Auth Rate] [Recent SS] [O/S] [Name]")
@@ -418,7 +418,7 @@ class Test_punkbuster_events(BF4TestCase):
         self.assert_pb_misc_evt("PunkBuster Server: 0 Ban Records Updated in d:\\localuser\\g119142\\pb\\pbbans.dat")
 
     def test_misc(self):
-        self.assertEqual("Event<EVT_PUNKBUSTER_LOST_PLAYER>({'slot': '1', 'ip': 'x.x.x.x', 'port': '3659', 'name': 'joe', 'pbuid': '0837c128293d42aaaaaaaaaaaaaaaaa'}, None, None)",
+        self.assertEqual("Event<EVT_PUNKBUSTER_LOST_PLAYER>({'slot': '1', 'ip': 'x.x.x.x', 'port': '3659', 'pbuid': '0837c128293d42aaaaaaaaaaaaaaaaa', 'name': 'joe'}, None, None)",
             str(self.pb("PunkBuster Server: Lost Connection (slot #1) x.x.x.x:3659 0837c128293d42aaaaaaaaaaaaaaaaa(-) joe")))
 
         self.assert_pb_misc_evt("PunkBuster Server: Invalid Player Specified: None")
@@ -604,7 +604,7 @@ class Test_bf4_maps(BF4TestCase):
 
 
     def test_getMapsSoundingLike(self):
-        self.assertEqual(['rogue transmission', 'hainan resort', 'lancang dam'], self.parser.getMapsSoundingLike(''), '')
+        self.assertEqual(['zavod 311', 'lancang dam', 'flood zone'], self.parser.getMapsSoundingLike(''), '')
         self.assertEqual('MP_Abandoned', self.parser.getMapsSoundingLike('Zavod 311'), 'Zavod 311')
         self.assertEqual('MP_Tremors', self.parser.getMapsSoundingLike('dawn'))
         #self.assertEqual(['operation metro', 'operation firestorm', 'operation 925'], self.parser.getMapsSoundingLike('operation'))
@@ -624,7 +624,7 @@ class Test_bf4_maps(BF4TestCase):
         self.assertEqual('MP_Naval', self.parser.getMapsSoundingLike('paracel'))
         self.assertEqual(['paracel storm', 'firestorm 2014'], self.parser.getMapsSoundingLike('storm'))
         self.assertEqual('MP_Naval', self.parser.getMapsSoundingLike('Paracel Storm'))
-        self.assertEqual(['operation locker', 'operation whiteout', 'operation mortar'], self.parser.getMapsSoundingLike('operation'))
+        self.assertEqual(['operation locker', 'operation metro 2014', 'operation mortar'], self.parser.getMapsSoundingLike('operation'))
         self.assertEqual('MP_Prison', self.parser.getMapsSoundingLike('locker'))
         self.assertEqual('MP_Prison', self.parser.getMapsSoundingLike('Operation Locker'))
         self.assertEqual('MP_Resort', self.parser.getMapsSoundingLike('hainan'))
@@ -640,7 +640,7 @@ class Test_bf4_maps(BF4TestCase):
         self.assertEqual('XP1_001', self.parser.getMapsSoundingLike('silk'))
         self.assertEqual('XP1_002', self.parser.getMapsSoundingLike('altai'))
         self.assertEqual('XP1_003', self.parser.getMapsSoundingLike('guilin'))
-        self.assertEqual(['sunken dragon', 'dragon pass'], self.parser.getMapsSoundingLike('dragon'))
+        self.assertEqual(['dragon pass', 'sunken dragon'], self.parser.getMapsSoundingLike('dragon'))
         self.assertEqual('XP0_Caspian', self.parser.getMapsSoundingLike('caspian'))
         self.assertEqual('XP0_Firestorm', self.parser.getMapsSoundingLike('firestorm'))
         self.assertEqual('XP0_Oman', self.parser.getMapsSoundingLike('oman'))
@@ -663,8 +663,8 @@ class Test_bf4_maps(BF4TestCase):
     def test_getGamemodeSoundingLike(self):
         self.assertEqual('ConquestSmall0', self.parser.getGamemodeSoundingLike('MP_Siege', 'ConquestSmall0'), 'ConquestSmall0')
         self.assertEqual('ConquestSmall0', self.parser.getGamemodeSoundingLike('MP_Siege', 'Conquest'), 'Conquest')
-        self.assertListEqual(['Squad Deathmatch', 'Team Deathmatch'], self.parser.getGamemodeSoundingLike('MP_Siege', 'Deathmatch'), 'Deathmatch')
-        self.assertListEqual(['Rush', 'Conquest', 'Conquest64'], self.parser.getGamemodeSoundingLike('MP_Siege', 'foo'))
+        self.assertListEqual(['Team Deathmatch', 'Squad Deathmatch'], self.parser.getGamemodeSoundingLike('MP_Siege', 'Deathmatch'), 'Deathmatch')
+        self.assertListEqual(['Rush', 'Defuse', 'Conquest'], self.parser.getGamemodeSoundingLike('MP_Siege', 'foo'))
         self.assertEqual('TeamDeathMatch0', self.parser.getGamemodeSoundingLike('MP_Siege', 'tdm'), 'tdm')
         self.assertEqual('TeamDeathMatch0', self.parser.getGamemodeSoundingLike('MP_Siege', 'teamdeathmatch'), 'teamdeathmatch')
         self.assertEqual('TeamDeathMatch0', self.parser.getGamemodeSoundingLike('MP_Siege', 'team death match'), 'team death match')

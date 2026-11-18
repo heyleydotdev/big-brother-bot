@@ -23,7 +23,6 @@
 # ################################################################### #
 
 import os
-import sys
 import unittest
 
 from unittest.mock import Mock
@@ -204,7 +203,8 @@ class AdminTestCase(unittest.TestCase):
         self.conf.loadFromString("""<configuration></configuration>""")
         self.parser = InsurgencyParser(self.conf)
         self.parser.output = Mock()
-        self.parser.output.write = Mock(wraps=sys.stdout.write)
+        # py3 sys.stdout.write returns a char count; Rcon.write returns str or None
+        self.parser.output.write = Mock(wraps=print)
         when(self.parser).is_sourcemod_installed().thenReturn(True)
         adminPlugin_conf = CfgConfigParser()
         adminPlugin_conf.load(ADMIN_CONFIG_FILE)
@@ -415,9 +415,10 @@ class FunctionalTest(AdminTestCase):
         superadmin.connects("1")
         # WHEN
         superadmin.says("!map blargh blub")
-        # THEN
-        self.assertListEqual(["do you mean : buhriz, district, sinjar, siege, uprising, ministry, revolt, heights, "
-                              "contact, peak, panj, market ?"], superadmin.message_history)
+        # THEN suggestions ranked by levenshtein distance to 'blargh', ties alphabetical
+        # (py2 expectation encoded arbitrary set() iteration order)
+        self.assertListEqual(["do you mean : buhriz, market, panj, peak, siege, heights, revolt, sinjar, "
+                              "contact, district, ministry, uprising ?"], superadmin.message_history)
 
     def test_map_with_correct_parameters(self):
         # GIVEN

@@ -556,7 +556,7 @@ def frostbiteClientMessageBigMethod(self, msg):
         for line in self.console.getWrap(text):
             self.messagebigqueue.put(line)
         # create a thread that executes the worker and pushes out the queue
-        if not hasattr(self, 'messagebighandler') or not self.messagebighandler.isAlive():
+        if not hasattr(self, 'messagebighandler') or not self.messagebighandler.is_alive():
             self.messagebighandler = threading.Thread(target=self.messagebigqueueworker)
             self.messagebighandler.setDaemon(True)
             self.messagebighandler.start()

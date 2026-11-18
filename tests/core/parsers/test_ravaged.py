@@ -297,13 +297,13 @@ class Test_gamelog_parsing(RavagedTestCase):
 
     def test_Server_say(self):
         self.queueEvent_mock.reset_mock()
-        self.parser.route_game_event(b'''Server say "Admin: B\xb3: www.bigbrotherbot.net (b3) v1.10dev [nt] [Coco] [ONLINE]"''')
+        self.parser.route_game_event('''Server say "Admin: B³: www.bigbrotherbot.net (b3) v1.10dev [nt] [Coco] [ONLINE]"''')
         self.assertFalse(self.queueEvent_mock.called)
 
 
     def test_Server_say_team(self):
         self.queueEvent_mock.reset_mock()
-        self.parser.route_game_event(b'''Server say_team "f00" to team "1"''')
+        self.parser.route_game_event('''Server say_team "f00" to team "1"''')
         self.assertFalse(self.queueEvent_mock.called)
 
 
@@ -710,7 +710,7 @@ class test_functional(unittest.TestCase):
 10 Thrust_Liberty
 11 Thrust_Oilrig
 12 Thrust_Rooftop
-""".encode('UTF-8'))
+""")
         when(self.parser.output).write("addmap Thrust_Chasm 1").thenReturn(None)
         when(self.parser.output).write("nextmap").thenReturn(None)
         admin = FakeClient(console=self.parser, name="admin", guid="guid_admin", groupBits=128)

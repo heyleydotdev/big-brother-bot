@@ -29,7 +29,6 @@ import b3
 import b3.events
 import b3.parsers.punkbuster
 import re
-import string
 
 from b3.parsers.q3a.abstractParser import AbstractParser
 from b3.functions import prefixText
@@ -251,7 +250,7 @@ class Sof2Parser(AbstractParser):
         :param info: The infostring to be parsed.
         """
         # 0 \ip\145.99.135.000:-12553\cl_guid\XXXXD914662572D3649B94B1EA5F921\cl_punkbuster\0\details\5\name\xlr8or...
-        player_id, info = string.split(info, ' ', 1)
+        player_id, info = info.split(' ', 1)
         if info[:1] != '\\':
             info = '\\' + info
 
@@ -332,7 +331,7 @@ class Sof2Parser(AbstractParser):
                 bclient['cl_guid'] = 'BOT' + str(bclient['cid'])
                 bot = True
             else:
-                ip_port_data = string.split(bclient['ip'], ':', 1)
+                ip_port_data = bclient['ip'].split(':', 1)
                 bclient['ip'] = ip_port_data[0]
                 if len(ip_port_data) > 1:
                     bclient['port'] = ip_port_data[1]
@@ -457,7 +456,7 @@ class Sof2Parser(AbstractParser):
 
     def OnSay(self, action, data, match=None):
         # 3:59 say: XLR8or: general chat
-        msg = string.split(data, ': ', 1)
+        msg = data.split(': ', 1)
         if not len(msg) == 2:
             return None
 
@@ -472,7 +471,7 @@ class Sof2Parser(AbstractParser):
 
     def OnSayteam(self, action, data, match=None):
         # 4:06 sayteam: XLR8or: teamchat
-        msg = string.split(data, ': ', 1)
+        msg = data.split(': ', 1)
         if not len(msg) == 2:
             return None
 
@@ -617,7 +616,7 @@ class Sof2Parser(AbstractParser):
 
     def OnItem(self, action, data, match=None):
         # Item: 5 weapon_betty
-        cid, item = string.split(data, ' ', 1)
+        cid, item = data.split(' ', 1)
         client = self.clients.getByCID(cid)
         if client:
             return self.getEvent('EVT_CLIENT_ITEM_PICKUP', item, client)

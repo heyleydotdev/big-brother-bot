@@ -30,7 +30,6 @@ import b3
 import b3.events
 import b3.parsers.punkbuster
 import re
-import string
 
 from b3.parsers.q3a.abstractParser import AbstractParser
 from threading import Timer
@@ -429,13 +428,6 @@ class CodParser(AbstractParser):
         if data and ord(data[:1]) == 21:
             data = data[1:]
 
-        # decode the server data
-        if self.encoding:
-            try:
-                data = data.decode(self.encoding)
-            except Exception as msg:
-                self.warning('ERROR: decoding data: %r', msg)
-
         if client.name != match.group('name'):
             client.name = match.group('name')
 
@@ -456,13 +448,6 @@ class CodParser(AbstractParser):
         if data and ord(data[:1]) == 21:
             data = data[1:]
 
-        # decode the server data
-        if self.encoding:
-            try:
-                data = data.decode(self.encoding)
-            except Exception as msg:
-                self.warning('ERROR: decoding data: %r', msg)
-
         if client.name != match.group('name'):
             client.name = match.group('name')
 
@@ -481,13 +466,6 @@ class CodParser(AbstractParser):
         data = match.group('text')
         if data and ord(data[:1]) == 21:
             data = data[1:]
-
-        # decode the server data
-        if self.encoding:
-            try:
-                data = data.decode(self.encoding)
-            except Exception as msg:
-                self.warning('ERROR: decoding data: %r', msg)
 
         client.name = match.group('name')
         return self.getEvent('EVT_CLIENT_PRIVATE_SAY', data=data, client=client, target=tclient)
@@ -514,7 +492,7 @@ class CodParser(AbstractParser):
         return self.getEvent('EVT_GAME_EXIT', data=data)
 
     def OnItem(self, action, data, match=None):
-        guid, cid, name, item = string.split(data, ';', 3)
+        guid, cid, name, item = data.split(';', 3)
         client = self.clients.getByCID(cid)
         if client:
             return self.getEvent('EVT_CLIENT_ITEM_PICKUP', data=item, client=client)

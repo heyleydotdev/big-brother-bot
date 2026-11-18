@@ -358,7 +358,7 @@ class Test_gamelog_parsing(CsgoTestCase):
         self.assertIsNone(self.parser.clients.getByCID("2"))
         # WHEN
         self.clear_events()
-        self.parser.parseLine(b'''L 08/26/2012 - 03:22:36: "Spoon\xc2\xab\xc2\xab<2><STEAM_1:0:1111111><>" connected, address "11.222.111.222:27005"''')
+        self.parser.parseLine(b'''L 08/26/2012 - 03:22:36: "Spoon\xc2\xab\xc2\xab<2><STEAM_1:0:1111111><>" connected, address "11.222.111.222:27005"'''.decode('utf-8', 'replace'))
         # THEN a client object is created
         client = self.parser.clients.getByCID("2")
         self.assertIsNotNone(client)

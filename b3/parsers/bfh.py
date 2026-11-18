@@ -743,7 +743,7 @@ class BfhParser(AbstractParser):
             except IndexError:
                 pass
             except CommandFailedError as err:
-                if err.message[0] == 'InvalidPlayerName':
+                if err.args[0][0] == 'InvalidPlayerName':
                     pass
                 else:
                     raise Exception(err)

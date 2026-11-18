@@ -42,7 +42,6 @@ __author__ = 'xlr8or, ailmanki'
 __version__ = '0.0.11'
 
 import re
-import string
 import b3
 import b3.clients
 import b3.events
@@ -294,7 +293,7 @@ class EtproParser(AbstractParser):
         Parse an infostring.
         :param info: The infostring to be parsed.
         """
-        player_id, info = string.split(info, ' ', 1)
+        player_id, info = info.split(' ', 1)
         if info[:1] != '\\':
             info += '\\'
 
@@ -310,7 +309,7 @@ class EtproParser(AbstractParser):
 
         # split port from ip field
         if 'ip' in data:
-            tip = string.split(data['ip'], ':', 1)
+            tip = data['ip'].split(':', 1)
             data['ip'] = tip[0]
             data['port'] = tip[1]
 
@@ -388,6 +387,15 @@ class EtproParser(AbstractParser):
                                        state=b3.STATE_ALIVE, guid=guid, data={'guid': guid})
 
         return None
+
+    def OnSay(self, action, data, match=None):
+        # local py3 copy: the q3a abstract parser OnSay still uses the removed string.split
+        msg = data.split(': ', 1)
+        if not len(msg) == 2:
+            return None
+
+        client = self.clients.getByExactName(msg[0])
+        return self.getEvent('EVT_CLIENT_SAY', msg[1], client)
 
     def OnKill(self, action, data, match=None):
         self.debug('OnKill: %s (%s)' % (match.group('aweap'), match.group('text')))
