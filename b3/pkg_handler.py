@@ -31,7 +31,12 @@ __all__ = ['resource_directory']
 def resource_directory(module):
     """
     Return the filesystem directory holding the given module/package.
-    Replaces the old pkg_resources based lookup (deprecated, slow import, memory hog).
+    Uses importlib find_spec so both packages and plain modules work (the old
+    pkg_resources based lookup is deprecated and slow to import).
     """
-    from importlib.resources import files
-    return str(files(module))
+    import importlib.util
+    import os
+    spec = importlib.util.find_spec(module)
+    if spec is not None and spec.origin:
+        return os.path.dirname(spec.origin)
+    raise ImportError("could not locate module %r" % module)

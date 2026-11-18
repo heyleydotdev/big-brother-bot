@@ -39,7 +39,7 @@ import time
 
 from b3 import getConfPath, getB3Path, getWritableFilePath
 from b3.functions import splitDSN
-from cgi import escape
+from html import escape
 from ftplib import FTP
 from xml.dom.minidom import Document
 
@@ -50,7 +50,7 @@ class DocBuilder:
     _console = None
     _adminPlugin = None
     _outputType = 'html'
-    _outputUrl = 'file://' + getConfPath() + '/b3doc.html'
+    _outputUrl = None
     _maxlevel = None
     
     def __init__(self, console):
@@ -60,6 +60,9 @@ class DocBuilder:
         """
         self._console = console
         self._outputDir = getConfPath()
+        # computed here (not in the class body) so importing this module does
+        # not require a running console / confdir to be set
+        self._outputUrl = 'file://' + (self._outputDir or '') + '/b3doc.html'
         self._adminPlugin = self._console.getPlugin('admin')
         if self._adminPlugin is None:
             raise Exception('AUTODOC: cannot generate documentation without the admin plugin')
