@@ -179,9 +179,9 @@ class HttpytailPlugin(b3.plugin.Plugin):
         """
         try:
             self.file = open(self.lgame_log, 'ab')
-            self.file.write('\r\n')
-            self.file.write('B3 has been restarted\r\n')
-            self.file.write('\r\n')
+            self.file.write(b'\r\n')
+            self.file.write(b'B3 has been restarted\r\n')
+            self.file.write(b'\r\n')
             self.file.close()
         except Exception as e:
             if hasattr(e, 'reason'):
@@ -239,7 +239,7 @@ class HttpytailPlugin(b3.plugin.Plugin):
                 webFile = opener.open(req)
                 urllib.request.install_opener(opener)
                 filestats = webFile.info()
-                remoteSize = filestats.getheader('Content-Length')
+                remoteSize = filestats.get('Content-Length')
                 webFile.close() # We close the remote connection as soon as possible to avoid spamming the server, and
                 # thus blacklisting us for an amount of time
 
@@ -283,7 +283,7 @@ class HttpytailPlugin(b3.plugin.Plugin):
                     # We update the current cursor position to the size of the remote file
                     self._remoteFileOffset = remoteSize
 
-                    self.verbose("%s bytes downloaded" % webFileDiff.info().getheader('Content-Length'))
+                    self.verbose("%s bytes downloaded" % webFileDiff.info().get('Content-Length'))
                     # Finally, we close the distant file
                     webFileDiff.close()
 
@@ -302,9 +302,9 @@ class HttpytailPlugin(b3.plugin.Plugin):
                 if self._logAppend:
                     try:
                         self.file = open(self.lgame_log, 'ab')
-                        self.file.write('\r\n')
-                        self.file.write('B3 has restarted writing the log file\r\n')
-                        self.file.write('\r\n')
+                        self.file.write(b'\r\n')
+                        self.file.write(b'B3 has restarted writing the log file\r\n')
+                        self.file.write(b'\r\n')
                     except:
                         self.file = open(self.lgame_log, 'w')
                 else:

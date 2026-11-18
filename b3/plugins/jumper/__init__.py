@@ -36,6 +36,7 @@ import re
 from b3.functions import getCmd
 from b3.functions import getStuffSoundingLike
 from b3.functions import right_cut
+from b3.querybuilder import QueryBuilder
 from configparser import NoOptionError
 from threading import Timer
 
@@ -320,8 +321,6 @@ class JumperPlugin(b3.plugin.Plugin):
                   AND mapname = '%s' AND way_id = '%d'""",
         'jr9': """DELETE FROM jumpruns WHERE id = '%d'""",
         'jw1': """SELECT * FROM jumpways WHERE mapname = '%s' AND way_id = '%d'""",
-        'jw2': """INSERT INTO jumpways VALUES (NULL, '%s', '%d', '%s')""",
-        'jw3': """UPDATE jumpways SET way_name = '%s' WHERE mapname = '%s' AND way_id = '%d'""",
     }
 
     _demo_record = True
@@ -1015,12 +1014,15 @@ class JumperPlugin(b3.plugin.Plugin):
         cursor = self.console.storage.query(self.sql['jw1'] % (mapname, way_id))
 
         if cursor.EOF:
-            # new entry for this way_id on this map
-            self.console.storage.query(self.sql['jw2'] % (mapname, way_id, way_name))
+            # new entry for this way_id on this map. way_name is raw chat text,
+            # so it goes through the QueryBuilder escaping layer
+            self.console.storage.query(QueryBuilder(self.console.storage.db).InsertQuery(
+                {'mapname': mapname, 'way_id': way_id, 'way_name': way_name}, 'jumpways'))
             client.message('^7added alias for way ^3%d^7: ^2%s' % (way_id, way_name))
         else:
             # update old entry with the new name
-            self.console.storage.query(self.sql['jw3'] % (way_name, mapname, way_id))
+            self.console.storage.query(QueryBuilder(self.console.storage.db).UpdateQuery(
+                {'way_name': way_name}, 'jumpways', {'mapname': mapname, 'way_id': way_id}))
             client.message('^7updated alias for way ^3%d^7: ^2%s' % (way_id, way_name))
 
         cursor.close()

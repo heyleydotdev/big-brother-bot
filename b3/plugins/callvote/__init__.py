@@ -31,6 +31,7 @@ import os
 import re
 
 from b3.functions import getCmd
+from b3.querybuilder import QueryBuilder
 
 
 class CallvotePlugin(b3.plugin.Plugin):
@@ -53,8 +54,7 @@ class CallvotePlugin(b3.plugin.Plugin):
     }
 
     sql = {
-        'q1': """INSERT INTO callvote VALUES (NULL, '%s', '%s', '%s', '%d', '%d', '%d', '%d')""",
-        'q2': """SELECT c1.name, c2.* FROM callvote AS c2 INNER JOIN clients AS c1 ON c1.id = c2.client_id ORDER BY time_add DESC LIMIT 0, 1""",
+        'q2': """SELECT c1.name, c2.* FROM callvote AS c2 INNER JOIN clients AS c1 ON c1.id = c2.client_id ORDER BY time_add DESC LIMIT 1""",
     }
 
     ####################################################################################################################
@@ -211,11 +211,17 @@ class CallvotePlugin(b3.plugin.Plugin):
         self.callvote['num_yes'] = event.data['yes']
         self.callvote['max_num'] = len(self.console.clients.getList())
 
-        # save the callvote in the storage
-        self.console.storage.query(self.sql['q1'] % (self.callvote['client'].id, self.callvote['type'],
-                                                     self.callvote['args'] if self.callvote['args'] else None,
-                                                     self.callvote['max_num'], self.callvote['num_yes'],
-                                                     self.callvote['num_no'], self.callvote['time']))
+        # save the callvote in the storage. the args are raw in-game text, so
+        # they go through the QueryBuilder escaping layer, not string formatting
+        self.console.storage.query(QueryBuilder(self.console.storage.db).InsertQuery({
+            'client_id': self.callvote['client'].id,
+            'type': self.callvote['type'],
+            'data': self.callvote['args'] if self.callvote['args'] else None,
+            'max_num': self.callvote['max_num'],
+            'num_yes': self.callvote['num_yes'],
+            'num_no': self.callvote['num_no'],
+            'time_add': self.callvote['time'],
+        }, 'callvote'))
 
     ####################################################################################################################
     #                                                                                                                  #

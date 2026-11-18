@@ -212,9 +212,9 @@ class FtpytailPlugin(b3.plugin.Plugin):
 
         ftp = None
         self.file = open(self.lgame_log, 'ab')
-        self.file.write('\r\n')
-        self.file.write('B3 has been restarted\r\n')
-        self.file.write('\r\n')
+        self.file.write(b'\r\n')
+        self.file.write(b'B3 has been restarted\r\n')
+        self.file.write(b'\r\n')
 
         while self.console.working:
 
@@ -276,9 +276,9 @@ class FtpytailPlugin(b3.plugin.Plugin):
                 if self._logAppend:
                     try:
                         self.file = open(self.lgame_log, 'ab')
-                        self.file.write('\r\n')
-                        self.file.write('B3 has restarted writing the log file\r\n')
-                        self.file.write('\r\n')
+                        self.file.write(b'\r\n')
+                        self.file.write(b'B3 has restarted writing the log file\r\n')
+                        self.file.write(b'\r\n')
                     except IOError:
                         self.file = open(self.lgame_log, 'w')
                 else:

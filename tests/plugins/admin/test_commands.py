@@ -2107,3 +2107,21 @@ class Test_cmd_spam(Admin_functional_test):
         self.assertListEqual([call('^3Rule #1: No racism of any kind')], saybig_mock.mock_calls)
         self.assertListEqual([], self.joe.message_history)
 
+
+
+class Test_secret_level(Admin_functional_test):
+    """the secretLevel given to registerCommand must reach the Command object"""
+
+    def setUp(self):
+        Admin_functional_test.setUp(self)
+        self.init(r"""
+[commands]
+help: 0
+""")
+
+    def test_default_secret_level_is_hidecmd_level(self):
+        self.assertEqual(self.p._hidecmd_level, self.p._commands['help'].secretLevel)
+
+    def test_secret_level_is_kept(self):
+        self.p.registerCommand(self.p, 'f00', 0, lambda data, client, cmd=None: None, secretLevel=5)
+        self.assertEqual(5, self.p._commands['f00'].secretLevel)

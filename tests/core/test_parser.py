@@ -22,8 +22,12 @@
 # ################################################################### #
 
 import logging
+import queue
+import threading
+import time
 import unittest
 from b3.clients import Client
+from b3.events import EventsStats, eventManager
 from b3.parser import Parser
 
 
@@ -34,6 +38,61 @@ class DummyParser(Parser):
     def __init__(self):
         pass # skip parent class constructor
         self.log = logging.getLogger("output")
+
+
+class _EventHandler:
+    """Stand-in for a plugin: records the events it is given."""
+
+    def __init__(self):
+        self.events = []
+
+    def isEnabled(self):
+        return True
+
+    def parseEvent(self, event):
+        self.events.append(event)
+
+
+class Test_handleEvents(unittest.TestCase):
+    """
+    The production event dispatcher. b3.fake.FakeConsole replaces it with its own
+    version, so the real loop needs its own test: time.clock() was removed in
+    python 3.8 and nothing caught it because no test ever ran this method.
+    """
+
+    def setUp(self):
+        self.parser = DummyParser()
+        self.parser.Events = eventManager
+        self.parser.working = True
+        self.parser.queue = queue.Queue(10)
+        self.parser.exiting = threading.Lock()
+        self.parser._eventsStats = EventsStats(self.parser)
+        self.handler = _EventHandler()
+        self.parser._handlers = {self.parser.getEventID('EVT_CLIENT_SAY'): [self.handler]}
+
+    def _queue(self, key, data):
+        now = self.parser.time()
+        self.parser.queue.put((now, now + 10, self.parser.getEvent(key, data)))
+
+    def test_events_reach_the_handler(self):
+        thread = threading.Thread(target=self.parser.handleEvents, daemon=True)
+        thread.start()
+
+        self._queue('EVT_CLIENT_SAY', 'hello')
+
+        deadline = time.time() + 3
+        while not self.handler.events and time.time() < deadline:
+            time.sleep(0.01)
+
+        received = list(self.handler.events)
+
+        self.parser.working = False  # let the loop end after the next event
+        self._queue('EVT_CLIENT_SAY', 'goodbye')
+        thread.join(3)
+
+        self.assertEqual(1, len(received), "the event never reached the handler")
+        self.assertEqual('hello', received[0].data)
+        self.assertFalse(thread.is_alive())
 
 
 class Test_getMessage(unittest.TestCase):

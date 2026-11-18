@@ -443,14 +443,17 @@ class Banlist(object):
             result = webFile.read()
             webFile.close()
             if webFile.headers.get('content-encoding', '') == 'gzip':
-                result = io.StringIO(result)
+                result = io.BytesIO(result)
                 gzipper = gzip.GzipFile(fileobj=result)
                 result = gzipper.read()
+            # the banlist file is read back as iso-8859-1 (see load()) and this
+            # one-byte encoding round-trips the downloaded bytes unchanged
+            result = result.decode('iso-8859-1')
             self.remote_lastmodified = webFile.headers.get('Last-Modified')
             self.remote_etag = webFile.headers.get('ETag')
             self.plugin.debug('received headers : %s', webFile.info())
             self.plugin.debug("received %s bytes", len(result))
-            localFile = open(self.file, 'w')
+            localFile = open(self.file, 'w', encoding='iso-8859-1')
             localFile.write(result)
             localFile.close()
             return True

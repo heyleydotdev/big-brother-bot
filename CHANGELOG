@@ -1,3 +1,25 @@
+2.0.0 -> 2.0.1
+----
+
+2.0.1 fixes the event dispatcher, which was dead on arrival in 2.0.0.
+
+Fixes
+~~~~~
+- The event handling thread timed plugin work with `time.clock()`, removed in
+  Python 3.8. The thread died on the first event, so B3 read game logs but
+  reacted to nothing, and shutting it down could hang. It now uses
+  `time.perf_counter()`, and a test runs the real dispatcher loop (the test
+  suite used `FakeConsole`, which replaces it).
+- FTP/SFTP/HTTP log tailing wrote `str` into binary files, so remote log mode
+  crashed before mirroring a single line; the banlist download wrote `bytes`
+  into a text file. Both now use the right side of the text/bytes boundary.
+- `!setway` and callvote records built SQL by string formatting with in-game
+  text; they now go through `QueryBuilder`, so quotes and backslashes cannot
+  break or inject the insert. The callvote report query uses `LIMIT 1`
+  (portable to PostgreSQL).
+- `Command.secretLevel` was never assigned, so `hidecmd_level` had no effect
+  and every command could be used silently. Hidden commands are gated again.
+
 1.12 -> 2.0.0
 ----
 

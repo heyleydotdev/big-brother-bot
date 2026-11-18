@@ -556,6 +556,8 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         Handle EVT_CLIENT_PRIVATE_SAY
         """
+        # hidden commands are issued by telling the command to oneself (see the
+        # hidecmd_level setting); the sender must be the target for it to count
         if event.target and event.client.id == event.target.id:
             self.OnSay(event, True)
 
@@ -2406,8 +2408,7 @@ class Command(object):
         else:
             self.level = (int(level), 100)
 
-        if secretLevel is None:
-            self.secretLevel = 100
+        self.secretLevel = 100 if secretLevel is None else int(secretLevel)
 
     def canUse(self, client):
         """
