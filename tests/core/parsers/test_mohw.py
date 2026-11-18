@@ -23,8 +23,8 @@
 # ################################################################### #
 #
 from textwrap import dedent
-import unittest2 as unittest
-from mock import patch
+import unittest
+from unittest.mock import patch
 from mockito import when
 from b3.clients import Client, Clients
 from b3.fake import FakeClient

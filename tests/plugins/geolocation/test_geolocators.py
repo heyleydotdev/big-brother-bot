@@ -24,7 +24,7 @@
 
 import unittest
 
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from b3.clients import Client
 from b3.plugins.geolocation.exceptions import GeolocalizationError
 from b3.plugins.geolocation.geolocators import FreeIpApiGeolocator

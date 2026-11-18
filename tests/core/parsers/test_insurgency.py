@@ -24,11 +24,11 @@
 
 import os
 import sys
-import unittest2 as unittest
+import unittest
 
-from mock import Mock
-from mock import patch
-from mock import call
+from unittest.mock import Mock
+from unittest.mock import patch
+from unittest.mock import call
 from mockito import when
 from b3 import TEAM_BLUE, TEAM_FREE
 from b3 import TEAM_RED

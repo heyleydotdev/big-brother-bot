@@ -23,9 +23,9 @@
 # ################################################################### #
 
 import logging
-import unittest2 as unittest
+import unittest
 
-from mock import Mock, patch, ANY
+from unittest.mock import Mock, patch, ANY
 from mockito import mock, when, any as anything
 from b3.clients import Client
 from b3.config import XmlConfigParser

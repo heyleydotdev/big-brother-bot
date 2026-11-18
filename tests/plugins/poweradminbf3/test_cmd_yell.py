@@ -22,7 +22,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import patch
+from unittest.mock import patch
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminbf3 import Poweradminbf3Plugin
 from tests.plugins.poweradminbf3 import Bf3TestCase

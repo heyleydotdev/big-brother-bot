@@ -25,8 +25,8 @@
 import time
 from b3 import update
 import urllib.request, urllib.error, urllib.parse
-import unittest2 as unittest
-from mock import patch
+import unittest
+from unittest.mock import patch
 from b3.update import B3version
 
 class TestB3Version(unittest.TestCase):

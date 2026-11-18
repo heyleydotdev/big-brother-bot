@@ -26,7 +26,7 @@ import time
 import pytest
 from textwrap import dedent
 from tests.plugins.makeroom import *
-from mock import Mock
+from unittest.mock import Mock
 
 
 t = int(time.time())

@@ -24,8 +24,8 @@
 
 import re
 from textwrap import dedent
-import unittest2 as unittest
-from mock import Mock, DEFAULT, patch, call
+import unittest
+from unittest.mock import Mock, DEFAULT, patch, call
 from mockito import when, verify
 import b3
 from b3.clients import Client, Clients

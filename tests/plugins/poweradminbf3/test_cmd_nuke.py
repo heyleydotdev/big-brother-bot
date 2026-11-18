@@ -22,7 +22,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import patch, call, Mock
+from unittest.mock import patch, call, Mock
 import time
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminbf3 import Poweradminbf3Plugin

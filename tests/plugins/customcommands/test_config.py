@@ -23,7 +23,7 @@
 # ################################################################### #
 import b3
 import os
-from mock import patch, call
+from unittest.mock import patch, call
 from b3.plugins.admin import Command
 from b3.config import CfgConfigParser
 from b3.plugins.customcommands import CustomcommandsPlugin

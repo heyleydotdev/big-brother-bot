@@ -22,7 +22,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import Mock
+from unittest.mock import Mock
 from mockito import verify, when
 import b3
 from b3.config import CfgConfigParser

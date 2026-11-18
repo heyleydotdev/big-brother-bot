@@ -17,7 +17,7 @@
 
 import logging
 
-from mock import patch
+from unittest.mock import patch
 from b3.config import CfgConfigParser
 from b3.plugins.spamcontrol import SpamcontrolPlugin
 from tests import B3TestCase

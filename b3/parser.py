@@ -34,7 +34,7 @@ import _thread
 import datetime
 import dateutil.tz
 import queue
-import imp
+import importlib.util
 import atexit
 import socket
 import glob
@@ -255,13 +255,13 @@ class Parser(object):
 
         if self._publicIp and self._publicIp[0:1] in ('~', '/'):
             # load ip from a file
-            f = file(b3.getAbsolutePath(self._publicIp, decode=True))
+            f = open(b3.getAbsolutePath(self._publicIp, decode=True))
             self._publicIp = f.read().strip()
             f.close()
 
         if self._rconIp[0:1] in ('~', '/'):
             # load ip from a file
-            f = file(b3.getAbsolutePath(self._rconIp, decode=True))
+            f = open(b3.getAbsolutePath(self._rconIp, decode=True))
             self._rconIp = f.read().strip()
             f.close()
 
@@ -358,7 +358,7 @@ class Parser(object):
             self.screen.write('Using gamelog    : %s\n' % b3.getShortPath(os.path.abspath(f)))
 
             if os.path.isfile(f):
-                self.input = file(f, 'r')
+                self.input = open(f, 'r')
                 if self.config.has_option('server', 'seek'):
                     seek = self.config.getboolean('server', 'seek')
                     if seek:
@@ -901,26 +901,38 @@ class Parser(object):
         if path is not None:
             # import error is being handled in loadPlugins already
             self.info('Loading plugin from specified path: %s', path)
-            fp, pathname, description = imp.find_module(name, [path])
-            try:
-                return imp.load_module(name, fp, pathname, description)
-            finally:
-                if fp:
-                    fp.close()
-
-        fp = None
+            return self._load_plugin_module(name, path)
 
         try:
-            fp, pathname, description = imp.find_module(name, [os.path.join(b3.getB3Path(True), 'plugins')])
-            return imp.load_module(name, fp, pathname, description)
+            return self._load_plugin_module(name, os.path.join(b3.getB3Path(True), 'plugins'))
         except ImportError as m:
             self.verbose('%s is not a built-in plugin (%s)' % (name.title(), m))
             self.verbose('Trying external plugin directory : %s', self.config.get_external_plugins_dir())
-            fp, pathname, description = imp.find_module(name, [self.config.get_external_plugins_dir()])
-            return imp.load_module(name, fp, pathname, description)
-        finally:
-            if fp:
-                fp.close()
+            return self._load_plugin_module(name, self.config.get_external_plugins_dir())
+
+    @staticmethod
+    def _load_plugin_module(name, search_dir):
+        """
+        Load a plugin as a python module, handling both single .py files and packages
+        (directories with an __init__.py), like the old imp based loader did.
+        :param name: The plugin name.
+        :param search_dir: The directory to search the plugin into.
+        """
+        package_init = os.path.join(search_dir, name, '__init__.py')
+        single_file = os.path.join(search_dir, name + '.py')
+        if os.path.isfile(package_init):
+            spec = importlib.util.spec_from_file_location(name, package_init,
+                                                          submodule_search_locations=[os.path.join(search_dir, name)])
+        elif os.path.isfile(single_file):
+            spec = importlib.util.spec_from_file_location(name, single_file)
+        else:
+            raise ImportError("no module named '%s' (looked in %s)" % (name, search_dir))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        # register in sys.modules like the old imp.load_module did, so plugins
+        # referencing each other by module name keep working
+        sys.modules[name] = module
+        return module
 
     def startPlugins(self):
         """

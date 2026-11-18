@@ -23,7 +23,7 @@
 # ################################################################### #
 
 import b3
-from mock import Mock
+from unittest.mock import Mock
 from tests.plugins.censor import Detection_TestCase
 
 

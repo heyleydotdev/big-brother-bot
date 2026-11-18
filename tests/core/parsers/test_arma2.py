@@ -22,8 +22,8 @@
 #                                                                     #
 # ################################################################### #
 
-import unittest2 as unittest
-from mock import Mock, patch, call
+import unittest
+from unittest.mock import Mock, patch, call
 from mockito import when
 from b3.fake import FakeClient
 from b3.parsers.arma2 import Arma2Parser

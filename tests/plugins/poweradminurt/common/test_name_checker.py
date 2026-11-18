@@ -23,7 +23,7 @@
 # ################################################################### #
 
 import time
-from mock import patch, call, Mock, ANY
+from unittest.mock import patch, call, Mock, ANY
 from b3.config import CfgConfigParser
 from b3.fake import FakeClient
 from b3.plugins.poweradminurt import PoweradminurtPlugin

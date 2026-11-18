@@ -25,7 +25,7 @@
 import b3
 
 from mockito import when
-from mock import Mock
+from unittest.mock import Mock
 from b3.fake import FakeClient
 from b3.plugins.admin import AdminPlugin
 from tests.plugins.spamcontrol import SpamcontrolTestCase

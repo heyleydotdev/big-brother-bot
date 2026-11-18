@@ -29,7 +29,7 @@ from b3.plugins.tk import TkPlugin
 from b3.config import CfgConfigParser
 from configparser import NoOptionError
 from textwrap import dedent
-from mock import patch, call
+from unittest.mock import patch, call
 from tests import B3TestCase
 from tests.plugins.tk import Test_Tk_plugin
 

@@ -23,7 +23,7 @@
 # ################################################################### #
 
 import time
-from mock import patch, call
+from unittest.mock import patch, call
 from mockito import when
 from b3.config import CfgConfigParser
 from b3.cvar import Cvar

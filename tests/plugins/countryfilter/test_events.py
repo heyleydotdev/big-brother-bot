@@ -22,7 +22,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import Mock, call
+from unittest.mock import Mock, call
 from tests.plugins.countryfilter import CountryFilterTestCase
 from textwrap import dedent
 

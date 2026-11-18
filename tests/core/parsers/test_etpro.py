@@ -25,11 +25,11 @@
 import logging
 import os
 from textwrap import dedent
-from mock import call, patch, Mock
+from unittest.mock import call, patch, Mock
 import sys
 from mockito import when
 
-import unittest2 as unittest
+import unittest
 
 from b3.clients import Client
 from b3.config import CfgConfigParser, XmlConfigParser

@@ -25,7 +25,7 @@
 from types import MethodType
 from textwrap import dedent
 from tests.plugins.afk import *
-from mock import call, Mock
+from unittest.mock import call, Mock
 
 # This test suite makes sure `check_client` is called appropriately
 

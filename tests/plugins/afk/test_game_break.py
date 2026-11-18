@@ -24,7 +24,7 @@
 
 from textwrap import dedent
 from tests.plugins.afk import *
-from mock import Mock
+from unittest.mock import Mock
 
 
 

@@ -22,10 +22,10 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import Mock, call, patch
+from unittest.mock import Mock, call, patch
 from mockito import when, verify
 import sys
-import unittest2 as unittest
+import unittest
 from b3 import TEAM_BLUE, TEAM_RED, TEAM_UNKNOWN, TEAM_SPEC
 from b3.clients import Client
 from b3.config import XmlConfigParser

@@ -302,7 +302,7 @@ class Plugin(object):
             return default
 
         try:
-            val = self.config.get(section, option, value_type == b3.TEMPLATE)
+            val = self.config.get(section, option, raw=(value_type == b3.TEMPLATE))
         except b3.config.NoOptionError:
             self.warning('could not find %s::%s in configuration file, using default : %s', section, option, default)
             val = default

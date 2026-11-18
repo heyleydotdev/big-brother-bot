@@ -32,7 +32,8 @@ class ConfigFileNotFound(Exception):
     """
     def __init__(self, message):
         Exception.__init__(self, message)
-        
+        self.message = message
+
     def __str__(self):
         return repr(self.message)
 
@@ -43,7 +44,8 @@ class ConfigFileNotValid(Exception):
     """
     def __init__(self, message):
         Exception.__init__(self, message)
-        
+        self.message = message
+
     def __str__(self):
         return repr(self.message)
 
@@ -54,6 +56,7 @@ class MissingRequirement(Exception):
     """
     def __init__(self, message, throwable=None):
         Exception.__init__(self, message)
+        self.message = message
         self.throwable = throwable
 
     def __str__(self):
@@ -90,6 +93,7 @@ class UpdateError(Exception):
     """
     def __init__(self, message, throwable=None):
         Exception.__init__(self, message)
+        self.message = message
         self.throwable = throwable
 
     def __str__(self):

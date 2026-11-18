@@ -24,11 +24,11 @@
 
 import logging
 import os
-import unittest2 as unittest
+import unittest
 
 from b3.plugins.admin import AdminPlugin
 from tests import B3TestCase
-from mock import patch,  Mock
+from unittest.mock import patch,  Mock
 from mockito import when, unstub
 from b3.plugins.adv import AdvPlugin
 from b3.config import XmlConfigParser, CfgConfigParser

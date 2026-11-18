@@ -25,7 +25,7 @@
 import configparser
 import logging
 from unittest import TestCase
-import unittest2 as unittest
+import unittest
 import sys
 from b3.config import XmlConfigParser, CfgConfigParser, ConfigFileNotValid
 from tests import B3TestCase

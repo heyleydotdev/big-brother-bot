@@ -28,7 +28,7 @@ import sys
 
 from b3 import TEAM_RED
 from mockito import when, any as whatever
-from mock import Mock, patch, call, ANY
+from unittest.mock import Mock, patch, call, ANY
 from b3.fake import FakeClient
 from b3.config import CfgConfigParser
 from b3.plugins.admin import Command

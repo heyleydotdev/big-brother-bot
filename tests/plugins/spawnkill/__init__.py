@@ -22,7 +22,7 @@
 #                                                                     #
 # ################################################################### #
 
-import unittest2 as unittest
+import unittest
 
 from b3 import TEAM_BLUE, TEAM_RED
 from textwrap import dedent

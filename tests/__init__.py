@@ -35,9 +35,9 @@ import b3.output # do not remove, needed because the module alters some defaults
 log = logging.getLogger('output')
 log.setLevel(logging.WARNING)
 
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 import time
-import unittest2 as unittest
+import unittest
 from b3.events import Event
 
 
@@ -121,10 +121,11 @@ class B3TestCase(unittest.TestCase):
                 # WHEN
                 self.client.team = 24
         """
-        if type(event_type) is str:
-            event_type_name = event_type
-        else:
-            event_type_name = self.console.getEventName(event_type)
+        # normalize the event key (string) or the event ID (int) to the event
+        # display name, since assertEvent below compares against what
+        # getEventName() returns for the numeric type of the raised event
+        event_type_name = self.console.getEventName(event_type)
+        if type(event_type) is not str:
             self.assertIsNotNone(event_type_name, "could not find event with name '%s'" % event_type)
 
         with patch.object(self.console, 'queueEvent') as queueEvent:

@@ -23,8 +23,8 @@
 # ################################################################### #
 
 import time
-import unittest2 as unittest
-from mock import sentinel, Mock
+import unittest
+from unittest.mock import sentinel, Mock
 from b3.cron import CronTab, OneTimeCronTab, PluginCronTab, Cron
 from tests import B3TestCase
 

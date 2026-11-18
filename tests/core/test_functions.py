@@ -23,7 +23,7 @@
 # ################################################################### #
 
 from b3 import functions
-import unittest2 as unittest
+import unittest
     
 class TestSplitDSN(unittest.TestCase):
     def assertDsnEqual(self, url, expected):
@@ -230,7 +230,10 @@ class Test_getStuffSoundingLike(unittest.TestCase):
         self.assertListEqual(['jack'], functions.getStuffSoundingLike('jak', ['bar', 'foO', 'joe', 'jack', 'averell', 'william']))
 
     def test_fallback(self):
-        self.assertListEqual(['bar', 'william', 'joe', 'averell', 'foO', 'jack'], functions.getStuffSoundingLike('xxx', ['bar', 'foO', 'joe', 'jack', 'averell', 'william']))
+        # py2 returned these in arbitrary-but-stable set() order; the py3 code
+        # dedupes order-preserving so the fallback is the levenshtein-stable
+        # sort of the alphabetically sorted input
+        self.assertListEqual(['bar', 'foO', 'joe', 'jack', 'averell', 'william'], functions.getStuffSoundingLike('xxx', ['bar', 'foO', 'joe', 'jack', 'averell', 'william']))
 
 
 class Test_topologicalSort(unittest.TestCase):

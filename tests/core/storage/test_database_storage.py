@@ -24,15 +24,15 @@
 
 import b3
 import os
-import unittest2 as unittest
+import unittest
 
 from b3.clients import Client
 from b3.functions import splitDSN
 from b3.storage.common import DatabaseStorage
 from b3.storage.mysql import MysqlStorage
-from mock import Mock
-from mock import patch
-from mock import sentinel
+from unittest.mock import Mock
+from unittest.mock import patch
+from unittest.mock import sentinel
 from mockito import when
 from mockito import any as ANY
 

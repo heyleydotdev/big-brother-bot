@@ -23,7 +23,7 @@
 # ################################################################### #
 
 import time
-from mock import patch
+from unittest.mock import patch
 from mockito import when, verify
 from b3.config import CfgConfigParser
 from b3.parsers.frostbite2.protocol import CommandFailedError

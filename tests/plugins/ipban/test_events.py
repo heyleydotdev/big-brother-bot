@@ -23,7 +23,7 @@
 # ################################################################### #
 
 
-from mock import Mock
+from unittest.mock import Mock
 from tests.plugins.ipban import IpbanTestCase
 
 class Test_events(IpbanTestCase):

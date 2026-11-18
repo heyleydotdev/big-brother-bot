@@ -24,10 +24,10 @@
 
 import b3
 import b3.clients
-import unittest2 as unittest
+import unittest
 
 from b3.parsers.homefront import HomefrontParser
-from mock import Mock, sentinel
+from unittest.mock import Mock, sentinel
 
  
 class Test_HomefrontParser(unittest.TestCase):

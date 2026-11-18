@@ -24,12 +24,12 @@
 
 
 import time
-import unittest2 as unittest
+import unittest
 import threading
 import sys
 
 from mockito import when, unstub
-from mock import Mock
+from unittest.mock import Mock
 from b3.config import XmlConfigParser
 from b3.plugins.admin import AdminPlugin
 from tests import logging_disabled

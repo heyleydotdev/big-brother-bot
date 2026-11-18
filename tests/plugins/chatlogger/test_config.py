@@ -25,11 +25,11 @@
 import b3
 import b3.events
 import os
-import unittest2 as unittest
+import unittest
 import sys
 
 from mockito import when
-from mock import Mock, ANY
+from unittest.mock import Mock, ANY
 from b3.config import CfgConfigParser
 from b3.plugins.chatlogger import ChatloggerPlugin
 from tests import logging_disabled

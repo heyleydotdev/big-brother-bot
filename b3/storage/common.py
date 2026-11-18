@@ -153,7 +153,7 @@ class DatabaseStorage(Storage):
         except Exception:
             # query failed, try local cache
             if self.console.config.has_option('admins_cache', client.guid):
-                data = self.console.config.get('admins_cache', client.guid, True)
+                data = self.console.config.get('admins_cache', client.guid, raw=True)
                 self.console.debug('pulling user form admins_cache %s' % data)
                 cid, name, level = data.split(',')
                 client.id = cid.strip()
@@ -400,16 +400,15 @@ class DatabaseStorage(Storage):
             penalty.keyword = ''
 
         if penalty.reason:
-            # decode the reason data, as the name may need it
+            # in python 3 text is already text: only convert when we actually get
+            # raw bytes (parsers deliver bytes at the boundary). the old py2
+            # decode->encode round trip silently turned str reasons into bytes
             if hasattr(self.console, "encoding") and self.console.encoding:
-                try:
-                    penalty.reason = penalty.reason.decode(self.console.encoding)
-                except Exception as msg:
-                    self.console.warning('ERROR: decoding reason: %r', msg)
-                try:
-                    penalty.reason = penalty.reason.encode('UTF-8', 'replace')
-                except Exception as msg:
-                    self.console.warning('ERROR: encoding reason: %r', msg)
+                if isinstance(penalty.reason, bytes):
+                    try:
+                        penalty.reason = penalty.reason.decode(self.console.encoding, 'replace')
+                    except Exception as msg:
+                        self.console.warning('ERROR: decoding reason: %r', msg)
 
         for f in fields:
             if hasattr(penalty, self.getVar(f)):

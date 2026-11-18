@@ -24,10 +24,10 @@
 
 import b3
 import logging
-import unittest2 as unittest
+import unittest
 
 from mockito import mock, when, any as anything, verify
-from mock import Mock, patch, ANY
+from unittest.mock import Mock, patch, ANY
 from b3.clients import Client
 from b3.config import XmlConfigParser
 from b3.events import Event

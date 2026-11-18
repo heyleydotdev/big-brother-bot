@@ -24,9 +24,9 @@
 
 import b3
 import logging
-import unittest2 as unittest
+import unittest
 
-from mock import Mock, call, patch
+from unittest.mock import Mock, call, patch
 from mockito import mock, when, any as anything
 from b3.clients import Clients, Client
 from b3.config import XmlConfigParser

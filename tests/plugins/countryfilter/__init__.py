@@ -23,9 +23,9 @@
 # ################################################################### #
 
 import time
-import unittest2
+import unittest
 
-from mock import Mock
+from unittest.mock import Mock
 from mockito import when, unstub
 from b3.config import MainConfig
 from b3.config import CfgConfigParser
@@ -59,7 +59,7 @@ LOCATION_BILL.lon = -122.0838
 LOCATION_BILL.zipcode = 94035
 
 
-class CountryFilterTestCase(unittest2.TestCase):
+class CountryFilterTestCase(unittest.TestCase):
 
     def setUp(self):
         # create a FakeConsole parser

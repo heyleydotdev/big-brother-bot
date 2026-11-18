@@ -22,7 +22,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import patch
+from unittest.mock import patch
 from b3.config import CfgConfigParser
 from b3.plugins.customcommands import CustomcommandsPlugin
 from tests import logging_disabled

@@ -22,7 +22,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from tests.plugins.poweradminbf3 import Bf3TestCase, logging_disabled
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminbf3 import Poweradminbf3Plugin

@@ -24,7 +24,7 @@
 
 import sys
 import xml.etree.ElementTree as ET
-from mock import Mock
+from unittest.mock import Mock
 from b3.plugins.banlist import IpBanlist
 from tests.plugins.banlist import BanlistTestCase
 

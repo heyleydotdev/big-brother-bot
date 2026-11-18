@@ -25,7 +25,7 @@
 from textwrap import dedent
 import time
 from tests.plugins.makeroom import *
-from mock import Mock
+from unittest.mock import Mock
 import pytest
 
 

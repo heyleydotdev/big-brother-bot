@@ -23,8 +23,8 @@
 # ################################################################### #
 
 
-from mock import Mock
-from unittest2 import TestCase
+from unittest.mock import Mock
+from unittest import TestCase
 from b3.config import CfgConfigParser
 from b3.plugins.customcommands import CustomcommandsPlugin
 

@@ -24,7 +24,7 @@
 
 import time
 # http://www.voidspace.org.uk/python/mock/mock.html
-from mock import patch
+from unittest.mock import patch
 from mockito import when, verify
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminbf3 import Poweradminbf3Plugin

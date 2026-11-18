@@ -23,7 +23,7 @@
 # ################################################################### #
 
 import logging
-from mock import Mock
+from unittest.mock import Mock
 from mockito import when, verify, unstub
 from b3.parsers.frostbite2.protocol import CommandFailedError
 from tests.plugins.poweradminbf3 import Bf3TestCase, logging_disabled

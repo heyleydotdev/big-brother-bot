@@ -25,7 +25,7 @@
 import time
 import logging
 
-from mock import Mock
+from unittest.mock import Mock
 from mockito import unstub
 from b3.fake import FakeClient
 from b3.plugins.geolocation import GeolocationPlugin

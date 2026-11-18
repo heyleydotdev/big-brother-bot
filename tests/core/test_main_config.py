@@ -25,7 +25,7 @@
 import b3
 import configparser
 import logging
-import unittest2 as unittest
+import unittest
 from b3 import getAbsolutePath
 from b3.config import CfgConfigParser
 from b3.config import MainConfig

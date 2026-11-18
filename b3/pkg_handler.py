@@ -23,34 +23,15 @@
 # ################################################################### #
 
 __author__ = 'ThorN'
-__version__ = '1.4'
-
-import os
-import sys
-from b3.functions import main_is_frozen
+__version__ = '2.0'
 
 __all__ = ['resource_directory']
 
 
 def resource_directory(module):
     """
-    Use this if pkg_resources is NOT installed
+    Return the filesystem directory holding the given module/package.
+    Replaces the old pkg_resources based lookup (deprecated, slow import, memory hog).
     """
-    return os.path.dirname(sys.modules[module].__file__)
-
-
-if not main_is_frozen():
-    try:
-        import pkg_resources
-    except ImportError:
-        pkg_resources = None
-        pass
-    else:
-        # package tools is installed
-        def resource_directory_from_pkg_resources(module):
-            """
-            Use this if pkg_resources is installed
-            """
-            return pkg_resources.resource_filename(module, '')
-
-        resource_directory = resource_directory_from_pkg_resources
+    from importlib.resources import files
+    return str(files(module))

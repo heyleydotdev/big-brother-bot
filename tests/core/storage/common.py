@@ -27,7 +27,7 @@ from b3.clients import Alias
 from b3.clients import IpAlias
 from b3.clients import Penalty
 from b3.clients import Group
-from mock import Mock
+from unittest.mock import Mock
 from mockito import when
 from mockito import any as ANY
 

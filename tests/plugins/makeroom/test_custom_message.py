@@ -25,7 +25,7 @@
 from textwrap import dedent
 
 import pytest
-from mock import call, Mock
+from unittest.mock import call, Mock
 from tests.plugins.makeroom import *
 
 

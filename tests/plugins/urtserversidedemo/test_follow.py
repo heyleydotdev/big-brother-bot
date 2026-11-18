@@ -22,7 +22,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import Mock
+from unittest.mock import Mock
 from mockito import when
 from time import sleep
 from b3.fake import FakeClient

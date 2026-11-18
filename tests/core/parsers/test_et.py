@@ -24,10 +24,10 @@
 
 import logging
 import io
-from mock import call, patch, Mock
+from unittest.mock import call, patch, Mock
 
 from mockito import mock, verify
-import unittest2 as unittest
+import unittest
 
 from b3.clients import Client
 from b3.config import XmlConfigParser

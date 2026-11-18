@@ -22,7 +22,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import  call, Mock
+from unittest.mock import  call, Mock
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminurt import PoweradminurtPlugin
 from tests.plugins.poweradminurt.iourt42 import Iourt42TestCase

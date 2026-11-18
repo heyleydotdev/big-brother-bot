@@ -24,9 +24,9 @@
 
 import logging
 import re
-import unittest2 as unittest
+import unittest
 
-from mock import Mock, patch, call
+from unittest.mock import Mock, patch, call
 from b3.clients import Client
 from b3.plugins.admin import AdminPlugin
 from b3.config import XmlConfigParser

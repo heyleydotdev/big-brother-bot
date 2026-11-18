@@ -99,7 +99,7 @@ class B3ConfigParserMixin(object):
         :param setting: The configuration file setting.
         :param kwargs: A dict with variables used for string substitution.
         """
-        value = b3.functions.vars2printf(self.get(section, setting, True)).strip()
+        value = b3.functions.vars2printf(self.get(section, setting, raw=True)).strip()
         if len(kwargs):
             return value % kwargs
         return value
@@ -157,12 +157,13 @@ class XmlConfigParser(B3ConfigParserMixin):
 
         self._loadSettings()
 
-    def get(self, section, setting=None, dummy=False):
+    def get(self, section, setting=None, raw=False, dummy=False):
         """
         Return a configuration value as a string.
         :param section: The configuration file section.
         :param setting: The configuration file setting.
-        :return basestring
+        :param raw: kept for API parity with CfgConfigParser.get, ignored for XML configs
+        :return str
         """
         if setting is None:
             # parse as xpath
@@ -253,7 +254,7 @@ class XmlConfigParser(B3ConfigParserMixin):
         if not os.path.isfile(filename):
             raise ConfigFileNotFound(filename)
 
-        f = file(filename, 'r')
+        f = open(filename, 'r')
         self.readfp(f)
         f.close()
 
@@ -297,7 +298,12 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         Object constructor.
         :param allow_no_value: Whether or not to allow empty values in configuration sections
         """
-        configparser.ConfigParser.__init__(self, allow_no_value=allow_no_value)
+        # strict=False keeps the python2 behavior of tolerating duplicated
+        # options/sections in .ini files (last one wins) instead of raising
+        # interpolation=None keeps the python2 behavior of passing raw '%'
+        # characters through (b3 configs are full of printf-style templates)
+        configparser.ConfigParser.__init__(self, allow_no_value=allow_no_value, strict=False,
+                                            interpolation=None)
 
     def add_comment(self, section, comment):
         """
@@ -331,7 +337,7 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         """
         Load a configuration file.
         """
-        f = file(filename, 'r')
+        f = open(filename, 'r')
         self.readfp(f)
         f.close()
         self.fileName = filename
@@ -355,7 +361,8 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         Inherits from ConfigParser.ConfigParser to throw our custom exception if needed
         """
         try:
-            configparser.ConfigParser.readfp(self, fp, filename)
+            # readfp was removed from configparser in python 3.12: read_file is the py3 API
+            configparser.ConfigParser.read_file(self, fp, filename)
         except Exception as e:
             raise ConfigFileNotValid("%s" % e)
 

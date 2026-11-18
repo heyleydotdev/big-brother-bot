@@ -22,7 +22,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from tests.plugins.tk import Tk_functional_test
 
 @patch("threading.Timer")

@@ -23,9 +23,9 @@
 # ################################################################### #
 
 import os
-import unittest2 as unittest
+import unittest
 
-from mock import Mock, call, patch
+from unittest.mock import Mock, call, patch
 from mockito import when
 from b3 import TEAM_UNKNOWN
 from b3.clients import Client

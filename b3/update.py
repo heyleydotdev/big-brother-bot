@@ -24,16 +24,14 @@
 
 import b3
 import b3.config
+import functools
 import json
 import os
 import re
-import string
 import sys
 import urllib.request, urllib.error, urllib.parse
 
-from distutils import version
 from time import sleep
-from types import StringType
 
 ## url from where we can get the latest B3 version number
 URL_B3_LATEST_VERSION = 'http://master.bigbrotherbot.net/version.json'
@@ -44,10 +42,11 @@ UPDATE_CHANNEL_BETA = 'beta'
 UPDATE_CHANNEL_DEV = 'dev'
 
 
-class B3version(version.StrictVersion):
+@functools.total_ordering
+class B3version(object):
     """
     Version numbering for BigBrotherBot.
-    Compared to version.StrictVersion this class allows version numbers such as :
+    Allows version numbers such as :
         1.0dev
         1.0dev2
         1.0d3
@@ -58,7 +57,11 @@ class B3version(version.StrictVersion):
         1.0b1
         1.0b3
         1.9.0dev7.daily21-20121004
-    And make sure that any 'dev' prerelease is inferior to any 'alpha' prerelease
+    And makes sure that any 'dev' prerelease is inferior to any 'alpha' prerelease.
+
+    NOTE: standalone python3 rewrite of the old distutils.version.StrictVersion subclass
+    (distutils was removed from the stdlib in python 3.12): implements total ordering
+    instead of the python2 __cmp__ protocol.
     """
     version = None
     prerelease = None
@@ -77,7 +80,11 @@ class B3version(version.StrictVersion):
 $''', re.VERBOSE)
     prerelease_order = {'dev': 0, 'a': 1, 'b': 2}
 
-    def parse (self, vstring):
+    def __init__(self, vstring=None):
+        if vstring:
+            self.parse(vstring)
+
+    def parse(self, vstring):
         """
         Parse the version number from a string.
         :param vstring: The version string
@@ -85,77 +92,64 @@ $''', re.VERBOSE)
         match = self.version_re.match(vstring)
         if not match:
             raise ValueError("invalid version number '%s'" % vstring)
+        self._vstring = vstring
 
         major = match.group('major')
         minor = match.group('minor')
 
         patch = match.group('patch')
         if patch:
-            self.version = tuple(map(string.atoi, [major, minor, patch]))
+            self.version = tuple(map(int, [major, minor, patch]))
         else:
-            self.version = tuple(list(map(string.atoi, [major, minor])) + [0])
+            self.version = tuple(list(map(int, [major, minor])) + [0])
 
         prerelease = match.group('tag')
         prerelease_num = match.group('tag_num')
         if prerelease:
-            self.prerelease = (prerelease, string.atoi(prerelease_num if prerelease_num else '0'))
+            self.prerelease = (prerelease, int(prerelease_num if prerelease_num else '0'))
         else:
             self.prerelease = None
 
         daily_num = match.group('build_num')
         if daily_num:
-            self.build_num = string.atoi(daily_num if daily_num else '0')
+            self.build_num = int(daily_num if daily_num else '0')
         else:
             self.build_num = None
 
-    def __cmp__ (self, other):
+    def __str__(self):
+        return self._vstring
+
+    def __repr__(self):
+        return "%s ('%s')" % (self.__class__.__name__, self._vstring)
+
+    def _cmp_key(self):
         """
-        Compare current object with another one.
-        :param other: The other object
+        Comparison key preserving the old __cmp__ semantics:
+        a version with a prerelease is lesser than the same version without one
+        (1.0dev < 1.0), and likewise for the daily build number.
         """
-        if isinstance(other, StringType):
-            other = B3version(other)
+        prerelease = (1,) if self.prerelease is None else \
+            (0, self.prerelease_order[self.prerelease[0]], self.prerelease[1])
+        build = (1,) if self.build_num is None else (0, self.build_num)
+        return tuple(self.version), prerelease, build
 
-        compare = cmp(self.version, other.version)
-        if compare != 0:
-            return compare
+    @staticmethod
+    def _coerce(other):
+        if isinstance(other, str):
+            return B3version(other)
+        return other
 
-        # we have to compare prerelease
-        compare = self.__cmp_prerelease(other)
-        if compare != 0:
-            return compare
+    def __eq__(self, other):
+        other = self._coerce(other)
+        if not isinstance(other, B3version):
+            return NotImplemented
+        return self._cmp_key() == other._cmp_key()
 
-        # we have to compare build num
-        return self.__cmp_build(other)
-
-    def __cmp_prerelease(self, other):
-        # case 1: neither has prerelease; they're equal
-        # case 2: self has prerelease, other doesn't; other is greater
-        # case 3: self doesn't have prerelease, other does: self is greater
-        # case 4: both have prerelease: must compare them!
-        if not self.prerelease and not other.prerelease:
-            return 0
-        elif self.prerelease and not other.prerelease:
-            return -1
-        elif not self.prerelease and other.prerelease:
-            return 1
-        elif self.prerelease and other.prerelease:
-            return cmp((self.prerelease_order[self.prerelease[0]], self.prerelease[1]),
-                       (self.prerelease_order[other.prerelease[0]], other.prerelease[1]))
-
-    def __cmp_build(self, other):
-        # case 1: neither has build_num; they're equal
-        # case 2: self has build_num, other doesn't; other is greater
-        # case 3: self doesn't have build_num, other does: self is greater
-        # case 4: both have build_num: must compare them!
-        if not self.build_num and not other.build_num:
-            return 0
-        elif self.build_num and not other.build_num:
-            return -1
-        elif not self.build_num and other.build_num:
-            return 1
-        elif self.build_num and other.build_num:
-            return cmp(self.build_num, other.build_num)
+    def __lt__(self, other):
+        other = self._coerce(other)
+        if not isinstance(other, B3version):
+            return NotImplemented
+        return self._cmp_key() < other._cmp_key()
 
 
 def getDefaultChannel(currentVersion):

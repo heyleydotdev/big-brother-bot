@@ -29,9 +29,9 @@ import logging
 import os
 from configparser import NoOptionError
 
-from mock import patch
-from mock import call
-from mock import ANY
+from unittest.mock import patch
+from unittest.mock import call
+from unittest.mock import ANY
 from mockito import when
 
 from b3.config import CfgConfigParser

@@ -23,7 +23,7 @@
 # ################################################################### #
 
 
-from mock import Mock
+from unittest.mock import Mock
 from b3.events import Event
 from tests.plugins.urtserversidedemo import PluginTestCase
 from b3.fake import FakeClient

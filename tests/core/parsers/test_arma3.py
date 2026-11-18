@@ -23,8 +23,8 @@
 # ################################################################### #
 
 import logging
-import unittest2 as unittest
-from mock import Mock, patch
+import unittest
+from unittest.mock import Mock, patch
 from mockito import when
 from b3.clients import Client
 from b3.parsers.arma3 import Arma3Parser

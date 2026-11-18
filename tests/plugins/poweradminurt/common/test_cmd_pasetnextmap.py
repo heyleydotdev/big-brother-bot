@@ -23,7 +23,7 @@
 # ################################################################### #
 
 import time
-from mock import patch, Mock
+from unittest.mock import patch, Mock
 from mockito import when, verify
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminurt import PoweradminurtPlugin

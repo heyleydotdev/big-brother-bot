@@ -26,7 +26,7 @@ import b3
 
 from b3.clients import Clients, Client
 from tests import B3TestCase
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 
 class TestClients(B3TestCase):

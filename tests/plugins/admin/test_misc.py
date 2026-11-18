@@ -22,9 +22,9 @@
 #                                                                     #
 # ################################################################### #
 
-import unittest2 as unittest
+import unittest
 
-from mock import Mock
+from unittest.mock import Mock
 from tests.plugins.admin import Admin_TestCase, Admin_functional_test
 
 

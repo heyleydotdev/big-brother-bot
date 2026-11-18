@@ -22,7 +22,7 @@
 #                                                                     #
 # ################################################################### #
 
-import unittest2
+import unittest
 
 from mockito import when, unstub
 from b3.config import MainConfig
@@ -32,7 +32,7 @@ from b3.plugins.duel import DuelPlugin
 from tests import logging_disabled
 
 
-class DuelTestCase(unittest2.TestCase):
+class DuelTestCase(unittest.TestCase):
 
     def setUp(self):
         console_conf = CfgConfigParser()

@@ -18,7 +18,7 @@
 import unittest
 import logging
 
-from mock import Mock
+from unittest.mock import Mock
 from mockito.mockito import when
 from b3.config import XmlConfigParser, CfgConfigParser
 from b3.parsers.iourt41 import Iourt41Parser

@@ -30,7 +30,7 @@ import re
 import codecs
 
 from mockito import when
-from mock import ANY
+from unittest.mock import ANY
 from b3 import TEAM_RED, TEAM_BLUE
 from b3.config import CfgConfigParser
 from b3.plugins.chatlogger import ChatloggerPlugin

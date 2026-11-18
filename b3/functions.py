@@ -241,7 +241,9 @@ def decode(text):
     :param text: the text to decode
     :return: string
     """
-    return text.decode(sys.getfilesystemencoding())
+    if isinstance(text, bytes):
+        return text.decode(sys.getfilesystemencoding())
+    return text
 
 
 def clamp(value, minv=None, maxv=None):
@@ -318,14 +320,16 @@ def soundex(s1):
     """
     Return the soundex value to a string argument.
     """
-    ignore = "~!@#$%^&*()_+=-`[]\|;:'/?.,<>\" \t\f\v"
-    table = string.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZ', '01230120022455012623010202')
+    ignore = b"~!@#$%^&*()_+=-`[]\\|;:'/?.,<>\" \t\f\v"
+    table = bytes.maketrans(b'ABCDEFGHIJKLMNOPQRSTUVWXYZ', b'01230120022455012623010202')
 
-    s1 = string.strip(string.upper(s1))
+    s1 = s1.upper().strip()
     if not s1:
         return "Z000"
     s2 = s1[0]
-    s1 = string.translate(s1.encode('ascii', 'ignore'), table, ignore)
+    # translate in the bytes domain (py3 has no string.translate) then get
+    # back to str so the per-character comparisons below keep py2 semantics
+    s1 = s1.encode('ascii', 'ignore').translate(table, ignore).decode('ascii')
     if not s1:
         return "Z000"
     prev = s1[0]
@@ -438,7 +442,10 @@ def getStuffSoundingLike(stuff, expected_stuff):
     if not len(match):
         match = sorted(list(expected_stuff))
         match.sort(key=lambda _map: levenshteinDistance(clean_stuff, _map.strip()))
-    return list(set(match))
+    # py2 used set() here whose iteration order was arbitrary (but happened
+    # to be stable given deterministic str hashing): python 3 randomizes str
+    # hashes per process, so dedupe order-preserving to stay deterministic
+    return list(dict.fromkeys(match))
 
 
 def hash_password(password):

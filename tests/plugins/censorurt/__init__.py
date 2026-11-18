@@ -26,7 +26,7 @@ import b3
 import b3.events
 import logging
 
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from b3.fake import FakeClient
 from tests import B3TestCase
 from b3.plugins.censorurt import CensorurtPlugin

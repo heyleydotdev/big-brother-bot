@@ -25,7 +25,7 @@
 import b3
 import new
 
-from mock import Mock
+from unittest.mock import Mock
 from mockito import when
 from b3.events import Event
 from b3.fake import FakeClient
