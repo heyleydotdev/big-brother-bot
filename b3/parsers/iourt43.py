@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -24,7 +23,7 @@
 
 import b3
 import re
-import new
+import types
 import time
 
 from b3.clients import Client
@@ -37,7 +36,7 @@ from b3.plugins.spamcontrol import SpamcontrolPlugin
 __author__ = 'Courgette, Fenix, ptitbigorneau'
 __version__ = '0.2'
 
-    
+
 class Iourt43Client(Client):
 
     def auth_by_guid(self):
@@ -47,7 +46,7 @@ class Iourt43Client(Client):
         self.console.debug("Auth by guid: %r", self.guid)
         try:
             return self.console.storage.getClient(self)
-        except KeyError, msg:
+        except KeyError as msg:
             self.console.debug('User not found %s: %s', self.guid, msg)
             return False
 
@@ -123,7 +122,7 @@ class Iourt43Client(Client):
                     # fix up corrupted data due to bug #162
                     if in_storage and in_storage.pbid == 'None':
                         in_storage.pbid = None
-                except Exception, e:
+                except Exception as e:
                     self.console.error("Auth by guid failed", exc_info=e)
                     self.authorizing = False
                     return False
@@ -131,7 +130,7 @@ class Iourt43Client(Client):
                 # auth with FSA
                 try:
                     in_storage = self.auth_by_pbid()
-                except Exception, e:
+                except Exception as e:
                     self.console.error("Auth by FSA failed", exc_info=e)
                     self.authorizing = False
                     return False
@@ -140,7 +139,7 @@ class Iourt43Client(Client):
                     # fallback on auth with cl_guid only
                     try:
                         in_storage = self.auth_by_guid()
-                    except Exception, e:
+                    except Exception as e:
                         self.console.error("Auth by guid failed (when no known FSA)", exc_info=e)
                         self.authorizing = False
                         return False
@@ -181,7 +180,7 @@ class Iourt43Client(Client):
 
 
 class Iourt43Parser(Iourt41Parser):
-   
+
     gameName = 'iourt43'
     spamcontrolPlugin = None
 
@@ -294,10 +293,10 @@ class Iourt43Parser(Iourt41Parser):
         # ClientSpawn: 0
         # ClientMelted: 1
         re.compile(r'^(?P<action>Client(Melted|Spawn)):\s(?P<cid>[0-9]+)$', re.IGNORECASE),
-        
+
         #Assist: 0 14 15: -[TPF]-PtitBigorneau assisted Bot1 to kill Bot2
         re.compile(r'^(?P<action>Assist):\s(?P<acid>[0-9]+)\s(?P<kcid>[0-9]+)\s(?P<dcid>[0-9]+):\s+(?P<text>.*)$', re.IGNORECASE),
-        
+
         # Generated with ioUrbanTerror v4.1:
         # Hit: 12 7 1 19: BSTHanzo[FR] hit ercan in the Helmet
         # Hit: 13 10 0 8: Grover hit jacobdk92 in the Head
@@ -534,7 +533,7 @@ class Iourt43Parser(Iourt41Parser):
         UT_MOD_BENELLI: [100, 100, 90, 67, 32, 32, 60, 50, 35, 35, 30, 30, 20, 20],
         UT_MOD_P90: [50, 40, 33, 27, 16, 16, 27, 25, 17, 17, 15, 15, 12, 12],
         UT_MOD_MAGNUM: [100, 82, 66, 50, 33, 33, 57, 52, 40, 33, 25, 25],
-    }   
+    }
 
     ####################################################################################################################
     #                                                                                                                  #
@@ -556,7 +555,7 @@ class Iourt43Parser(Iourt41Parser):
             if gamename != 'q3urt43':
                 self.error("The iourt43 B3 parser cannot be used with a game server other than Urban Terror 4.3")
                 raise SystemExit(220)
-        except Exception, e:
+        except Exception as e:
             self.warning("Could not query server for gamename.", exc_info=e)
 
         Iourt41Parser.startup(self)
@@ -611,7 +610,7 @@ class Iourt43Parser(Iourt41Parser):
         """
         try:
             frozensand_auth_available = self.is_frozensand_auth_available()
-        except Exception, e:
+        except Exception as e:
             self.warning("Could not query server for cvar auth", exc_info=e)
             frozensand_auth_available = False
         self.info("Frozen Sand auth system enabled : %s" % ('yes' if frozensand_auth_available else 'no'))
@@ -622,7 +621,7 @@ class Iourt43Parser(Iourt41Parser):
                 frozensand_auth_owners = cvar.getString()
             else:
                 frozensand_auth_owners = None
-        except Exception, e:
+        except Exception as e:
             self.warning("Could not query server for cvar auth_owners", exc_info=e)
             frozensand_auth_owners = ""
 
@@ -649,7 +648,7 @@ class Iourt43Parser(Iourt41Parser):
         if self.config.has_option('server', 'permban_with_frozensand'):
             try:
                 self._permban_with_frozensand = self.config.getboolean('server', 'permban_with_frozensand')
-            except ValueError, err:
+            except ValueError as err:
                 self.warning(err)
 
         self.info("Send permbans to Frozen Sand : %s" % ('yes' if self._permban_with_frozensand else 'no'))
@@ -662,7 +661,7 @@ class Iourt43Parser(Iourt41Parser):
         if self.config.has_option('server', 'tempban_with_frozensand'):
             try:
                 self._tempban_with_frozensand = self.config.getboolean('server', 'tempban_with_frozensand')
-            except ValueError, err:
+            except ValueError as err:
                 self.warning(err)
 
         self.info("Send temporary bans to Frozen Sand : %s" % ('yes' if self._tempban_with_frozensand else 'no'))
@@ -676,7 +675,7 @@ class Iourt43Parser(Iourt41Parser):
         if self.config.has_option('server', 'allow_userinfo_overflow'):
             try:
                 self._allow_userinfo_overflow = self.config.getboolean('server', 'allow_userinfo_overflow')
-            except ValueError, err:
+            except ValueError as err:
                 self.warning(err)
 
         self.info("Allow userinfo string overflow : %s" % ('yes' if self._allow_userinfo_overflow else 'no'))
@@ -695,7 +694,7 @@ class Iourt43Parser(Iourt41Parser):
     #   EVENT HANDLERS                                                                                                 #
     #                                                                                                                  #
     ####################################################################################################################
-    
+
     def OnClientuserinfo(self, action, data, match=None):
         # 2 \ip\145.99.135.227:27960\challenge\-232198920\qport\2781\protocol\68\battleye\1\name\[SNT]^1XLR^78or..
         # 0 \gear\GMIORAA\team\blue\skill\5.000000\characterfile\bots/ut_chicken_c.c\color\4\sex\male\race\2\snaps\20\..
@@ -730,7 +729,7 @@ class Iourt43Parser(Iourt41Parser):
 
             if client:
                 # update existing client
-                for k, v in bclient.iteritems():
+                for k, v in bclient.items():
                     if hasattr(client, 'gear') and k == 'gear' and client.gear != v:
                         self.queueEvent(b3.events.Event(self.getEventID('EVT_CLIENT_GEAR_CHANGE'), v, client))
                     if not k.startswith('_') and k not in ('login', 'password', 'groupBits', 'maskLevel', 'autoLogin', 'greeting'):
@@ -785,7 +784,7 @@ class Iourt43Parser(Iourt41Parser):
                             elif ':' in ip:
                                 ip = ip.split(':')[0]
                             bclient['ip'] = ip
-                        except Exception, err:
+                        except Exception as err:
                             bclient['ip'] = ''
                             self.warning("Failed to get client %s ip address" % bclient['cid'], err)
 
@@ -926,7 +925,7 @@ class Iourt43Parser(Iourt41Parser):
                                                                               'way_time': way_time,
                                                                               'attempt_num': attempt_num,
                                                                               'attempt_max': attempt_max})
-    
+
     def OnClientjumpruncanceled(self, action, data, match=None):
         cid = match.group('cid')
         way_id = match.group('way_id')
@@ -939,7 +938,7 @@ class Iourt43Parser(Iourt41Parser):
         return self.getEvent('EVT_CLIENT_JUMP_RUN_CANCEL', client=client, data={'way_id': way_id,
                                                                                 'attempt_num': attempt_num,
                                                                                 'attempt_max': attempt_max})
-    
+
     def OnClientsaveposition(self, action, data, match=None):
         cid = match.group('cid')
         position = float(match.group('x')), float(match.group('y')), float(match.group('z'))
@@ -957,7 +956,7 @@ class Iourt43Parser(Iourt41Parser):
             self.debug('No client found')
             return None
         return self.getEvent('EVT_CLIENT_POS_LOAD', client=client, data={'position': position})
-    
+
     def OnClientgoto(self, action, data, match=None):
         cid = match.group('cid')
         tcid = match.group('tcid')
@@ -966,12 +965,12 @@ class Iourt43Parser(Iourt41Parser):
         if not client:
             self.debug('No client found')
             return None
-        
+
         target = self.getByCidOrJoinPlayer(tcid)
         if not target:
             self.debug('No target client found')
             return None
-            
+
         return self.getEvent('EVT_CLIENT_GOTO', client=client, target=target, data={'position': position})
 
     def OnClientspawn(self, action, data, match=None):
@@ -1059,18 +1058,18 @@ class Iourt43Parser(Iourt41Parser):
 
         target.state = b3.STATE_ALIVE
         return self.getEvent('EVT_CLIENT_THAWOUT_FINISHED', client=client, target=target)
-        
+
     def OnAssist(self, action, data, match=None):
         #Assist: 0 14 15: -[TPF]-PtitBigorneau assisted Bot1 to kill Bot2
         cid = match.group('acid')
         vid = match.group('dcid')
         aid = match.group('kcid')
-        
+
         client = self.getByCidOrJoinPlayer(cid)
         if not client:
             self.debug('No client')
             return None
-    
+
         victim = self.getByCidOrJoinPlayer(vid)
         if not victim:
             self.debug('No victim')
@@ -1333,7 +1332,7 @@ class Iourt43Parser(Iourt41Parser):
             return auth != 0
         else:
             return False
-    
+
     def defineGameType(self, gametype_int):
         """
         Translate the gametype to a readable format (also for teamkill plugin!)
@@ -1375,7 +1374,7 @@ class Iourt43Parser(Iourt41Parser):
             points = self.damage[weapon][int(hitloc) - 1]
             self.debug("_getDamagePoints(%s, %s) -> %d" % (weapon, hitloc, points))
             return points
-        except (KeyError, IndexError), err:
+        except (KeyError, IndexError) as err:
             self.warning("_getDamagePoints(%s, %s) cannot find value : %s" % (weapon, hitloc, err))
             return 15
 
@@ -1389,7 +1388,7 @@ class Iourt43Parser(Iourt41Parser):
             new_event = Event(type=event.type, client=event.client, target=event.target, data=repr(event.data))
             this.onChat(new_event)
 
-        self.spamcontrolPlugin.onRadio = new.instancemethod(onRadio, self.spamcontrolPlugin, SpamcontrolPlugin)
+        self.spamcontrolPlugin.onRadio = types.MethodType(onRadio, self.spamcontrolPlugin, SpamcontrolPlugin)
         self.spamcontrolPlugin.registerEvent('EVT_CLIENT_RADIO', self.spamcontrolPlugin.onRadio)
 
     @staticmethod
@@ -1434,7 +1433,7 @@ class Iourt43Parser(Iourt41Parser):
             else:
                 clients = []
                 needle = re.sub(r'\s', '', handle.lower())
-                for cid, c in self.items():
+                for cid, c in list(self.items()):
                     cleanname = re.sub(r'\s', '', c.name.lower())
                     if not c.hide and (needle in cleanname or needle in c.pbid) and not c in clients:
                         clients.append(c)

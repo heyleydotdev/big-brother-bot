@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -23,9 +22,9 @@
 # ################################################################### #
 
 import time
-import unittest2
+import unittest
 
-from mock import Mock
+from unittest.mock import Mock
 from mockito import when, unstub
 from b3.config import MainConfig
 from b3.config import CfgConfigParser
@@ -45,7 +44,7 @@ LOCATION_MIKE.isp = 'Fastweb'
 LOCATION_MIKE.timezone = 'Europe/Rome'
 LOCATION_MIKE.lat = 41.9
 LOCATION_MIKE.lon = 12.4833
-LOCATION_MIKE.zipcode = 00100
+LOCATION_MIKE.zipcode = 0o0100
 
 LOCATION_BILL = Mock()
 LOCATION_BILL.country = 'United States'
@@ -60,7 +59,7 @@ LOCATION_BILL.lon = -122.0838
 LOCATION_BILL.zipcode = 94035
 
 
-class LocationTestCase(unittest2.TestCase):
+class LocationTestCase(unittest.TestCase):
 
     def setUp(self):
         # create a FakeConsole parser

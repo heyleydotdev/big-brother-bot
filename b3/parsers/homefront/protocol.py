@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -27,7 +26,7 @@ Module implementing the Homefront protocol. Provide the Client class which
 creates a connection to a Homefront gameserver
 """
 
-import asyncore
+from b3.lib import netasync as asyncore
 import socket
 import time
 
@@ -45,7 +44,7 @@ class MessageType(object):
     SERVER_RESPONSE = 'SR'
     SERVER_DISCONNECT = 'SD'
     SERVER_TRANSMISSION = 'ST'
-    
+
     @staticmethod
     def type2str(t):
         names = {
@@ -71,7 +70,7 @@ class ChannelType(object):
     CHATTER = 2
     GAMEPLAY = 3
     SERVER = 4
-    
+
     @staticmethod
     def type2str(t):
         names = {
@@ -92,12 +91,16 @@ class Packet(object):
     message = None
     channel = None
     data = None
-    
+
     def encode(self):
         ## Message Type
         ## type: 8-bit char[]
         ## byte length : 2
-        s = self.message[0:2]
+        s = self.message[0:2].encode('ascii')
+        ## Channel
+        ## type: 8-bit byte
+        ## byte length : 1
+        s += pack('>B', self.channel)
         ## Data length
         ## type: 32-bit signed int (big-endian)
         ## byte 4
@@ -107,19 +110,19 @@ class Packet(object):
         ## byte length : N
         s += self.data.encode('utf-8')
         return s
-    
+
     def decode(self, packet):
         if len(packet) <= 7:
             raise ValueError("too few data to extract a packet")
-        
+
         ## Message Type
         ## type: 8-bit char[]
         ## byte length : 2
-        self.message = packet[0:2]
+        self.message = packet[0:2].decode('ascii')
         ## Message Type
         ## type: 8-bit byte
         ## byte length : 1
-        (self.channel,) = unpack('>B', packet[2])
+        (self.channel,) = unpack('>B', packet[2:3])
         ## Data length
         ## type: 32-bit signed int (big-endian)
         ## byte 4
@@ -127,22 +130,21 @@ class Packet(object):
         ## Data
         ## type: 8-bit char[N]
         ## byte length : N
-        str = packet[7:7+datalength]
-        self.data = str.decode('utf-8')
-        
+        self.data = packet[7:7+datalength].decode('utf-8')
+
     @staticmethod
     def decodeIncomingPacketSize(packet):
         ## Data length
         ## type: 32-bit signed int (big-endian)
         ## byte 4
         return unpack('>i', packet[3:7])[0]
-    
+
     def getMessageTypeAsStr(self):
         return MessageType.type2str(self.message)
-    
+
     def getChannelTypeAsStr(self):
         return ChannelType.type2str(self.channel)
-    
+
     def __str__(self):
         return "[Message: %s], [Channel: %s], [Data: %s]" % (self.getMessageTypeAsStr(), self.getChannelTypeAsStr(), self.data)
 
@@ -156,14 +158,14 @@ class Client(asyncore.dispatcher_with_send):
         self._port = port
         self._password = password
         self.keepalive = keepalive
-        self._buffer_in = ''
+        self._buffer_in = b''
         self.authed = False
         self.server_version = None
         self.last_pong_time = self.last_ping_time = time.time()
         self._handlers = set()
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect( (self._host, self._port) )
-        
+
     def handle_connect(self):
         self.console.verbose('now connected to Homefront gameserver')
         self.login()
@@ -187,21 +189,21 @@ class Client(asyncore.dispatcher_with_send):
             for handler in self._handlers:
                 try:
                     handler(p)
-                except Exception, err:
+                except Exception as err:
                     self.console.exception(err)
             p = self._readPacket()
 
     def add_listener(self, handler):
         self._handlers.add(handler)
         return self
-    
+
     def remove_listener(self, handler):
         try:
             self._handlers.remove(handler)
         except:
             raise ValueError("handler is not handling this event, so cannot unhandle it")
-        return self            
-            
+        return self
+
     def login(self):
         """
         Authenticate to the server
@@ -229,9 +231,9 @@ class Client(asyncore.dispatcher_with_send):
         try:
             self.send(packet.encode())
             self.last_ping_time = time.time()
-        except socket.error, e:
+        except socket.error as e:
             self.console.error(repr(e))
-    
+
     def command(self, text):
         """
         Send command to server.
@@ -241,9 +243,9 @@ class Client(asyncore.dispatcher_with_send):
         packet.data = text
         try:
             self.send(packet.encode())
-        except socket.error, e:
+        except socket.error as e:
             self.console.error(repr(e))
-        
+
     def _readPacket(self):
         if len(self._buffer_in) > 7:
             packetlength = Packet.decodeIncomingPacketSize(self._buffer_in)
@@ -261,7 +263,7 @@ class Client(asyncore.dispatcher_with_send):
             self.authed = True
         elif p.channel == ChannelType.SERVER and p.data.startswith("HELLO: "):
             self.server_version = p.data[7:]
-            
+
 ########################################################################################################################
 # EXAMPLE PROGRAM                                                                                                      #
 ########################################################################################################################

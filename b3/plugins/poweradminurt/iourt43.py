@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -210,7 +209,7 @@ class Poweradminurt43Plugin(Poweradminurt41Plugin):
         if client:
             client.message('^7game type changed to ^4Freeze Tag')
         self.set_configmode('freeze')
-        
+
     def cmd_pagungame(self, data, client, cmd=None):
         """
         Change game type to Gungame
@@ -284,7 +283,7 @@ class Poweradminurt43Plugin(Poweradminurt41Plugin):
         elif data.lower() == 'off':
             self.console.setCvar('g_instagib', 0)
             self.console.say('^7Instagib: ^1OFF')
-    
+
     def cmd_pahardcore(self, data, client, cmd=None):
         """
         Set the g_hardcore <on/off>
@@ -300,7 +299,7 @@ class Poweradminurt43Plugin(Poweradminurt41Plugin):
         elif data.lower() == 'off':
             self.console.setCvar('g_hardcore', 0)
             self.console.say('^7Hardcore: ^1OFF')
-            
+
     def cmd_pastamina(self, data, client, cmd=None):
         """
         Set the stamina behavior <default/regain/infinite>
@@ -353,9 +352,9 @@ class Poweradminurt43Plugin(Poweradminurt41Plugin):
         if not data:
             self.printgear(client=client, cmd=cmd)
             # display help text
-            client.message('^7Usage: ^3!^7pagear [+/-][%s]' % '|'.join(self._weapons.keys()))
-            client.message('^7Load weapon groups: ^3!^7pagear [+/-][%s]' % '|'.join(self._weapon_groups.keys()))
-            client.message('^7Load defaults: ^3!^7pagear [%s]' % '|'.join(self._gears.keys()))
+            client.message('^7Usage: ^3!^7pagear [+/-][%s]' % '|'.join(list(self._weapons.keys())))
+            client.message('^7Load weapon groups: ^3!^7pagear [+/-][%s]' % '|'.join(list(self._weapon_groups.keys())))
+            client.message('^7Load defaults: ^3!^7pagear [%s]' % '|'.join(list(self._gears.keys())))
             return
 
         def update_gear(gear_set, param_data):
@@ -368,7 +367,7 @@ class Poweradminurt43Plugin(Poweradminurt41Plugin):
             cleaned_data = re.sub(r'\s', "", param_data)
 
             # set a predefined gear
-            if cleaned_data in self._gears.keys():
+            if cleaned_data in list(self._gears.keys()):
                 gear_set.clear()
                 gear_set.add(self._gears[cleaned_data])
                 return
@@ -500,7 +499,7 @@ class Poweradminurt43Plugin(Poweradminurt41Plugin):
         if sclient.team == b3.TEAM_SPEC:
             client.message("%s is a spectator! - Can't set substitute status" % sclient.name)
             return
-    
+
         self.console.write("forcesub %s" % sclient.cid)
 
         # only give  notice if the client is not the admin who issued the command:
@@ -532,7 +531,7 @@ class Poweradminurt43Plugin(Poweradminurt41Plugin):
     def getTime(self):
         """ just to ease automated tests """
         return self.console.time()
-    
+
     def get_weapon_code(self, name):
         """
         try its best to guess the weapon code given a name.

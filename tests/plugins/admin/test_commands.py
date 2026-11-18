@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,13 +21,13 @@
 #                                                                     #
 # ################################################################### #
 
-import thread
+import _thread
 import time
 import sys
 
 from b3 import TEAM_RED
 from mockito import when, any as whatever
-from mock import Mock, patch, call, ANY
+from unittest.mock import Mock, patch, call, ANY
 from b3.fake import FakeClient
 from b3.config import CfgConfigParser
 from b3.plugins.admin import Command
@@ -84,6 +83,7 @@ class Test_misc_cmd(Admin_TestCase):
 
     def test_maps(self):
         mock_client = Mock(spec=Client, name="client")
+        mock_client.maxLevel = 100
         mock_cmd = Mock(spec=Command)
 
         # None
@@ -750,7 +750,7 @@ class Test_cmd_lastbans(CommandTestCase):
         # WHEN
         self.lastbans()
         # THEN
-        self.mock_command.sayLoudOrPM.assert_called_once_with(self.player, u'^2@1^7 Bill^7^7 (Perm)')
+        self.mock_command.sayLoudOrPM.assert_called_once_with(self.player, '^2@1^7 Bill^7^7 (Perm)')
 
     def test_one_ban_with_reason(self):
         # GIVEN
@@ -761,7 +761,7 @@ class Test_cmd_lastbans(CommandTestCase):
         # WHEN
         self.lastbans()
         # THEN
-        self.mock_command.sayLoudOrPM.assert_called_once_with(self.player, u'^2@1^7 Bill^7^7 (Perm) test reason')
+        self.mock_command.sayLoudOrPM.assert_called_once_with(self.player, '^2@1^7 Bill^7^7 (Perm) test reason')
 
     def test_two_bans_with_reason(self):
         # GIVEN
@@ -779,8 +779,8 @@ class Test_cmd_lastbans(CommandTestCase):
         self.lastbans()
         # THEN
         self.mock_command.sayLoudOrPM.assert_has_calls([
-            call(self.player, u'^2@1^7 P1^7^7 (Perm) test reason'),
-            call(self.player, u'^2@2^7 P2^7^7 (2 minutes remaining) test reason f00'),
+            call(self.player, '^2@1^7 P1^7^7 (Perm) test reason'),
+            call(self.player, '^2@2^7 P2^7^7 (2 minutes remaining) test reason f00'),
         ])
 
 class Test_cmd_baninfo(Admin_functional_test):
@@ -1013,7 +1013,7 @@ class Test_cmd_lastbans(Admin_functional_test):
         self.joe.says('!tempban mike 5h test reason')
         self.joe.says('!lastbans')
         # THEN
-        self.joe.message.assert_called_with(u'^2@2^7 Mike^7^7 (5 hours remaining) test reason')
+        self.joe.message.assert_called_with('^2@2^7 Mike^7^7 (5 hours remaining) test reason')
         # WHEN
         self.joe.says('!unban @2')
         self.joe.says('!lastbans')
@@ -1224,7 +1224,7 @@ def _start_new_thread(callable, args_list, kwargs_dict):
     callable(*args_list, **kwargs_dict)
 
 @patch.object(time, "sleep")
-@patch.object(thread, "start_new_thread", wraps=_start_new_thread)
+@patch.object(_thread, "start_new_thread", wraps=_start_new_thread)
 class Test_cmd_rules(Admin_functional_test):
     def setUp(self):
         Admin_functional_test.setUp(self)
@@ -1436,7 +1436,7 @@ class Test_cmd_regulars(Admin_functional_test):
 
 
 class Test_cmd_map(Admin_functional_test):
-    
+
     def setUp(self):
         Admin_functional_test.setUp(self)
         self.init()
@@ -1460,8 +1460,8 @@ class Test_cmd_map(Admin_functional_test):
         when(self.console).changeMap('f00').thenReturn(None)
         self.joe.says('!map f00')
         self.assertEqual(0, self.joe.message.call_count)
-        
-        
+
+
 class Test_cmd_register(Admin_functional_test):
     def setUp(self):
         Admin_functional_test.setUp(self)
@@ -1651,11 +1651,11 @@ message: ^1WARNING^7 [^3$warnings^7]: $reason
             call('^1WARNING^7 [^31^7]: Mike^7^7, ^7behave yourself'),
             call('^1WARNING^7 [^32^7]: Mike^7^7, ^7behave yourself'),
             call('^1WARNING^7 [^33^7]: Mike^7^7, ^7behave yourself'),
-            call(u'^1ALERT^7: Mike^7^7 auto-kick from warnings if not cleared [^33^7] ^7behave yourself'),
+            call('^1ALERT^7: Mike^7^7 auto-kick from warnings if not cleared [^33^7] ^7behave yourself'),
         ], self.say_mock.mock_calls)
         # THEN Mike was kicked for having too many warnings
         self.assertListEqual([
-            call(u'^7too many warnings: ^7behave yourself', u'None', 6, self.joe, False, '')
+            call('^7too many warnings: ^7behave yourself', 'None', 6, self.joe, False, '')
         ], mike_tempban_mock.mock_calls)
         # THEN No private message was sent
         self.assertListEqual([], self.joe.message_history)
@@ -1680,11 +1680,11 @@ message: ^1WARNING^7 [^3$warnings^7]: $reason
             call('^1WARNING^7 [^31^7]: Mike^7^7, ^7behave yourself'),
             call('^1WARNING^7 [^32^7]: Mike^7^7, ^7behave yourself'),
             call('^1WARNING^7 [^33^7]: Mike^7^7, ^7behave yourself'),
-            call(u'^1ALERT^7: Mike^7^7 auto-kick from warnings if not cleared [^33^7] ^7behave yourself'),
+            call('^1ALERT^7: Mike^7^7 auto-kick from warnings if not cleared [^33^7] ^7behave yourself'),
         ], self.say_mock.mock_calls)
         # THEN Mike was kicked for having too many warnings
         self.assertListEqual([
-            call(u'^7too many warnings: ^7behave yourself', u'None', 3, self.joe, False, '')
+            call('^7too many warnings: ^7behave yourself', 'None', 3, self.joe, False, '')
         ], mike_tempban_mock.mock_calls)
         # THEN No private message was sent
         self.assertListEqual([], self.joe.message_history)

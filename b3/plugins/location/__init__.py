@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -33,11 +32,11 @@ import b3.events
 import math
 
 from b3.functions import getCmd
-from ConfigParser import NoOptionError
+from configparser import NoOptionError
 
 
 class LocationPlugin(b3.plugin.Plugin):
-    
+
     _adminPlugin = None
     _announce = True
 
@@ -155,7 +154,7 @@ class LocationPlugin(b3.plugin.Plugin):
         if not client.location or client.location.lat is None:
             self.debug('could not compute distance: %s has not enough geolocation data', client.name)
             return False
-        
+
         if not sclient.location or sclient.location.lat is None:
             self.debug('could not compute distance: %s has not enough geolocation data', sclient.name)
             return False
@@ -166,15 +165,15 @@ class LocationPlugin(b3.plugin.Plugin):
         lon1 = float(client.location.lon)
         lat2 = float(sclient.location.lat)
         lon2 = float(sclient.location.lon)
-        
+
         ###
         # Haversine formula
         ###
-        
+
         radius = 6371  # Earth radius in Km
         dlat = math.radians(lat2 - lat1)
         dlon = math.radians(lon2 - lon1)
-        
+
         a = math.sin(dlat / 2) * math.sin(dlat / 2) + math.cos(math.radians(lat1)) \
             * math.cos(math.radians(lat2)) * math.sin(dlon / 2) * math.sin(dlon / 2)
         b = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
@@ -190,7 +189,7 @@ class LocationPlugin(b3.plugin.Plugin):
         """
         <client> - display geolocation info of the specified client
         """
-        if not data: 
+        if not data:
             client.message('^7missing data, try ^3!^7help locate')
         else:
             sclient = self._adminPlugin.findClientPrompt(data, client)
@@ -204,7 +203,7 @@ class LocationPlugin(b3.plugin.Plugin):
         """
         <client> - display the world distance between you and the given client
         """
-        if not data: 
+        if not data:
             client.message('^7missing data, try ^3!^7help distance')
         else:
             sclient = self._adminPlugin.findClientPrompt(data, client)

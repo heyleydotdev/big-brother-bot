@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -35,11 +34,11 @@ class Test_Censor_badname_default_config(Detection_TestCase):
         super(Test_Censor_badname_default_config, self).setUp()
 
         def my_info(text):
-            print("INFO\t%s" % text)
+            print(("INFO\t%s" % text))
         #self.p.info = my_info
 
         def my_warning(text):
-            print("WARNING\t%s" % text)
+            print(("WARNING\t%s" % text))
         #self.p.warning = my_warning
 
         self.p.config.load(b3.getAbsolutePath('@b3/conf/plugin_censor.xml'))

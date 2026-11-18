@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -24,7 +23,7 @@
 
 import time
 
-from mock import patch, call
+from unittest.mock import patch, call
 from mockito import when, verify
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminbf3 import Poweradminbf3Plugin

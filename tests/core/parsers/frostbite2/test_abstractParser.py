@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -24,17 +23,22 @@
 
 import logging
 import re
-import unittest2 as unittest
+import unittest
 
-from mock import Mock, patch, call
+from unittest.mock import Mock, patch, call
 from b3.clients import Client
 from b3.plugins.admin import AdminPlugin
 from b3.config import XmlConfigParser
 from b3.parsers.frostbite2.protocol import CommandFailedError
 from b3.parsers.frostbite2.abstractParser import AbstractParser
+from functools import reduce
 
 sleep_patcher = None
 def setUpModule():
+    # NOTE: the global is required: without it this assigns a local and
+    # tearDownModule never stops the patch, leaving time.sleep mocked for the
+    # whole pytest session (breaks timer based tests in other modules).
+    global sleep_patcher
     sleep_patcher = patch("time.sleep")
     sleep_patcher.start()
 
@@ -63,7 +67,7 @@ class AbstractParser_TestCase(unittest.TestCase):
 
     def tearDown(self):
         if hasattr(self, "parser"):
-            for c in self.parser.clients.values():
+            for c in list(self.parser.clients.values()):
                 if hasattr(c, 'messagequeue'):
                     c.messagequeue.queue.clear()
             del self.parser.clients
@@ -999,7 +1003,7 @@ class Test_getFullBanList(AbstractParser_TestCase):
         # verify
         mlb = self.parser.getFullBanList()
         self.assertEqual(
-            "BanlistContent[{'idType': 'name', 'seconds_left': '0', 'reason': 'Banned by admin', 'banType': 'perm', 'rounds_left': '0', 'id': 'Foo1 '}]"
+            "BanlistContent[{'idType': 'name', 'id': 'Foo1 ', 'banType': 'perm', 'seconds_left': '0', 'rounds_left': '0', 'reason': 'Banned by admin'}]"
             , repr(mlb))
         self.assertEqual(2, self.parser.write.call_count)
 
@@ -1011,8 +1015,8 @@ class Test_getFullBanList(AbstractParser_TestCase):
             )
         # verify
         mlb = self.parser.getFullBanList()
-        self.assertEqual("BanlistContent[{'idType': 'name', 'seconds_left': '0', 'reason': 'Banned by admin', 'banType': 'perm', 'rounds_left': '0', 'id': 'Foo1 '}, \
-{'idType': 'name', 'seconds_left': '0', 'reason': 'Banned by admin', 'banType': 'perm', 'rounds_left': '0', 'id': 'Foo2 '}]"
+        self.assertEqual("BanlistContent[{'idType': 'name', 'id': 'Foo1 ', 'banType': 'perm', 'seconds_left': '0', 'rounds_left': '0', 'reason': 'Banned by admin'}, \
+{'idType': 'name', 'id': 'Foo2 ', 'banType': 'perm', 'seconds_left': '0', 'rounds_left': '0', 'reason': 'Banned by admin'}]"
             , repr(mlb))
         self.assertEqual(2, self.parser.write.call_count)
 

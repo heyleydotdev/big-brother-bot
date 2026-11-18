@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,7 +21,7 @@
 #                                                                     #
 # ################################################################### #
 
-import unittest2
+import unittest
 
 from textwrap import dedent
 from mockito import when
@@ -38,7 +37,7 @@ from b3.plugins.callvote import CallvotePlugin
 from b3.parsers.iourt42 import Iourt42Parser
 from tests import logging_disabled
 
-class CallvoteTestCase(unittest2.TestCase):
+class CallvoteTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -80,6 +79,7 @@ class CallvoteTestCase(unittest2.TestCase):
 
         # make sure the admin plugin obtained by other plugins is our admin plugin
         when(self.console).getPlugin('admin').thenReturn(self.adminPlugin)
+        when(self.console).getPlugin('poweradminurt').thenReturn(None)
 
         with logging_disabled():
             from b3.fake import FakeClient

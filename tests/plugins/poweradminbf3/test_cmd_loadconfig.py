@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,9 +21,9 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import Mock, ANY
+from unittest.mock import Mock, ANY
 import os
-from mock import patch
+from unittest.mock import patch
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminbf3 import Poweradminbf3Plugin
 from tests.plugins.poweradminbf3 import Bf3TestCase

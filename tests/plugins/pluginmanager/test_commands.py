@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -25,7 +24,7 @@
 import b3
 import b3.cron
 
-from mock import Mock
+from unittest.mock import Mock
 from mockito import when
 from b3.fake import FakeClient
 from b3.plugin import Plugin

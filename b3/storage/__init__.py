@@ -37,58 +37,58 @@ class Storage(object):
 
     def getCounts(self):
         raise NotImplementedError
-    
+
     def getClient(self, client):
         raise NotImplementedError
-    
+
     def getClientsMatching(self, match):
         raise NotImplementedError
-    
+
     def setClient(self, client):
         raise NotImplementedError
-    
+
     def setClientAlias(self, alias):
         raise NotImplementedError
-    
+
     def getClientAlias(self, alias):
         raise NotImplementedError
-    
+
     def getClientAliases(self, client):
         raise NotImplementedError
-    
+
     def setClientIpAddress(self, ipalias):
         raise NotImplementedError
-    
+
     def getClientIpAddress(self, ipalias):
         raise NotImplementedError
-    
+
     def getClientIpAddresses(self, client):
         raise NotImplementedError
-    
+
     def getLastPenalties(self, types='Ban', num=5):
         raise NotImplementedError
 
     def setClientPenalty(self, penalty):
         raise NotImplementedError
-    
+
     def getClientPenalty(self, penalty):
         raise NotImplementedError
-    
+
     def getClientPenalties(self, client, type='Ban'):
         raise NotImplementedError
-    
+
     def getClientLastPenalty(self, client, type='Ban'):
         raise NotImplementedError
-    
+
     def getClientFirstPenalty(self, client, type='Ban'):
         raise NotImplementedError
-    
+
     def disableClientPenalties(self, client, type='Ban'):
         raise NotImplementedError
-    
+
     def numPenalties(self, client, type='Ban'):
         raise NotImplementedError
-    
+
     def getGroups(self):
         raise NotImplementedError
 
@@ -104,9 +104,9 @@ class Storage(object):
     def status(self):
         raise NotImplementedError
 
-from mysql import MysqlStorage
-from sqlite import SqliteStorage
-from postgresql import PostgresqlStorage
+from .mysql import MysqlStorage
+from .sqlite import SqliteStorage
+from .postgresql import PostgresqlStorage
 
 def getStorage(dsn, dsnDict, console):
     """

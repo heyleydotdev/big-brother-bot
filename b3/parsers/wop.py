@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -26,7 +25,6 @@ __author__ = 'xlr8or'
 __version__ = '1.5'
 
 import re
-import string
 import b3
 import b3.events
 import b3.parsers.punkbuster
@@ -104,7 +102,7 @@ class WopParser(AbstractParser):
         # Item: 3 ammo_spray_n
         re.compile(r'^(?P<action>[a-z]+):\s*(?P<data>.*)$', re.IGNORECASE)
     )
-    
+
     # status
     # map: wop_huette
     # num score ping name            lastmsg address               qport rate
@@ -123,7 +121,7 @@ class WopParser(AbstractParser):
                             r'(?P<port>[0-9-]+)\s+'
                             r'(?P<qport>[0-9]+)\s+'
                             r'(?P<rate>[0-9]+)$', re.IGNORECASE)
-    
+
     _reColor = re.compile(r'(\^.)|[\x00-\x20]|[\x7E-\xff]')
 
     MOD_UNKNOWN = '0'
@@ -206,7 +204,7 @@ class WopParser(AbstractParser):
         :param info: The infostring to be parsed.
         """
         # 3 n\Dr.Schraube\t\0\model\padman/padsoldier_red\hmodel\padman/padsoldier_red\c1\4\c2\1\hc\100\w\0\l\0\tt\...
-        player_id, info = string.split(info, ' ', 1)
+        player_id, info = info.split(' ', 1)
 
         if info[:1] != '\\':
             info += '\\'
@@ -292,12 +290,12 @@ class WopParser(AbstractParser):
                 self._clientConnectGuid = None
                 bclient['ip'] = self._clientConnectIp
                 self._clientConnectIp = None
-            
+
             if client:
                 # update existing client
-                bclient['cl_guid'] = client.guid 
+                bclient['cl_guid'] = client.guid
                 bclient['ip'] = client.ip
-                for k, v in bclient.iteritems():
+                for k, v in bclient.items():
                     setattr(client, k, v)
             else:
                 # make a new client
@@ -333,7 +331,7 @@ class WopParser(AbstractParser):
 
     def OnSay(self, action, data, match=None):
         # 3:59 say: XLR8or: general chat
-        msg = string.split(data, ': ', 1)
+        msg = data.split(': ', 1)
         if not len(msg) == 2:
             return None
 
@@ -347,7 +345,7 @@ class WopParser(AbstractParser):
 
     def OnSayteam(self, action, data, match=None):
         # 4:06 sayteam: XLR8or: teamchat
-        msg = string.split(data, ': ', 1)
+        msg = data.split(': ', 1)
         if not len(msg) == 2:
             return None
 
@@ -389,7 +387,7 @@ class WopParser(AbstractParser):
         24:   MOD_GRAPPLE, Killed by grapple, not used in WoP
         """
         self.debug('OnKill: %s (%s)' % (match.group('aweap'), match.group('text')))
-        
+
         victim = self.clients.getByCID(match.group('cid'))
         if not victim:
             self.debug('No victim')
@@ -409,7 +407,7 @@ class WopParser(AbstractParser):
         else:
             attacker = self.clients.getByCID(match.group('acid'))
         ## end fix attacker
-          
+
         if not attacker:
             self.debug('No attacker')
             return None
@@ -436,14 +434,14 @@ class WopParser(AbstractParser):
         # if not logging damage we need a general hitloc (for xlrstats)
         if not hasattr(victim, 'hitloc'):
             victim.hitloc = 'body'
-        
+
         victim.state = b3.STATE_DEAD
         # need to pass some amount of damage for the teamkill plugin - 100 is a kill
         return self.getEvent(eventkey, (100, weapon, victim.hitloc, damagetype), attacker, victim)
 
     def OnItem(self, action, data, match=None):
         # Item: 5 weapon_betty
-        cid, item = string.split(data, ' ', 1)
+        cid, item = data.split(' ', 1)
         client = self.clients.getByCID(cid)
         if client:
             return self.getEvent('EVT_CLIENT_ITEM_PICKUP', item, client)

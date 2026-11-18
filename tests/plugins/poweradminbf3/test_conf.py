@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -24,7 +23,7 @@
 
 import logging
 from textwrap import dedent
-from mock import Mock, call
+from unittest.mock import Mock, call
 
 from b3.plugins.poweradminbf3 import Poweradminbf3Plugin, __file__ as poweradminbf3_file
 from b3.config import CfgConfigParser

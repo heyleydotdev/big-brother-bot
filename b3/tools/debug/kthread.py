@@ -68,16 +68,16 @@ class KThread(threading.Thread):
     self.killed = True
 
 if __name__ == '__main__':
-    
+
     def func():
         print('Function started')
-        for i in xrange(1000000):
+        for i in range(1000000):
             pass
         print('Function finished')
 
     A = KThread(target=func)
     A.start()
-    for i in xrange(1000):
+    for i in range(1000):
       pass
     A.kill()
 

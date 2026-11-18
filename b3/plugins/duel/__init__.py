@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -73,7 +72,7 @@ class DuelPlugin(b3.plugin.Plugin):
         """
         if event.client and event.client.isvar(self, 'duelling'):
             duels = event.client.var(self, 'duelling', {}).value
-            for duel in duels.values():
+            for duel in list(duels.values()):
                 if (duel.clientA == event.client and duel.clientB == event.target) or \
                     (duel.clientB == event.client and duel.clientA == event.target):
                     duel.registerKillEvent(event)
@@ -86,12 +85,12 @@ class DuelPlugin(b3.plugin.Plugin):
             self.debug('client disconnecting : %r' % event.client)
             for c in self.console.clients.getList():
                 duels = c.var(self, 'duelling', {}).value
-                for duel in duels.values():
+                for duel in list(duels.values()):
                     if duel.clientA == event.client or duel.clientB == event.client:
                         duel.announceScoreTo(duel.clientA)
                         duel.announceScoreTo(duel.clientB)
                         self.cancelDuel(duel)
-    
+
     def onRoundEnd(self, _):
         """
         Executed when EVT_GAME_ROUND_END is received.
@@ -137,7 +136,7 @@ class DuelPlugin(b3.plugin.Plugin):
         :param client: the client we want to notice Duel scores.
         """
         duels = client.var(self, 'duelling', {}).value
-        for duel in duels.values():
+        for duel in list(duels.values()):
             duel.announceScoreTo(client)
 
     ####################################################################################################################
@@ -158,7 +157,7 @@ class DuelPlugin(b3.plugin.Plugin):
         x = self.adminPlugin.parseUserCmd(data)
         if not x:
             if len(duels) == 1:
-                self.cancelDuel(duels.values()[0])
+                self.cancelDuel(list(duels.values())[0])
             else:
                 client.message('^7You have ^3%s ^7duels running, type ^3!^7duelcancel <name>' % len(duels))
         else:
@@ -173,7 +172,7 @@ class DuelPlugin(b3.plugin.Plugin):
                 client.message('^7You have no duel with %s^7: cannot cancel!' % opponent.exactName)
             else:
                 self.cancelDuel(duels[opponent])
-                
+
     def cmd_duelreset(self, data, client, _):
         """
         [<name>] - reset scores for a duel you started
@@ -186,7 +185,7 @@ class DuelPlugin(b3.plugin.Plugin):
         x = self.adminPlugin.parseUserCmd(data)
         if not x:
             if len(duels) == 1:
-                duels.values()[0].resetScores()
+                list(duels.values())[0].resetScores()
             else:
                 client.message('^7You have ^3%s ^7duels running, type ^3!^7duelreset <name>' % len(duels))
         else:
@@ -278,7 +277,7 @@ class Duel(object):
     clientB = None                       # the player who accept the duel
     scores = {}                          # duel scores
     status = STATUS_WAITING_AGREEMENT    # current duel status
-    
+
     def __init__(self, clientA, clientB):
         """
         Initialize the Duel instance
@@ -300,7 +299,7 @@ class Duel(object):
         self.scores = {clientA: 0, clientB: 0}
         self.clientB.message('%s ^7proposes a duel: '
                              'to accept type ^3!^7duel %s' % (self.clientA.exactName, self.clientA.name.lower()))
-    
+
     def acceptDuel(self):
         """
         Accept a proposed duel.
@@ -309,7 +308,7 @@ class Duel(object):
         self.clientA.message('%s^7 is now duelling with you' % self.clientB.exactName)
         self.clientB.message('^7You accepted %s^7\'s duel' % self.clientA.exactName)
         self.resetScores()
-    
+
     def resetScores(self):
         """
         Reset current duel scores and announce them.
@@ -317,7 +316,7 @@ class Duel(object):
         self.scores = {self.clientA: 0, self.clientB: 0}
         self.announceScoreTo(self.clientA)
         self.announceScoreTo(self.clientB)
-        
+
     def registerKillEvent(self, event):
         """
         Handle a kill event.
@@ -332,7 +331,7 @@ class Duel(object):
             self.scores[event.client] += 1
             self.announceScoreTo(event.client)
             self.announceScoreTo(event.target)
-            
+
     def announceScoreTo(self, client):
         """
         Announce duel score to the given client.

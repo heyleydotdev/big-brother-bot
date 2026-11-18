@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,13 +21,12 @@
 #                                                                     #
 # ################################################################### #
 
-import string
 import b3.events
 import b3.plugin
 
-from b3.functions import hash_password
+from b3.functions import hash_password  # python 3: md5 needs bytes, see encode() calls below
 from b3.clients import Client
-from ConfigParser import NoOptionError
+from configparser import NoOptionError
 
 __author__ = 'Tim ter Laak'
 __version__ = '1.4'
@@ -134,7 +132,7 @@ class LoginPlugin(b3.plugin.Plugin):
             return
 
         if data:
-            digest = hash_password(data)
+            digest = hash_password(data.encode('utf-8'))
             client_from_db = self._get_client_from_db(client.id)
             if digest == client_from_db.password:
                 client.setvar(self, 'loggedin', 1)
@@ -145,7 +143,7 @@ class LoginPlugin(b3.plugin.Plugin):
         else:
             message = 'Usage (via console): %s %s !login yourpassword' % (self._pmcomm, client.cid)
             client.message(message)
-        
+
     def cmd_setpassword(self, data, client, cmd=None):
         """
         <password> [<client>] - set a password for a client
@@ -154,7 +152,7 @@ class LoginPlugin(b3.plugin.Plugin):
             client.message('Usage: %s%s <new password> [<client>]' % (cmd.prefix, cmd.command))
             return
 
-        data = string.split(data)
+        data = data.split()
         if len(data) > 1:
             sclient = self._adminPlugin.findClientPrompt(data[1], client)
             if not sclient:
@@ -165,7 +163,7 @@ class LoginPlugin(b3.plugin.Plugin):
         else:
             sclient = client
 
-        sclient.password = hash_password(data[0])
+        sclient.password = hash_password(data[0].encode('utf-8'))
         sclient.save()
         if client == sclient:
             client.message("Your new password has been saved")

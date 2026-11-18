@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -31,7 +30,7 @@ import b3.cron
 import b3.functions
 import b3.plugin
 import os
-import thread
+import _thread
 
 from b3.functions import clamp
 
@@ -105,7 +104,7 @@ class NickregPlugin(b3.plugin.Plugin):
         """
         Handle EVT_CLIENT_NAME_CHANGE.
         """
-        thread.start_new_thread(self.check_client_for_nick_steal, (event.client,))
+        _thread.start_new_thread(self.check_client_for_nick_steal, (event.client,))
 
     ####################################################################################################################
     #                                                                                                                  #
@@ -182,7 +181,7 @@ class NickregPlugin(b3.plugin.Plugin):
     #   COMMANDS                                                                                                       #
     #                                                                                                                  #
     ####################################################################################################################
-                            
+
     def cmd_listnick(self, data, client, cmd=None):
         """
         [<client>] - list registered nicknames
@@ -210,7 +209,7 @@ class NickregPlugin(b3.plugin.Plugin):
                 cursor.moveNext()
             cmd.sayLoudOrPM(client, '^7%s ^7has registered nickname(s): %s' % (sclient.name, ', '.join(registered)))
             cursor.close()
-        
+
     def cmd_regnick(self, data, client, cmd=None):
         """
         - register current name as yours

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -59,7 +58,7 @@ __version__ = '2.8.1'
 
 import time
 import threading
-import Queue
+import queue
 import b3.clients
 import b3.events
 
@@ -93,7 +92,7 @@ BUILD_NUMBER_R17 = 560541
 class Bfbc2Parser(AbstractParser):
 
     gameName = 'bfbc2'
-    saybigqueue = Queue.Queue()
+    saybigqueue = queue.Queue()
     saybigqueuelistener = None
 
     _gameServerVars = (
@@ -150,7 +149,7 @@ class Bfbc2Parser(AbstractParser):
         """
         self.info('connecting all players...')
         plist = self.getPlayerList()
-        for cid, p in plist.iteritems():
+        for cid, p in plist.items():
             client = self.clients.getByCID(cid)
             if not client:
                 name = p['name']
@@ -182,7 +181,7 @@ class Bfbc2Parser(AbstractParser):
         if version[0] != 'BFBC2':
             raise Exception("the bfbc2 parser can only work with BattleField Bad Company 2")
         if int(version[1]) < BUILD_NUMBER_R9:
-            raise SystemExit("this bfbc2 parser requires a BFBC2 server R9 or later") 
+            raise SystemExit("this bfbc2 parser requires a BFBC2 server R9 or later")
 
     def getEasyName(self, mapname):
         """
@@ -494,7 +493,7 @@ class Bfbc2Parser(AbstractParser):
         2) if we got a level name
             if the level is not in the current rotation list, then add it to 
             the map list and load it
-        """        
+        """
         supportedMaps = self.getSupportedMaps()
         if mapname not in supportedMaps:
             match = self.getMapsSoundingLike(mapname)
@@ -502,7 +501,7 @@ class Bfbc2Parser(AbstractParser):
                 mapname = match[0]
             else:
                 return match
-            
+
         if mapname in supportedMaps:
             levelnames = self.write(('mapList.list',))
             if mapname not in levelnames:
@@ -520,7 +519,7 @@ class Bfbc2Parser(AbstractParser):
                 nextIndex = 0
                 while nextIndex < len(levelnames) and levelnames[nextIndex] != mapname:
                     nextIndex += 1
-            
+
             self.say('Changing map to %s' % mapname)
             time.sleep(1)
             self.write(('mapList.nextLevelIndex', nextIndex))
@@ -550,13 +549,13 @@ def frostbiteClientMessageBigMethod(self, msg):
     if msg and len(msg.strip())>0:
         # do we have a queue?
         if not hasattr(self, 'messagebigqueue'):
-            self.messagebigqueue = Queue.Queue()
+            self.messagebigqueue = queue.Queue()
         # fill the queue
         text = self.console.stripColors(self.console.msgPrefix + ' [pm] ' + msg)
         for line in self.console.getWrap(text):
             self.messagebigqueue.put(line)
         # create a thread that executes the worker and pushes out the queue
-        if not hasattr(self, 'messagebighandler') or not self.messagebighandler.isAlive():
+        if not hasattr(self, 'messagebighandler') or not self.messagebighandler.is_alive():
             self.messagebighandler = threading.Thread(target=self.messagebigqueueworker)
             self.messagebighandler.setDaemon(True)
             self.messagebighandler.start()

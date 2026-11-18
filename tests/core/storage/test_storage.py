@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,7 +21,7 @@
 #                                                                     #
 # ################################################################### #
 
-import unittest2 as unittest
+import unittest
 
 from b3.functions import splitDSN
 from b3.storage import Storage
@@ -30,7 +29,7 @@ from b3.storage import getStorage
 from b3.storage.sqlite import SqliteStorage
 from b3.storage.mysql import MysqlStorage
 from b3.storage.postgresql import PostgresqlStorage
-from mock import Mock
+from unittest.mock import Mock
 from tests import B3TestCase
 
 is_mysql_ready = True

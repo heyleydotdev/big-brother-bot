@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -27,11 +26,11 @@ import b3
 import imp
 import logging
 import os
-from ConfigParser import NoOptionError
+from configparser import NoOptionError
 
-from mock import patch
-from mock import call
-from mock import ANY
+from unittest.mock import patch
+from unittest.mock import call
+from unittest.mock import ANY
 from mockito import when
 
 from b3.config import CfgConfigParser
@@ -70,7 +69,7 @@ class MyPlugin(Plugin):
 
 
 class Test_Plugin_getMessage(B3TestCase):
-    
+
     def setUp(self):
         B3TestCase.setUp(self)
         self.conf = CfgConfigParser()
@@ -200,9 +199,9 @@ class Test_Plugin_registerEvent(B3TestCase):
         p = MyPlugin(self.console, self.conf)
         p.registerEvent(k)
         # THEN
-        self.assertIn(k, self.console._handlers.keys())
+        self.assertIn(k, list(self.console._handlers.keys()))
         self.assertIn(p, self.console._handlers[k])
-        self.assertIn(k, p.eventmap.keys())
+        self.assertIn(k, list(p.eventmap.keys()))
         # WHEN
         self.console.queueEvent(Event(k, None))
         # THEN
@@ -216,9 +215,9 @@ class Test_Plugin_registerEvent(B3TestCase):
         p = MyPlugin(self.console, self.conf)
         p.registerEvent(k, p.stub_not_callable)
         # THEN
-        self.assertIn(k, self.console._handlers.keys())
+        self.assertIn(k, list(self.console._handlers.keys()))
         self.assertIn(p, self.console._handlers[k])
-        self.assertNotIn(k, p.eventmap.keys())
+        self.assertNotIn(k, list(p.eventmap.keys()))
         # WHEN
         self.console.queueEvent(Event(k, None))
         # THEN
@@ -232,9 +231,9 @@ class Test_Plugin_registerEvent(B3TestCase):
         p = MyPlugin(self.console, self.conf)
         p.registerEvent(k, p.stub_method)
         # THEN
-        self.assertIn(k, self.console._handlers.keys())
+        self.assertIn(k, list(self.console._handlers.keys()))
         self.assertIn(p, self.console._handlers[k])
-        self.assertIn(k, p.eventmap.keys())
+        self.assertIn(k, list(p.eventmap.keys()))
         self.assertIn(p.stub_method, p.eventmap[k])
         # WHEN
         self.console.queueEvent(Event(k, None))
@@ -250,9 +249,9 @@ class Test_Plugin_registerEvent(B3TestCase):
         p.registerEvent(k, p.stub_method)
         p.registerEvent(k, p.stub_method2)
         # THEN
-        self.assertIn(k, self.console._handlers.keys())
+        self.assertIn(k, list(self.console._handlers.keys()))
         self.assertIn(p, self.console._handlers[k])
-        self.assertIn(k, p.eventmap.keys())
+        self.assertIn(k, list(p.eventmap.keys()))
         self.assertIn(p.stub_method, p.eventmap[k])
         self.assertIn(p.stub_method2, p.eventmap[k])
         # WHEN
@@ -269,9 +268,9 @@ class Test_Plugin_registerEvent(B3TestCase):
         p.registerEvent(k, p.stub_method)
         p.registerEvent(k, p.stub_not_callable)
         # THEN
-        self.assertIn(k, self.console._handlers.keys())
+        self.assertIn(k, list(self.console._handlers.keys()))
         self.assertIn(p, self.console._handlers[k])
-        self.assertIn(k, p.eventmap.keys())
+        self.assertIn(k, list(p.eventmap.keys()))
         self.assertIn(p.stub_method, p.eventmap[k])
         self.assertNotIn(p.stub_method2, p.eventmap[k])
         # WHEN
@@ -287,9 +286,9 @@ class Test_Plugin_registerEvent(B3TestCase):
         p = MyPlugin(self.console, self.conf)
         p.registerEvent(k, p.stub_method, p.stub_method2)
         # THEN
-        self.assertIn(k, self.console._handlers.keys())
+        self.assertIn(k, list(self.console._handlers.keys()))
         self.assertIn(p, self.console._handlers[k])
-        self.assertIn(k, p.eventmap.keys())
+        self.assertIn(k, list(p.eventmap.keys()))
         self.assertIn(p.stub_method, p.eventmap[k])
         self.assertIn(p.stub_method2, p.eventmap[k])
         # WHEN
@@ -305,9 +304,9 @@ class Test_Plugin_registerEvent(B3TestCase):
         p = MyPlugin(self.console, self.conf)
         p.registerEvent(k, p.stub_method, p.stub_not_callable)
         # THEN
-        self.assertIn(k, self.console._handlers.keys())
+        self.assertIn(k, list(self.console._handlers.keys()))
         self.assertIn(p, self.console._handlers[k])
-        self.assertIn(k, p.eventmap.keys())
+        self.assertIn(k, list(p.eventmap.keys()))
         self.assertIn(p.stub_method, p.eventmap[k])
         self.assertNotIn(p.stub_method2, p.eventmap[k])
         # WHEN
@@ -375,9 +374,9 @@ class Test_Plugin_registerEvent(B3TestCase):
         p = MyPlugin(self.console, self.conf)
         p.registerEvent(evt_name, p.stub_method)
         # THEN
-        self.assertIn(k, self.console._handlers.keys())
+        self.assertIn(k, list(self.console._handlers.keys()))
         self.assertIn(p, self.console._handlers[k])
-        self.assertIn(k, p.eventmap.keys())
+        self.assertIn(k, list(p.eventmap.keys()))
         self.assertIn(p.stub_method, p.eventmap[k])
         # WHEN
         self.console.queueEvent(Event(k, None))

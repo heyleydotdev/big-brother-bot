@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -42,6 +41,7 @@ class Test_commands(TranslatorTestCase):
             default_source_language: it
             default_target_language: en
             display_translator_name: no
+            always_loud: no
             translator_name: ^7[^1T^7]
             min_sentence_length: 6
             microsoft_client_id: fakeclientid
@@ -70,16 +70,16 @@ class Test_commands(TranslatorTestCase):
         self.bill.connects("2")
 
         # define some translations for !translate command
-        when(self.p).translate('it', 'en', 'Messaggio di prova').thenReturn('Test message')
-        when(self.p).translate('en', 'fr', 'Test message').thenReturn('Message de test')
-        when(self.p).translate('de', 'es', 'Test Meldungs').thenReturn('Mensaje de prueba')
-        when(self.p).translate('nl', 'de', 'Test Bericht').thenReturn('Test Meldungs')
-        when(self.p).translate('fr', 'en', 'Message de test').thenReturn('Test message')
-        when(self.p).translate('it', 'es', 'Messaggio di prova').thenReturn('Mensaje de prueba')
+        when(self.p).translate('Messaggio di prova', 'it', 'en').thenReturn('Test message')
+        when(self.p).translate('Test message', 'en', 'fr').thenReturn('Message de test')
+        when(self.p).translate('Test Meldungs', 'de', 'es').thenReturn('Mensaje de prueba')
+        when(self.p).translate('Test Bericht', 'nl', 'de').thenReturn('Test Meldungs')
+        when(self.p).translate('Message de test', 'fr', 'en').thenReturn('Test message')
+        when(self.p).translate('Messaggio di prova', 'it', 'es').thenReturn('Mensaje de prueba')
 
         # define some translations for !transauto and !translast command
-        when(self.p).translate('', 'en', 'Messaggio di prova').thenReturn('Test message')
-        when(self.p).translate('', 'fr', 'Messaggio di prova').thenReturn('Message de test')
+        when(self.p).translate('Messaggio di prova', to_lang='en').thenReturn('Test message')
+        when(self.p).translate('Messaggio di prova', to_lang='fr').thenReturn('Message de test')
 
     ####################################################################################################################
     #                                                                                                                  #

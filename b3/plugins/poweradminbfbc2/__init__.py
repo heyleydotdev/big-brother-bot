@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -42,13 +41,13 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
 
     _adminPlugin = None
     _enableTeamBalancer = None
-    
+
     _matchmode = False
     _match_plugin_disable = []
     _matchManager = None
-    
+
     _parseUserCmdRE = re.compile(r'^(?P<cid>[^\s]{2,}|@[0-9]+)\s?(?P<parms>.*)$')
-    
+
     _ignoreBalancingTill = 0
 
     ####################################################################################################################
@@ -73,7 +72,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
         except (b3.config.NoOptionError, ValueError):
             self._enableTeamBalancer = False
             self.debug('using default value (%s) for Teambalancer enabled', self._enableTeamBalancer)
-      
+
     def LoadMatchMode(self):
         """
         Load match mode configuration.
@@ -165,7 +164,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
                     newteam = '1'
                 try:
                     self.console.write(('admin.movePlayer', client.cid, newteam, 0, 'true'))
-                except FrostbiteCommandFailedError, err:
+                except FrostbiteCommandFailedError as err:
                     self.warning('could not move player, server replied %s' % err)
 
     def onRoundStart(self, event):
@@ -193,7 +192,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
                 self.console.write(('admin.setPlaylist', mode))
                 client.message('Server playlist changed to %s' % mode)
                 client.message('Type !map <mapname> to change server mode now')
-            except FrostbiteCommandFailedError, err:
+            except FrostbiteCommandFailedError as err:
                 client.message('Failed to change game mode. Server replied with: %s' % err)
 
     def teambalance(self):
@@ -233,14 +232,14 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
                     playerTeamTimes[c.cid] = teamTimeVar.value
 
             self.debug('playerTeamTimes: %s' % str(playerTeamTimes))
-            sortedPlayersTeamTimes = sorted(playerTeamTimes.iteritems(), key=lambda (k,v): (v,k))
+            sortedPlayersTeamTimes = sorted(iter(playerTeamTimes.items()), key=lambda k_v: (k_v[1],k_v[0]))
             self.debug('sortedPlayersTeamTimes: %s' % sortedPlayersTeamTimes)
 
             for c, teamtime in sortedPlayersTeamTimes[:howManyMustSwitch]:
                 try:
                     self.debug('forcing %s to the other team' % c.cid)
                     self.console.write(('admin.movePlayer', c.cid, smallTeam, 0, 'true'))
-                except FrostbiteCommandFailedError, err:
+                except FrostbiteCommandFailedError as err:
                     self.error(err)
 
     def getTeams(self):
@@ -249,7 +248,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
         """
         team1players = []
         team2players = []
-        for name, clientdata in self.console.getPlayerList().iteritems():
+        for name, clientdata in self.console.getPlayerList().items():
             if str(clientdata['teamId']) == '1':
                 team1players.append(name)
             elif str(clientdata['teamId']) == '2':
@@ -261,7 +260,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
     #    COMMANDS                                                                                                      #
     #                                                                                                                  #
     ####################################################################################################################
-    
+
     def cmd_pateams(self ,data , client, cmd=None):
         """
         - make the teams balanced
@@ -313,7 +312,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
                 self.debug('executing configfile = [%s]', data)
                 try:
                     self.console.write(('admin.runScript', '%s' % data))
-                except FrostbiteCommandFailedError, err:
+                except FrostbiteCommandFailedError as err:
                     self.warning('could not run script: %s' % err)
                     client.message('ERROR: %s' % str(err))
             else:
@@ -329,7 +328,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
             self.debug('executing punkbuster command = [%s]', data)
             try:
                 self.console.write(('punkBuster.pb_sv_command', '%s' % data))
-            except FrostbiteCommandFailedError, err:
+            except FrostbiteCommandFailedError as err:
                 self.warning('could not send punkbuster command: %s' % err)
                 client.message('ERROR: %s' % str(err))
 
@@ -357,7 +356,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
     def cmd_payellteam(self, data, client, cmd=None):
         """
         <msg> - yell message to all players of your team
-        """ 
+        """
         if not data:
             client.message('missing data, try !help payellteam')
         else:
@@ -368,7 +367,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
     def cmd_payellsquad(self, data, client, cmd=None):
         """
         <msg> - yell message to all players of your squad
-        """ 
+        """
         if not data:
             client.message('missing data, try !help payellsquad')
         else:
@@ -405,7 +404,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
         - this command identifies PowerAdminBFBC2 version and creator.
         """
         cmd.sayLoudOrPM(client, 'I am PowerAdminBFBC2 version %s by %s' % (__version__, __author__))
-        
+
     def cmd_pamaplist(self, data, client, cmd=None):
         """
         <maplist.txt> - load a server maplist.
@@ -438,7 +437,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
         self.console.write(('mapList.append', data))
         self.console.write(('admin.runNextLevel',))
         self.console.write(('mapList.load',))
-        
+
     def cmd_paset(self, data, client, cmd=None):
         """
         <var> <value> - set a server var to a certain value.
@@ -453,7 +452,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
                 try:
                     self.console.write(('vars.%s' % varName, value))
                     client.message('%s set' % varName)
-                except FrostbiteCommandFailedError, err:
+                except FrostbiteCommandFailedError as err:
                     client.message('ERROR setting %s : %s' % (varName, err))
 
     def cmd_paget(self, data, client, cmd=None):
@@ -477,7 +476,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
         else:
             match = self.console.getMapsSoundingLike(data)
             if len(match) > 1:
-                client.message('Do you mean: %s?' % string.join(match,', '))
+                client.message('Do you mean: %s?' % ', '.join(match))
             elif len(match) == 1:
                 levelname = match[0]
                 currentLevelCycle = self.console.write(('mapList.list',))
@@ -502,16 +501,16 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
         if not x:
             try:
                 cmd.sayLoudOrPM(client, '%s %s %s' % (client.cid, client.ip, client.guid))
-            except FrostbiteCommandFailedError, err:
+            except FrostbiteCommandFailedError as err:
                 client.message('Error, server replied %s' % err)
         else:
             try:
                 sclient = self._adminPlugin.findClientPrompt(x[0], client)
                 if sclient:
                     cmd.sayLoudOrPM(client, '%s %s %s' % (sclient.cid, sclient.ip, sclient.guid))
-            except FrostbiteCommandFailedError, err:
+            except FrostbiteCommandFailedError as err:
                 client.message('Error, server replied %s' % err)
-        
+
     def cmd_pakill(self, data, client, cmd=None):
         """
         <name> <reason> - kill a player
@@ -522,7 +521,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
         else:
             cid, keyword = m
             reason = self._adminPlugin.getReason(keyword)
-    
+
             if not reason and client.maxLevel < self._adminPlugin.config.getint('settings', 'noreason_level'):
                 client.message('ERROR: You must supply a reason')
             else:
@@ -533,7 +532,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
                         self.console.write(('admin.killPlayer', sclient.cid))
                         if reason:
                             self.console.say('%s was terminated by server admin for : %s' % (sclient.name, reason))
-                    except FrostbiteCommandFailedError, err:
+                    except FrostbiteCommandFailedError as err:
                         client.message('Error, server replied %s' % err)
 
     def cmd_pachangeteam(self, data, client, cmd=None):
@@ -549,13 +548,13 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
                 if sclient.teamId == '1':
                     newteam = '2'
                 else:
-                    newteam = '1' 
+                    newteam = '1'
                 try:
                     self.console.write(('admin.movePlayer', sclient.cid, newteam, 0, 'true'))
                     cmd.sayLoudOrPM(client, '%s forced to the other team' % sclient.cid)
-                except FrostbiteCommandFailedError, err:
+                except FrostbiteCommandFailedError as err:
                     client.message('Error, server replied %s' % err)
-        
+
     def cmd_paspectate(self, data, client, cmd=None):
         """
         [<name>] - move a player to spectate
@@ -569,10 +568,10 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
                 try:
                     self.console.write(('admin.movePlayer', sclient.cid, 0, 0, 'true'))
                     cmd.sayLoudOrPM(client, '%s forced to spectate' % sclient.name)
-                except FrostbiteCommandFailedError, err:
+                except FrostbiteCommandFailedError as err:
                     client.message('Error, server replied %s' % err)
-        
-    def cmd_pamatch(self, data, client, cmd=None): 
+
+    def cmd_pamatch(self, data, client, cmd=None):
         """
         - set server match mode on/off
         """
@@ -589,7 +588,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
                     if plugin:
                         plugin.disable()
                         client.message('plugin %s disabled' % e)
-                
+
                 self.console.say('match mode: ON')
 
                 if self._matchManager:
@@ -602,7 +601,7 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
                 if self._matchManager:
                     self._matchManager.stop()
                 self._matchManager = None
-                
+
                 # enable plugins
                 for e in self._match_plugin_disable:
                     self.debug('enabling plugin %s' %e)
@@ -613,25 +612,25 @@ class Poweradminbfbc2Plugin(b3.plugin.Plugin):
 
                 self.console.say('match mode: OFF')
 
-    def cmd_paconquest(self, data, client, cmd=None): 
+    def cmd_paconquest(self, data, client, cmd=None):
         """
         change server mode to CONQUEST
         """
         self._changeMode(data, client, cmd, mode='CONQUEST')
-        
-    def cmd_parush(self, data, client, cmd=None): 
+
+    def cmd_parush(self, data, client, cmd=None):
         """
         change server mode to RUSH
         """
         self._changeMode(data, client, cmd, mode='RUSH')
-        
-    def cmd_pasqdm(self, data, client, cmd=None): 
+
+    def cmd_pasqdm(self, data, client, cmd=None):
         """
         change server mode to SQDM
         """
         self._changeMode(data, client, cmd, mode='SQDM')
-        
-    def cmd_pasqrush(self, data, client, cmd=None): 
+
+    def cmd_pasqrush(self, data, client, cmd=None):
         """
         change server mode to SQRUSH
         """
@@ -649,14 +648,14 @@ class MatchManager(object):
     running = True
     timer = None
     countdownStarted = None
-    
+
     def __init__(self, plugin):
         self.plugin = plugin
         self.console = plugin.console
         self._adminPlugin = self.console.getPlugin('admin')
         if not self._adminPlugin:
             raise AttributeError('could not find admin plugin')
-    
+
     def stop(self):
         try:
             self.timer.cancel()
@@ -664,7 +663,7 @@ class MatchManager(object):
             pass
         self.running = False
         self.unregisterCommandReady()
-        
+
     def initMatch(self):
         """
         Initialize the match mode.
@@ -678,13 +677,13 @@ class MatchManager(object):
         self.console.saybig('ALL PLAYERS : type !ready when you are ready')
         self.timer = threading.Timer(10.0, self._checkIfEveryoneIsReady)
         self.timer.start()
-    
+
     def registerCommandReady(self):
         """
         Register the !ready command.
         """
         self._adminPlugin.registerCommand(self.plugin, 'ready', 0, self.cmd_ready)
-    
+
     def unregisterCommandReady(self):
         """
         Unregister the !ready command.
@@ -696,7 +695,7 @@ class MatchManager(object):
                 del self._adminPlugin._commands['ready']
         except KeyError:
             pass
-    
+
     def yellToClient(self, message, duration, client):
         """
         We need this to bypass the message queue managed by the BFBC2 parser.
@@ -714,15 +713,15 @@ class MatchManager(object):
                 waitingForPlayers.append(c)
                 self.yellToClient('we are waiting for you. type !ready', 10000, c)
                 isAllPlayersReady = False
-    
+
         if 0 < len(waitingForPlayers) <= 6:
             self.console.say('waiting for %s' % ', '.join([c.cid for c in waitingForPlayers]))
-        
+
         try:
             self.timer.cancel()
         except Exception:
             pass
-        
+
         if isAllPlayersReady is True:
             self.console.say('All players are ready, starting count down')
             self.countDown = 10
@@ -730,7 +729,7 @@ class MatchManager(object):
             self.timer = threading.Timer(0.9, self._countDown)
         else:
             self.timer = threading.Timer(10.0, self._checkIfEveryoneIsReady)
-            
+
         if self.running:
             self.timer.start()
 
@@ -742,14 +741,14 @@ class MatchManager(object):
             if self.running:
                 self.timer = threading.Timer(1.0, self._countDown)
                 self.timer.start()
-        else:    
+        else:
             # make sure to have a brief big text
             self.console.write(('admin.yell', 'FIGHT !!!', 6000, 'all'))
             self.console.say('Match started. GL & HF')
             self.console.write(('admin.restartMap',))
             self.stop()
 
-    def cmd_ready(self, data, client, cmd=None): 
+    def cmd_ready(self, data, client, cmd=None):
         """
         Notify other teams you are ready to start the match
         """

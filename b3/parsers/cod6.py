@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -77,7 +76,7 @@ class Cod6Parser(b3.parsers.cod4.Cod4Parser):
         Called after the parser loaded and started all plugins.
         """
         self.debug('Admin plugin not patched')
-        
+
     ####################################################################################################################
     #                                                                                                                  #
     #   EVENT HANDLERS                                                                                                 #

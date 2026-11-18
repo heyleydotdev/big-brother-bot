@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -28,19 +27,15 @@ __version__ = '3.2'
 import b3
 import b3.plugin
 import b3.events
+import importlib
 
-# translate utility that utilize google translator, support python2 & python3
-# Note that the order or arguments in the URL matters.
+# translate utility that utilize google translator
+# Note that the order of arguments in the URL matters.
 
-try:
-    from urllib import urlencode
-except ImportError:
-    from urllib.parse import urlencode
-
-try:
-    import urllib2
-except ImportError:
-    import urllib.request as urllib2
+from urllib.parse import urlencode
+import urllib.request
+import urllib.error
+import urllib.parse
 
 try:
     # only necessary if using exclude_language setting
@@ -52,8 +47,6 @@ import json
 import re
 import sys
 import time
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
 try:
     # import the getCmd function
@@ -69,7 +62,7 @@ except ImportError:
 
 
 class TranslatorPlugin(b3.plugin.Plugin):
-    
+
     adminPlugin = None
     cmdPrefix = None
 
@@ -105,7 +98,7 @@ class TranslatorPlugin(b3.plugin.Plugin):
         """
         def validate_source(x):
             """helper used to validate the source language"""
-            acceptable = self.languages.keys()
+            acceptable = list(self.languages.keys())
             acceptable.append('auto')
             if x not in acceptable and x != 'auto':
                 raise ValueError('value must be one of [%s]' % ', '.join(acceptable))
@@ -113,7 +106,7 @@ class TranslatorPlugin(b3.plugin.Plugin):
 
         def validate_target(x):
             """helper used to validate the target language"""
-            acceptable = self.languages.keys()
+            acceptable = list(self.languages.keys())
             if x not in acceptable and x != 'auto':
                 raise ValueError('value must be one of [%s]' % ', '.join(acceptable))
             return x
@@ -133,18 +126,18 @@ class TranslatorPlugin(b3.plugin.Plugin):
         Initialize plugin settings
         """
         self.adminPlugin = self.console.getPlugin('admin')
-        
+
         # register our commands
         if 'commands' in self.config.sections():
             for cmd in self.config.options('commands'):
                 level = self.config.get('commands', cmd)
                 sp = cmd.split('-')
                 alias = None
-                if len(sp) == 2: 
+                if len(sp) == 2:
                     cmd, alias = sp
 
                 func = getCmd(self, cmd)
-                if func: 
+                if func:
                     self.adminPlugin.registerCommand(self, cmd, level, func, alias)
 
         self.registerEvent('EVT_CLIENT_SAY', self.onSay)
@@ -173,22 +166,20 @@ class TranslatorPlugin(b3.plugin.Plugin):
         if len(message) < self.settings['min_sentence_length']:
             return
 
-        # check if we are not spamming requests
-        curTime = time.time()
-        if self.lastTime and curTime - self.lastTime <= self.settings['min_time_between']:
-            return
-        else:
-            # update last time with current time
-            self.lastTime = curTime
-
         # if it's not a B3 command
         if message[0] not in self.cmdPrefix:
+
+            # check if we are not spamming requests (commands do not count as chat spam)
+            curTime = time.time()
+            if self.lastTime and curTime - self.lastTime <= self.settings['min_time_between']:
+                return
+            self.lastTime = curTime
 
             # save for future use
             self.last_message_said.append(message)
             # remove old messages
-            if len(self.last_message) > self.settings['max_history']:
-                self.last_message.pop(0)
+            if len(self.last_message_said) > self.settings['max_history']:
+                self.last_message_said.pop(0)
 
             # we have now to send a translation to all the
             # clients that enabled the automatic translation
@@ -231,7 +222,7 @@ class TranslatorPlugin(b3.plugin.Plugin):
         Sanitize the given string.
         Will remove color codes, XML tags and substitute unprintable characters with their alphabetical representation.
         """
-        return re.sub('\^[0-9]', '', re.sub(r'<[^>]*>', '', s)).replace('ß', 'ss').replace('ü', 'ue').\
+        return re.sub(r'\^[0-9]', '', re.sub(r'<[^>]*>', '', s)).replace('ß', 'ss').replace('ü', 'ue').\
                replace('ö', 'oe').replace('ä', 'ae').replace('à', 'a').replace('è', 'e').replace('é', 'e').\
                replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('ç', 'c').replace('€', 'euro').\
                replace('$', 'dollar').replace('£', 'pound').replace('%', 'pc').replace('"', "''").strip()
@@ -279,10 +270,10 @@ class TranslatorPlugin(b3.plugin.Plugin):
         params.append(urlencode({'q': text}))
         url += '&'.join(params)
 
-        request = urllib2.Request(url)
+        request = urllib.request.Request(url)
         browser = "Mozilla/5.0 (X11; Linux x86_64; rv:45.0) Gecko/20100101 Firefox/45.0"
         request.add_header('User-Agent', browser)
-        response = urllib2.urlopen(request)
+        response = urllib.request.urlopen(request)
         rtn = json.loads(response.read().decode('utf8'))
         self.verbose('translation done and received, sanitizing...')
 
@@ -307,10 +298,10 @@ class TranslatorPlugin(b3.plugin.Plugin):
         params.append('tl=' + lang)
         params.append(urlencode({'q': text}))
         url += '&'.join(params)
-        request = urllib2.Request(url)
+        request = urllib.request.Request(url)
         browser = "Mozilla/5.0 (X11; Linux x86_64; rv:45.0) Gecko/20100101 Firefox/45.0"
         request.add_header('User-Agent', browser)
-        response = urllib2.urlopen(request)
+        response = urllib.request.urlopen(request)
         return response.read()
 
     def send_translation(self, client, message, cmd=None):
@@ -344,7 +335,7 @@ class TranslatorPlugin(b3.plugin.Plugin):
         """
         [<source>]*[<target>] <message> - translate a message
         """
-        if not data: 
+        if not data:
             client.message('^7missing data, try ^3!^7help translate')
             return
 
@@ -434,12 +425,12 @@ class TranslatorPlugin(b3.plugin.Plugin):
 
         # send the translation to the given client
         self.send_translation(client, message, cmd)
-    
+
     def cmd_transauto(self, data, client, cmd=None):
         """
         <on|off> - turn on/off the automatic translation
         """
-        if not data: 
+        if not data:
             client.message('^7missing data, try ^3!^7help transauto')
             return
 
@@ -460,7 +451,7 @@ class TranslatorPlugin(b3.plugin.Plugin):
         Display the list of available language codes
         """
         codes = []
-        for k, v in self.languages.items():
+        for k, v in list(self.languages.items()):
             codes.append('^2%s^7:%s' % (k, v))
 
         cmd.sayLoudOrPM(client, '^7Languages: %s' % ', '.join(codes))

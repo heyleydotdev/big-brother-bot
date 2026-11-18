@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,10 +21,10 @@
 #                                                                     #
 # ################################################################### #
 
-import unittest2 as unittest
+import unittest
 
 from b3.plugins.tk import TkPlugin, TkInfo
-from mock import Mock, sentinel
+from unittest.mock import Mock, sentinel
 
 class Test_TkInfo(unittest.TestCase):
 

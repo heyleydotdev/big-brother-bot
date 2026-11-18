@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -31,12 +30,12 @@ import b3.plugin
 import b3.events
 import os
 import re
-import StringIO
+import io
 import time
 
 from b3 import functions
 from b3.functions import sanitizeMe
-from ConfigParser import NoOptionError
+from configparser import NoOptionError
 from ftplib import FTP
 from xml.dom.minidom import Document
 
@@ -171,7 +170,7 @@ class StatusPlugin(b3.plugin.Plugin):
             self.debug('using custom value for settings/interval: %s' % self._interval)
         except NoOptionError:
             self.warning('could not find settings/interval in config file, using default: %s' % self._interval)
-        except ValueError, e:
+        except ValueError as e:
             self.error('could not load settings/interval config value: %s' % e)
             self.debug('using default value (%s) for settings/interval' % self._interval)
 
@@ -180,7 +179,7 @@ class StatusPlugin(b3.plugin.Plugin):
             self.debug('using custom value for settings/enableDBsvarSaving: %s' % self._enableDBsvarSaving)
         except NoOptionError:
             self.warning('could not find settings/enableDBsvarSaving in config file, using default: %s' % self._enableDBsvarSaving)
-        except ValueError, e:
+        except ValueError as e:
             self.error('could not load settings/enableDBsvarSaving config value: %s' % e)
             self.debug('using default value (%s) for settings/enableDBsvarSaving' % self._enableDBsvarSaving)
 
@@ -189,7 +188,7 @@ class StatusPlugin(b3.plugin.Plugin):
             self.debug('using custom value for settings/enableDBclientSaving: %s' % self._enableDBclientSaving)
         except NoOptionError:
             self.warning('could not find settings/enableDBclientSaving in config file, using default: %s' % self._enableDBclientSaving)
-        except ValueError, e:
+        except ValueError as e:
             self.error('could not load settings/enableDBclientSaving config value: %s' % e)
             self.debug('using default value (%s) for settings/enableDBclientSaving' % self._enableDBclientSaving)
 
@@ -272,7 +271,7 @@ class StatusPlugin(b3.plugin.Plugin):
         """
         clients = self.console.clients.getList()
         score_list = self.console.getPlayerScores()
-                 
+
         self.verbose('building XML status')
         xml = Document()
 
@@ -348,14 +347,14 @@ class StatusPlugin(b3.plugin.Plugin):
             self.storeServerinfo("OnlinePlayers", str(len(clients)))
             self.storeServerinfo("lastupdate", str(int(time.time())))
 
-        for k, v in self.console.game.__dict__.items():
+        for k, v in list(self.console.game.__dict__.items()):
             data = xml.createElement("Data")
             data.setAttribute("Name", str(k))
             data.setAttribute("Value", str(v))
             game.appendChild(data)
             self.storeServerinfo(k, v)
 
-        # --- End Game section        
+        # --- End Game section
 
         # --- Clients section
         b3clients = xml.createElement("Clients")
@@ -413,10 +412,10 @@ class StatusPlugin(b3.plugin.Plugin):
                     builder_key = ""
                     builder_value = ""
                     # get our attributes
-                    for k, v in client.attributes.items():
+                    for k, v in list(client.attributes.items()):
                         # build the qrystring
                         builder_key = "%s%s," % (builder_key, k)
-                        if isinstance(v, basestring):
+                        if isinstance(v, str):
                             if "'" in v:
                                 v = "%s" % v.replace("'", "\\'")
                         builder_value = "%s'%s'," % (builder_value, v)
@@ -433,38 +432,38 @@ class StatusPlugin(b3.plugin.Plugin):
 
                 b3clients.appendChild(client)
 
-                for k, v in c.data.iteritems():
+                for k, v in c.data.items():
                     data = xml.createElement("Data")
                     data.setAttribute("Name", "%s" % k)
 
                     try:
                         clean_data = sanitizeMe(str(v))
-                    except Exception, err:
+                    except Exception as err:
                         self.error("could not sanitize %r" % v, exc_info=err)
                         data.setAttribute("Value", "")
                     else:
                         data.setAttribute("Value", clean_data)
 
                     client.appendChild(data)
-                        
+
                 if self._tkPlugin:
                     if hasattr(c, 'tkplugin_points'):
                         tkplugin = xml.createElement("TkPlugin")
                         tkplugin.setAttribute("Points", str(c.var(self, 'points')))
-                        client.appendChild(tkplugin)            
+                        client.appendChild(tkplugin)
                         if hasattr(c, 'tkplugin_attackers'):
-                            for acid, points in c.var(self, 'attackers').value.items():
+                            for acid, points in list(c.var(self, 'attackers').value.items()):
                                 try:
                                     attacker = xml.createElement("Attacker")
                                     attacker.setAttribute("Name", sanitizeMe(self.console.clients[acid].name))
                                     attacker.setAttribute("CID", str(acid))
                                     attacker.setAttribute("Points", str(points))
                                     tkplugin.appendChild(attacker)
-                                except Exception, e:
+                                except Exception as e:
                                     self.warning('could not append child node in XML tree: %s' % e)
                                     pass
-                                
-            except Exception, err:
+
+            except Exception as err:
                 self.error('XML Failed: %r' % err, exc_info=err)
                 pass
 
@@ -499,7 +498,7 @@ class StatusPlugin(b3.plugin.Plugin):
         """
         if self._ftpstatus:
             self.debug('uploading XML status to FTP server')
-            ftp_file = StringIO.StringIO()
+            ftp_file = io.StringIO()
             ftp_file.write(xml)
             ftp_file.seek(0)
             ftp = FTP(self._ftpinfo['host'], self._ftpinfo['user'], passwd=self._ftpinfo['password'])

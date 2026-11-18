@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -23,12 +22,11 @@
 # ################################################################### #
 
 import os
-import sys
-import unittest2 as unittest
+import unittest
 
-from mock import Mock
-from mock import patch
-from mock import call
+from unittest.mock import Mock
+from unittest.mock import patch
+from unittest.mock import call
 from mockito import when
 from b3 import TEAM_BLUE, TEAM_FREE
 from b3 import TEAM_RED
@@ -76,7 +74,7 @@ def client_equal(client_a, client_b):
     if client_a is not None and client_b is None:
         return False
     return all(
-        map(lambda x: getattr(client_a, x, None) == getattr(client_b, x, None), ('cid', 'guid', 'name', 'ip', 'ping')))
+        [getattr(client_a, x, None) == getattr(client_b, x, None) for x in ('cid', 'guid', 'name', 'ip', 'ping')])
 
 
 WHATEVER = object()  # sentinel used in InsurgencyTestCase.assert_has_event
@@ -129,7 +127,7 @@ class InsurgencyTestCase(unittest.TestCase):
         """
         assert that self.evt_queue contains at least one event for the given type that has the given characteristics.
         """
-        assert isinstance(event_type, basestring)
+        assert isinstance(event_type, str)
         expected_event = self.parser.getEvent(event_type, data, client, target)
 
         if not len(self.evt_queue):
@@ -151,13 +149,13 @@ class InsurgencyTestCase(unittest.TestCase):
                         and (client_equal(expected_event.target, evt.target) or target == WHATEVER):
                     return
 
-            self.fail("expecting event %s. Got instead: %s" % (expected_event, map(str, self.evt_queue)))
+            self.fail("expecting event %s. Got instead: %s" % (expected_event, list(map(str, self.evt_queue))))
 
     def assert_has_not_event(self, event_type, data=None, client=None, target=None):
         """
         assert that self.evt_queue does not contain at least one event for the given type that has the given characteristics.
         """
-        assert isinstance(event_type, basestring)
+        assert isinstance(event_type, str)
         unexpected_event = self.parser.getEvent(event_type, data, client, target)
 
         if not len(self.evt_queue):
@@ -172,7 +170,7 @@ class InsurgencyTestCase(unittest.TestCase):
                 )
 
             if any(map(event_match, self.evt_queue)):
-                self.fail("not expecting event %s" % (filter(event_match, self.evt_queue)))
+                self.fail("not expecting event %s" % (list(filter(event_match, self.evt_queue))))
 
     def output_write(self, *args, **kwargs):
         """
@@ -204,7 +202,8 @@ class AdminTestCase(unittest.TestCase):
         self.conf.loadFromString("""<configuration></configuration>""")
         self.parser = InsurgencyParser(self.conf)
         self.parser.output = Mock()
-        self.parser.output.write = Mock(wraps=sys.stdout.write)
+        # py3 sys.stdout.write returns a char count; Rcon.write returns str or None
+        self.parser.output.write = Mock(wraps=print)
         when(self.parser).is_sourcemod_installed().thenReturn(True)
         adminPlugin_conf = CfgConfigParser()
         adminPlugin_conf.load(ADMIN_CONFIG_FILE)
@@ -415,9 +414,10 @@ class FunctionalTest(AdminTestCase):
         superadmin.connects("1")
         # WHEN
         superadmin.says("!map blargh blub")
-        # THEN
-        self.assertListEqual(["do you mean : buhriz, district, sinjar, siege, uprising, ministry, revolt, heights, "
-                              "contact, peak, panj, market ?"], superadmin.message_history)
+        # THEN suggestions ranked by levenshtein distance to 'blargh', ties alphabetical
+        # (py2 expectation encoded arbitrary set() iteration order)
+        self.assertListEqual(["do you mean : buhriz, market, panj, peak, siege, heights, revolt, sinjar, "
+                              "contact, district, ministry, uprising ?"], superadmin.message_history)
 
     def test_map_with_correct_parameters(self):
         # GIVEN

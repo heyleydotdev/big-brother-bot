@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -23,6 +22,7 @@
 # ################################################################### #
 
 import sys
+import logging
 
 from tests.plugins.duel import DuelTestCase
 
@@ -259,6 +259,10 @@ class Test_plugin(DuelTestCase):
     ####################################################################################################################
 
     def test_event_client_disconnect_with_active_duel(self):
+        # sys.getrefcount is polluted by pytest's log capture, which retains log
+        # records referencing the clients; silence logging while measuring
+        self.addCleanup(logging.disable, logging.NOTSET)
+        logging.disable(logging.CRITICAL)
         original_mike_refcount = mike_refcount = sys.getrefcount(self.mike)
         original_bill_refcount = bill_refcount = sys.getrefcount(self.bill)
         original_anna_refcount = anna_refcount = sys.getrefcount(self.anna)

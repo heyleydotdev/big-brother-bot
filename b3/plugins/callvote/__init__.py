@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -180,7 +179,7 @@ class CallvotePlugin(b3.plugin.Plugin):
                 if mapname:
                     self.console.say('^7Next Map: ^2%s' % mapname)
 
-        except KeyError, e:
+        except KeyError as e:
             # unhandled callvote type
             self.warning('could not handle callvote (%s) : %s', tp, e)
 

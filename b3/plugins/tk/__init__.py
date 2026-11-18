@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -31,7 +30,7 @@ import re
 import threading
 import time
 
-from ConfigParser import NoOptionError
+from configparser import NoOptionError
 
 __version__ = '1.5'
 __author__ = 'ThorN, mindriot, Courgette, xlr8or, SGT, 82ndab-Bravo17, ozon, Fenix'
@@ -126,7 +125,7 @@ class TkInfo(object):
     def _get_points(self):
         points = 0
         if len(self._attacked):
-            for cid, bol in self._attacked.items():
+            for cid, bol in list(self._attacked.items()):
                 try:
                     client = self.plugin.console.clients.getByCID(cid)
                     points += self.plugin.getClientTkInfo(client).getAttackerPoints(self.cid)
@@ -219,13 +218,13 @@ class TkPlugin(b3.plugin.Plugin):
 
         try:
             self._levels = self.load_config_for_levels()
-            self.debug('loaded levels: %s' % ','.join(map(str, self._levels.keys())))
+            self.debug('loaded levels: %s' % ','.join(map(str, list(self._levels.keys()))))
         except NoOptionError:
             self.warning('could not find levels in config file, '
-                         'using default: %s' % ','.join(map(str, self._levels.keys())))
-        except ValueError, e:
+                         'using default: %s' % ','.join(map(str, list(self._levels.keys()))))
+        except ValueError as e:
             self.error('could not load levels from config value: %s' % e)
-            self.debug('using default levels' % ','.join(map(str, self._levels.keys())))
+            self.debug('using default levels: %s' % ','.join(map(str, list(self._levels.keys()))))
 
         self._maxLevel = max(self._levels.keys())
         self.debug('teamkill max level is %s', self._maxLevel)
@@ -284,7 +283,7 @@ class TkPlugin(b3.plugin.Plugin):
             except NoOptionError:
                 self.error("option kill_multiplier is missing in section %s" % section_name)
                 is_valid = False
-            except ValueError, err:
+            except ValueError as err:
                 self.error("value for kill_multiplier is invalid. %s" % err)
                 is_valid = False
 
@@ -293,7 +292,7 @@ class TkPlugin(b3.plugin.Plugin):
             except NoOptionError:
                 self.error("option damage_multiplier is missing in section %s" % section_name)
                 is_valid = False
-            except ValueError, err:
+            except ValueError as err:
                 self.error("value for damage_multiplier is invalid. %s" % err)
                 is_valid = False
 
@@ -302,7 +301,7 @@ class TkPlugin(b3.plugin.Plugin):
             except NoOptionError:
                 self.error("option ban_length is missing in section %s" % section_name)
                 is_valid = False
-            except ValueError, err:
+            except ValueError as err:
                 self.error("value for ban_length is invalid. %s" % err)
                 is_valid = False
 
@@ -401,7 +400,7 @@ class TkPlugin(b3.plugin.Plugin):
                 msg = ''
                 if len(tkinfo.attacked) > 0:
                     myvictims = []
-                    for cid, bol in tkinfo.attacked.items():
+                    for cid, bol in list(tkinfo.attacked.items()):
                         victim = self.console.clients.getByCID(cid)
                         if not victim:
                             continue
@@ -438,7 +437,7 @@ class TkPlugin(b3.plugin.Plugin):
                 mult = 1
 
             duration = self.getMultipliers(client)[2] * mult
-            for cid, a in tkinfo.attacked.items():
+            for cid, a in list(tkinfo.attacked.items()):
                 self.forgive(cid, client, True)
 
             client.tempban(self.getMessage('ban'), 'tk', duration)
@@ -450,9 +449,9 @@ class TkPlugin(b3.plugin.Plugin):
         if msg is None:
             msg = 'halving all TK Points'
         self.debug(msg)
-        for cid, c in self.console.clients.items():
+        for cid, c in list(self.console.clients.items()):
             tkinfo = self.getClientTkInfo(c)
-            for acid, points in tkinfo.attackers.items():
+            for acid, points in list(tkinfo.attackers.items()):
                 points = int(round(points / 2))
                 if points == 0:
                     self.forgive(acid, c, True)
@@ -462,7 +461,7 @@ class TkPlugin(b3.plugin.Plugin):
                     except KeyError:
                         pass
 
-        if self._tkpointsHalflife > 0: 
+        if self._tkpointsHalflife > 0:
             if self._cronTab_tkhalflife:
                 # remove existing crontab
                 self.console.cron - self._cronTab_tkhalflife
@@ -471,7 +470,7 @@ class TkPlugin(b3.plugin.Plugin):
             self.console.cron + self._cronTab_tkhalflife
             #self.console.say('TK Crontab re-started')
             self.debug('TK crontab re-started')
-            
+
     def crontab_time(self):
         s = self._tkpointsHalflife
         m = int(time.strftime('%M'))
@@ -482,10 +481,10 @@ class TkPlugin(b3.plugin.Plugin):
         if m > 59:
             m -= 60
         return m, s
-    
+
     def getMultipliers(self, client):
         level = ()
-        for lev, mult in self._levels.iteritems():
+        for lev, mult in self._levels.items():
             if lev <= client.maxLevel:
                 level = mult
 
@@ -508,14 +507,14 @@ class TkPlugin(b3.plugin.Plugin):
 
         # 10/20/2008 - 1.1.6b0 - mindriot
         # * in clientDamage, kill and damage mutlipliers were reversed - changed if killed: to [0] and else: to [1]
-        if killed:        
+        if killed:
             points = int(round(points * self.getMultipliers(attacker)[0]))
         else:
             points = int(round(points * self.getMultipliers(attacker)[1]))
 
         a.damage(v.cid, points)
         v.damaged(a.cid, points)
-        
+
         self.debug('attacker: %s, TK points: %s, attacker.maxLevel: %s, last warn time: %s, console time: %s' % (
                    attacker.exactName, points, attacker.maxLevel, a.lastwarntime, self.console.time()))
 
@@ -614,7 +613,7 @@ class TkPlugin(b3.plugin.Plugin):
 
         # forgive all his points
         points = 0
-        for cid, c in self.console.clients.items():
+        for cid, c in list(self.console.clients.items()):
             v = self.getClientTkInfo(c)
             points += v.forgive(acid)
             a.forgiven(v.cid)
@@ -638,7 +637,7 @@ class TkPlugin(b3.plugin.Plugin):
 
         if not data:
             if len(v.attackers) == 1:
-                for cid, points in v.attackers.items():
+                for cid, points in list(v.attackers.items()):
                     self.grudge(cid, client)
             else:
                 self.cmd_forgivelist(data, client)
@@ -648,7 +647,7 @@ class TkPlugin(b3.plugin.Plugin):
             self.grudge(data, client)
         else:
             data = data.lower()
-            for cid, points in v.attackers.items():
+            for cid, points in list(v.attackers.items()):
                 c = self.console.clients.getByCID(cid)
                 if c and c.name.lower().find(data) != -1:
                     self.grudge(c.cid, client)
@@ -664,7 +663,7 @@ class TkPlugin(b3.plugin.Plugin):
 
         if not data:
             if len(v.attackers) == 1:
-                for cid, points in v.attackers.items():
+                for cid, points in list(v.attackers.items()):
                     self.forgive(cid, client)
             else:
                 self.cmd_forgivelist(data, client)
@@ -674,7 +673,7 @@ class TkPlugin(b3.plugin.Plugin):
             self.forgive(data, client)
         else:
             data = data.lower()
-            for cid, points in v.attackers.items():
+            for cid, points in list(v.attackers.items()):
                 c = self.console.clients.getByCID(cid)
                 if c and c.name.lower().find(data) != -1:
                     self.forgive(c.cid, client)
@@ -685,7 +684,7 @@ class TkPlugin(b3.plugin.Plugin):
         """
         v = self.getClientTkInfo(client)
         if len(v.attackers) == 1:
-            for cid, attacker in v.attackers.items():
+            for cid, attacker in list(v.attackers.items()):
                 if v.isGrudged(cid):
                     client.message(self.getMessage('no_forgive'))
                 else:
@@ -693,7 +692,7 @@ class TkPlugin(b3.plugin.Plugin):
         elif v.lastAttacker and not v.isGrudged(v.lastAttacker):
             self.forgive(v.lastAttacker, client)
         else:
-            client.message(self.getMessage('no_forgive'))            
+            client.message(self.getMessage('no_forgive'))
 
     def cmd_forgiveall(self, data, client, cmd=None):
         """
@@ -702,7 +701,7 @@ class TkPlugin(b3.plugin.Plugin):
         v = self.getClientTkInfo(client)
         if len(v.attackers) > 0:
             forgave = []
-            for cid, points in v.attackers.items():
+            for cid, points in list(v.attackers.items()):
                 if v.isGrudged(cid):
                     continue
 
@@ -734,7 +733,7 @@ class TkPlugin(b3.plugin.Plugin):
         v = self.getClientTkInfo(client)
         if len(v.attackers) > 0:
             myattackers = []
-            for cid, points in v.attackers.items():
+            for cid, points in list(v.attackers.items()):
                 attacker = self.console.clients.getByCID(cid)
                 if not attacker:
                     v.forgive(cid)
@@ -768,29 +767,29 @@ class TkPlugin(b3.plugin.Plugin):
             msg = ''
             if len(tkinfo.attacked) > 0:
                 myvictims = []
-                for cid, bol in tkinfo.attacked.items():
+                for cid, bol in list(tkinfo.attacked.items()):
                     victim = self.console.clients.getByCID(cid)
                     if not victim:
                         continue
-                    
+
                     v = self.getClientTkInfo(victim)
                     myvictims.append('%s ^7(^1%s^7)' % (victim.name, v.getAttackerPoints(sclient.cid)))
-                    
+
                 if len(myvictims):
                     msg += ', ^1Attacked^7: %s' % ', '.join(myvictims)
 
             if len(tkinfo.attackers) > 0:
                 myattackers = []
-                for cid, points in tkinfo.attackers.items():
+                for cid, points in list(tkinfo.attackers.items()):
                     attacker = self.console.clients.getByCID(cid)
                     if not attacker:
                         continue
-                    
+
                     if tkinfo.isGrudged(attacker.cid):
                         myattackers.append('^1%s ^7[^3%s^7]' % (attacker.name, points))
                     else:
                         myattackers.append('%s ^7[^3%s^7]' % (attacker.name, points))
-                    
+
                 if len(myattackers):
                     msg += ', ^3Attacked By^7: %s' % ', '.join(myattackers)
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -43,6 +42,7 @@ class LoginTestCase(B3TestCase):
     def setUp(self):
         self.log = logging.getLogger('output')
         self.log.propagate = False
+        self._original_log_level = self.log.level
 
         B3TestCase.setUp(self)
 
@@ -59,6 +59,8 @@ class LoginTestCase(B3TestCase):
 
     def tearDown(self):
         B3TestCase.tearDown(self)
+        # do not leave DEBUG logging enabled for the other test modules
+        self.log.setLevel(self._original_log_level)
 
     def init_plugin(self, config_content=None):
         self.conf = CfgConfigParser()

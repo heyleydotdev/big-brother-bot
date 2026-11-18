@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -33,7 +32,7 @@ class Test_Censor_badname(Detection_TestCase):
     def test_regexp(self):
 
         def my_info(text):
-            print("INFO\t%s" % text)
+            print(("INFO\t%s" % text))
         #self.p.info = my_info
 
         self.p._badNames = []
@@ -51,7 +50,7 @@ class Test_Censor_badname(Detection_TestCase):
     def test_word(self):
 
         def my_info(text):
-            print("INFO\t%s" % text)
+            print(("INFO\t%s" % text))
         #self.p.info = my_info
 
         self.p._badNames = []

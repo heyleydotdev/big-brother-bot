@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -78,10 +77,10 @@ class Cvar(object):
     def getString(self):
         """
         Return the CVAR value as a string.
-        :return basestring
+        :return str
         """
         return str(self.value)
-        
+
     def getInt(self):
         """
         Return the CVAR value as an integer.

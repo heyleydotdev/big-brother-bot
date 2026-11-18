@@ -79,7 +79,6 @@ import b3
 import b3.clients
 import b3.events
 import re
-import string
 
 from b3.parsers.q3a.abstractParser import AbstractParser
 
@@ -324,7 +323,7 @@ class Q3Parser(AbstractParser):
         # initialize connected clients
         self.info('Discover connected clients')
         plist = self.getPlayerList()
-        for cid, c in plist.iteritems():
+        for cid, c in plist.items():
             userinfostring = self.queryClientUserInfoByCid(cid)
             if userinfostring:
                 self.OnClientuserinfochanged(None, userinfostring)
@@ -355,18 +354,18 @@ class Q3Parser(AbstractParser):
             except IndexError:
                 # special case for damage lines where no action group can be set
                 action = 'damage'
-            
+
             return m, action, m.group('data').strip(), client, target
 
         elif '------' not in line:
             self.verbose('XLR--------> line did not match format: %s' % line)
-    
+
     def parseUserInfo(self, info):
         """
         Parse an infostring.
         :param info: The infostring to be parsed.
         """
-        player_id, info = string.split(info, ' ', 1)
+        player_id, info = info.split(' ', 1)
         # If userinfo not starting with \ character, prepend it to avoid breaking regex
         if info[:1] != '\\':
             info = '\\' + info
@@ -387,22 +386,22 @@ class Q3Parser(AbstractParser):
             t = data['t']
 
         data['team'] = self.getTeam(t)
-        
+
         if 'id' in data:
             data['guid'] = data['id']
             del data['id']
 
         if 'cl_guid' in data:
             data['guid'] = data['cl_guid']
-        
+
         return data
-    
+
     ####################################################################################################################
     #                                                                                                                  #
     #   EVENT HANDLERS                                                                                                 #
     #                                                                                                                  #
     ####################################################################################################################
-        
+
     def OnClientconnect(self, action, data, match=None):
         client = self.clients.getByCID(data)
         self.debug('OnClientConnect: %s, %s' % (data, client))
@@ -420,17 +419,17 @@ class Q3Parser(AbstractParser):
         self.verbose('Parsed user info: %s' % bclient)
         if bclient:
             cid = bclient['cid']
-            
+
             if cid in self._connectingSlots:
                 self.debug('Client on slot %s is already being connected' % cid)
                 return
-            
+
             self._connectingSlots.append(cid)
             client = self.clients.getByCID(cid)
 
             if client:
                 # update existing client
-                for k, v in bclient.iteritems():
+                for k, v in bclient.items():
                     setattr(client, k, v)
                 # use the full client as reference now
                 bclient = client
@@ -461,15 +460,15 @@ class Q3Parser(AbstractParser):
                         bclient['ip'] = infoclient['ip']
                     else:
                         self.warning('Failed to get client ip')
-                
+
                 if 'ip' in bclient:
                     self.clients.newClient(cid, name=bclient['name'], ip=bclient['ip'], state=b3.STATE_ALIVE,
                                            guid=guid, data={'guid': guid}, team=bclient['team'], bot=False, money=20)
                 else:
                     self.warning('Failed to get connect client')
-                    
+
             self._connectingSlots.remove(cid)
-                
+
         return None
 
     def OnKill(self, action, data, match=None):
@@ -493,7 +492,7 @@ class Q3Parser(AbstractParser):
         else:
             attacker = self.getByCidOrJoinPlayer(match.group('acid'))
         ## End fix attacker
-          
+
         if not attacker:
             self.debug('No attacker')
             return None
@@ -513,7 +512,7 @@ class Q3Parser(AbstractParser):
         # if not defined we need a general hitloc (for xlrstats)
         if not hasattr(victim, 'hitloc'):
             victim.hitloc = 'body'
-        
+
         victim.state = b3.STATE_DEAD
         # need to pass some amount of damage for the teamkill plugin - 100 is a kill
         return self.getEvent(eventkey, (100, weapon, victim.hitloc, damagetype), attacker, victim)
@@ -654,7 +653,7 @@ class Q3Parser(AbstractParser):
             result = b3.TEAM_SPEC
         else:
             result = b3.TEAM_UNKNOWN
-        
+
         return result
 
     def defineGameType(self, gametype_int):
@@ -662,7 +661,7 @@ class Q3Parser(AbstractParser):
         Translate the gametype to a readable format (also for teamkill plugin!).
         """
         gametype = str(gametype_int)
-        
+
         if gametype_int == '0':
             gametype = 'dm'        # Free for all
         elif gametype_int == '1':
@@ -687,7 +686,7 @@ class Q3Parser(AbstractParser):
     def connectClient(self, ccid):
         players = self.getPlayerList()
         self.verbose('connectClient() = %s' % players)
-        for cid, p in players.iteritems():
+        for cid, p in players.items():
             if int(cid) == int(ccid):
                 self.debug('Client found in status/playerList')
                 return p
@@ -934,10 +933,10 @@ class Q3Parser(AbstractParser):
         """
         plist = self.getPlayerList()
         mlist = dict()
-        for cid, c in plist.iteritems():
+        for cid, c in plist.items():
             client = self.getByCidOrJoinPlayer(cid)
             if client:
-                if client.guid and 'guid' in c.keys():
+                if client.guid and 'guid' in list(c.keys()):
                     if client.guid == c['guid']:
                         # player matches
                         self.debug('in-sync %s == %s', client.guid, c['guid'])
@@ -945,7 +944,7 @@ class Q3Parser(AbstractParser):
                     else:
                         self.debug('no-sync %s <> %s', client.guid, c['guid'])
                         client.disconnect()
-                elif client.ip and 'ip' in c.keys():
+                elif client.ip and 'ip' in list(c.keys()):
                     if client.ip == c['ip']:
                         # player matches
                         self.debug('in-sync %s == %s', client.ip, c['ip'])
@@ -955,5 +954,5 @@ class Q3Parser(AbstractParser):
                         client.disconnect()
                 else:
                     self.debug('no-sync: no guid or ip found')
-        
+
         return mlist

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -30,7 +29,6 @@ import b3
 import b3.events
 import b3.parsers.punkbuster
 import re
-import string
 
 from b3.parsers.q3a.abstractParser import AbstractParser
 from threading import Timer
@@ -429,13 +427,6 @@ class CodParser(AbstractParser):
         if data and ord(data[:1]) == 21:
             data = data[1:]
 
-        # decode the server data
-        if self.encoding:
-            try:
-                data = data.decode(self.encoding)
-            except Exception, msg:
-                self.warning('ERROR: decoding data: %r', msg)
-
         if client.name != match.group('name'):
             client.name = match.group('name')
 
@@ -456,13 +447,6 @@ class CodParser(AbstractParser):
         if data and ord(data[:1]) == 21:
             data = data[1:]
 
-        # decode the server data
-        if self.encoding:
-            try:
-                data = data.decode(self.encoding)
-            except Exception, msg:
-                self.warning('ERROR: decoding data: %r', msg)
-
         if client.name != match.group('name'):
             client.name = match.group('name')
 
@@ -481,13 +465,6 @@ class CodParser(AbstractParser):
         data = match.group('text')
         if data and ord(data[:1]) == 21:
             data = data[1:]
-
-        # decode the server data
-        if self.encoding:
-            try:
-                data = data.decode(self.encoding)
-            except Exception, msg:
-                self.warning('ERROR: decoding data: %r', msg)
 
         client.name = match.group('name')
         return self.getEvent('EVT_CLIENT_PRIVATE_SAY', data=data, client=client, target=tclient)
@@ -514,7 +491,7 @@ class CodParser(AbstractParser):
         return self.getEvent('EVT_GAME_EXIT', data=data)
 
     def OnItem(self, action, data, match=None):
-        guid, cid, name, item = string.split(data, ';', 3)
+        guid, cid, name, item = data.split(';', 3)
         client = self.clients.getByCID(cid)
         if client:
             return self.getEvent('EVT_CLIENT_ITEM_PICKUP', data=item, client=client)
@@ -552,7 +529,7 @@ class CodParser(AbstractParser):
         """
         players = self.getPlayerList()
         self.verbose('connectClient() = %s' % players)
-        for cid, p in players.iteritems():
+        for cid, p in players.items():
             #self.debug('cid: %s, ccid: %s, p: %s' %(cid, ccid, p))
             if int(cid) == int(ccid):
                 self.debug('%s found in status/playerList' % p['name'])
@@ -729,7 +706,7 @@ class CodParser(AbstractParser):
         plist = self.getPlayerList(maxRetries=4)
         mlist = {}
 
-        for cid, c in plist.iteritems():
+        for cid, c in plist.items():
             client = self.clients.getByCID(cid)
             if client:
                 if client.guid and 'guid' in c and not self.IpsOnly:
@@ -761,7 +738,7 @@ class CodParser(AbstractParser):
         """
         players = self.getPlayerList(maxRetries=4)
         self.verbose('authorizeClients() = %s' % players)
-        for cid, p in players.iteritems():
+        for cid, p in players.items():
             sp = self.clients.getByCID(cid)
             if sp:
                 # Only set provided data, otherwise use the currently set data
@@ -777,7 +754,7 @@ class CodParser(AbstractParser):
 #--LogLineFormats---------------------------------------------------------------
 
 #===============================================================================
-# 
+#
 # *** CoD:
 # Join:               J;160913;10;PlayerName
 # Quit:               Q;160913;10;PlayerName
@@ -791,7 +768,7 @@ class CodParser(AbstractParser):
 # Private message:    tell;160913;12;PlayerName1;1322833;8;PlayerName2;what message?
 # Winners:            W;axis;160913;PlayerName1;258015;PlayerName2
 # Losers:             L;allies;160913;PlayerName1;763816;PlayerName2
-# 
+#
 # ExitLevel:          ExitLevel: executed
 # Shutdown Engine:    ShutdownGame:
 # Seperator:          ------------------------------------------------------------
@@ -801,8 +778,8 @@ class CodParser(AbstractParser):
 #                    \scr_friendlyfire\3\scr_killcam\1\shortversion\1.0\sv_allowAnonymous\0\sv_floodProtect\1
 #                    \sv_hostname\^5[SNT] #3 ^7Tactical Gaming ^9(^7B3^9) (^1v1.0^9)\sv_maxclients\24\sv_maxPing\220
 #                    \sv_maxRate\20000\sv_minPing\0\sv_privateClients\8\sv_pure\1\sv_voice\1
-# 
-# 
+#
+#
 # *** CoD5 specific lines:
 # JoinTeam:           JT;283895439;17;axis;PlayerName;
 #                    AD;564;allies;580090035;6;axis;PlayerName;stg44_mp;30;MOD_RIFLE_BULLET;right_arm_lower

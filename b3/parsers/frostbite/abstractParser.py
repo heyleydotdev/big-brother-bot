@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -30,8 +29,7 @@ import sys
 import re
 import traceback
 import time
-import string
-import Queue
+import queue
 import threading
 import b3.clients
 import b3.cron
@@ -60,14 +58,14 @@ class AbstractParser(b3.parser.Parser):
 
     _serverConnection = None
     _nbConsecutiveConnFailure = 0
-    
-    sayqueue = Queue.Queue()
+
+    sayqueue = queue.Queue()
     sayqueuelistener = None
 
     # frostbite engine does not support color code, so we need this property
     # in order to get stripColors working
-    _reColor = re.compile(r'(\^[0-9])') 
-    
+    _reColor = re.compile(r'(\^[0-9])')
+
     _line_length = 100
     _message_delay = 2
     _line_color_prefix = ''
@@ -88,7 +86,7 @@ class AbstractParser(b3.parser.Parser):
     _eventMap = {
         #'player.onKicked': b3.events.EVT_CLIENT_KICK,
     }
-    
+
     _punkbusterMessageFormats = (
         (re.compile(r'^.*: PunkBuster Server for BC2 \((?P<version>.+)\)\sEnabl.*$'), 'OnPBVersion'),
         (re.compile(r'^.*: Running PB Scheduled Task \(slot #(?P<slot>\d+)\)\s+(?P<task>.*)$'), 'OnPBScheduledTask'),
@@ -107,7 +105,7 @@ class AbstractParser(b3.parser.Parser):
     def __new__(cls, *args, **kwargs):
         patch_b3_clients()
         return b3.parser.Parser.__new__(cls)
-           
+
     def startup(self):
         """
         Called after the parser is created before run().
@@ -155,8 +153,8 @@ class AbstractParser(b3.parser.Parser):
                     self.bot('PAUSED - not parsing any lines: B3 will be out of sync')
                     self._pauseNotice = True
             else:
-                
-                try:                
+
+                try:
                     if self._serverConnection is None:
                         self.verbose('Connecting to frostbite server...')
                         self._serverConnection = FrostbiteConnection(self, self._rconIp, self._rconPort, self._rconPassword)
@@ -164,7 +162,7 @@ class AbstractParser(b3.parser.Parser):
                     self._serverConnection.subscribeToEvents()
                     self.clients.sync()
                     self._nbConsecutiveConnFailure = 0
-                        
+
                     nbConsecutiveReadFailure = 0
                     while self.working:
                         # while we are working and connected, read a packet
@@ -176,13 +174,13 @@ class AbstractParser(b3.parser.Parser):
                                     self.routeFrostbitePacket(packet)
                                 except SystemExit:
                                     raise
-                                except Exception, msg:
+                                except Exception as msg:
                                     self.error('%s: %s', msg, traceback.extract_tb(sys.exc_info()[2]))
-                            except FrostbiteException, e:
+                            except FrostbiteException as e:
                                 nbConsecutiveReadFailure += 1
                                 if nbConsecutiveReadFailure > 5:
                                     raise e
-                except FrostbiteException, e:
+                except FrostbiteException as e:
                     self.debug(e)
                     self._nbConsecutiveConnFailure += 1
                     self._serverConnection.close()
@@ -195,7 +193,7 @@ class AbstractParser(b3.parser.Parser):
                     else:
                         self.debug('sleeping 30 sec...')
                         time.sleep(30)
-                    
+
         self.bot('Stop listening...')
 
         with self.exiting:
@@ -217,7 +215,7 @@ class AbstractParser(b3.parser.Parser):
         """
         if packet is None:
             self.warning('Cannot route empty packet : %s' % traceback.extract_tb(sys.exc_info()[2]))
-        
+
         eventType = packet[0]
         eventData = packet[1:]
 
@@ -225,15 +223,15 @@ class AbstractParser(b3.parser.Parser):
         func = ''
         match = re.search(r"^(?P<actor>[^.]+)\.on(?P<event>.+)$", eventType)
         if match:
-            func = 'On%s%s' % (string.capitalize(match.group('actor')), string.capitalize(match.group('event')))
+            func = 'On%s%s' % (match.group('actor').capitalize(), match.group('event').capitalize())
             #self.debug("-==== FUNC!!: " + func)
-            
+
         if match and hasattr(self, func):
             func = getattr(self, func)
             event = func(eventType, eventData)
             if event:
                 self.queueEvent(event)
-            
+
         elif eventType in self._eventMap:
             self.queueEvent(b3.events.Event(self._eventMap[eventType], eventData))
         else:
@@ -243,7 +241,7 @@ class AbstractParser(b3.parser.Parser):
             data += str(eventType) + ': ' + str(eventData)
             self.debug('TODO: %r' % packet)
             self.queueEvent(self.getEvent('EVT_UNKNOWN', data))
-    
+
     def sayqueuelistenerworker(self):
         while self.working:
             message = self.sayqueue.get()
@@ -255,7 +253,7 @@ class AbstractParser(b3.parser.Parser):
     def joinPlayers(self):
         self.info('Joining players...')
         plist = self.getPlayerList()
-        for cid, p in plist.iteritems():
+        for cid, p in plist.items():
             client = self.clients.getByCID(cid)
             if client:
                 self.debug(' - joining %s' % cid)
@@ -277,11 +275,11 @@ class AbstractParser(b3.parser.Parser):
                 preparedcmd.append(a % kwargs)
             except KeyError:
                 pass
-        
+
         result = tuple(preparedcmd)
         self.debug('getCommand: %s', result)
         return result
-    
+
     def write(self, msg, maxRetries=1, needConfirmation=False):
         """
         Write a message to Rcon/Console.
@@ -299,7 +297,7 @@ class AbstractParser(b3.parser.Parser):
 
     def checkVersion(self):
         raise NotImplementedError('checkVersion must be implemented in concrete classes')
-        
+
     def getServerVars(self):
         raise NotImplementedError('getServerVars must be implemented in concrete classes')
 
@@ -327,7 +325,7 @@ class AbstractParser(b3.parser.Parser):
         B3 GUID  <--> EA_guid
         """
         raise NotImplementedError('getClient must be implemented in concrete classes')
-    
+
     def getTeam(self, team):
         """
         Convert frostbite team numbers to B3 team numbers.
@@ -345,7 +343,7 @@ class AbstractParser(b3.parser.Parser):
     #   EVENT HANDLERS                                                                                                 #
     #                                                                                                                  #
     ####################################################################################################################
-    
+
     def OnPlayerChat(self, action, data):
         """
         player.onChat <source soldier name: string> <text: string> <target group: player subset>
@@ -382,7 +380,7 @@ class AbstractParser(b3.parser.Parser):
     def OnPlayerLeave(self, action, data):
         # player.onLeave: ['GunnDawg']
         client = self.getClient(data[0])
-        if client: 
+        if client:
             client.endMessageThreads = True
             client.disconnect() # this triggers the EVT_CLIENT_DISCONNECT event
         return None
@@ -446,7 +444,7 @@ class AbstractParser(b3.parser.Parser):
         if not victim:
             self.debug('No victim')
             return None
-        
+
         if data[2]:
             weapon = data[2]
         else:
@@ -510,7 +508,7 @@ class AbstractParser(b3.parser.Parser):
         # we'll still leave the call here since it provides us self.game.roundTime()
         self.game.startRound()
         self.game.rounds -= 1
-        
+
         # players need to be joined (EVT_CLIENT_JOIN) for stats to count rounds
         self.joinPlayers()
         return self.getEvent('EVT_GAME_ROUND_START', self.game)
@@ -573,10 +571,10 @@ class AbstractParser(b3.parser.Parser):
                 func = getattr(self, funcName)
                 event = func(match, data[0])
                 if event:
-                    self.queueEvent(event)     
+                    self.queueEvent(event)
             else:
                 return self.getEvent('EVT_UNKNOWN', data)
-                
+
     def OnPBVersion(self, match,data):
         """
         PB notifies us of the version numbers version = match.group('version').
@@ -671,7 +669,7 @@ class AbstractParser(b3.parser.Parser):
         client.ip = ip
         client.pbid = pbid
         client.save()
-        
+
     ####################################################################################################################
     #                                                                                                                  #
     #   B3 PARSER INTERFACE IMPLEMENTATION                                                                             #
@@ -713,7 +711,7 @@ class AbstractParser(b3.parser.Parser):
         if isinstance(client, str):
             self.write(self.getCommand('kick', cid=client, reason=reason[:80]))
             return
-        
+
         if admin:
             variables = self.getMessageVariables(client=client, reason=reason, admin=admin)
             fullreason = self.getMessage('kicked_by', variables)
@@ -726,12 +724,12 @@ class AbstractParser(b3.parser.Parser):
 
         if self.PunkBuster:
             self.PunkBuster.kick(client, 0.5, reason)
-        
+
         self.write(self.getCommand('kick', cid=client.cid, reason=reason[:80]))
 
         if not silent and fullreason != '':
             self.say(fullreason)
-            
+
     def tempban(self, client, reason='', duration=2, admin=None, silent=False, *kwargs):
         """
         Tempban a client.
@@ -745,7 +743,7 @@ class AbstractParser(b3.parser.Parser):
         if isinstance(client, str):
             self.write(self.getCommand('tempban', guid=client, duration=duration*60, reason=reason[:80]))
             return
-        
+
         if admin:
             banduration = b3.functions.minutesStr(duration)
             variables = self.getMessageVariables(client=client, reason=reason, admin=admin, banduration=banduration)
@@ -754,7 +752,7 @@ class AbstractParser(b3.parser.Parser):
             banduration = b3.functions.minutesStr(duration)
             variables = self.getMessageVariables(client=client, reason=reason, banduration=banduration)
             fullreason = self.getMessage('temp_banned', variables)
-            
+
         fullreason = self.stripColors(fullreason)
         reason = self.stripColors(reason)
 
@@ -766,9 +764,9 @@ class AbstractParser(b3.parser.Parser):
                 duration = 1440
 
             self.PunkBuster.kick(client, duration, reason)
-        
+
         self.write(self.getCommand('tempban', guid=client.guid, duration=duration*60, reason=reason[:80]))
-        
+
         if not silent and fullreason != '':
             self.say(fullreason)
 
@@ -799,17 +797,17 @@ class AbstractParser(b3.parser.Parser):
                 else:
                     variables = self.getMessageVariables(client=client, reason=reason)
                     fullreason = self.getMessage('unbanned', variables)
-                
+
                 if not silent and fullreason != '':
                     self.say(fullreason)
-        
+
         response = self.write(self.getCommand('unban', guid=client.guid, reason=reason), needConfirmation=True)
 
         if response == "OK":
             self.verbose('UNBAN: removed guid (%s) from banlist' %client.guid)
             if admin:
                 admin.message('Unbanned: removed %s guid from banlist' % client.exactName)
-        
+
         if self.PunkBuster:
             self.PunkBuster.unBanGUID(client)
 
@@ -832,7 +830,7 @@ class AbstractParser(b3.parser.Parser):
         else:
             variables = self.getMessageVariables(client=client, reason=reason)
             fullreason = self.getMessage('banned', variables)
-            
+
         fullreason = self.stripColors(fullreason)
         reason = self.stripColors(reason)
 
@@ -852,10 +850,10 @@ class AbstractParser(b3.parser.Parser):
 
         if self.PunkBuster:
             self.PunkBuster.banGUID(client, reason)
-        
+
         if not silent and fullreason != '':
             self.say(fullreason)
-        
+
         self.queueEvent(self.getEvent('EVT_CLIENT_BAN', {'reason': reason, 'admin': admin}, client))
 
     def sync(self):
@@ -870,7 +868,7 @@ class AbstractParser(b3.parser.Parser):
         """
         plist = self.getPlayerList()
         mlist = {}
-        for cid, c in plist.iteritems():
+        for cid, c in plist.items():
             client = self.clients.getByCID(cid)
             if client:
                 mlist[cid] = client
@@ -888,7 +886,7 @@ class AbstractParser(b3.parser.Parser):
         """
         players = self.getPlayerList()
         self.verbose('authorizeClients() = %s' % players)
-        for cid, p in players.iteritems():
+        for cid, p in players.items():
             sp = self.clients.getByCID(cid)
             if sp:
                 # only set provided data,
@@ -1035,7 +1033,7 @@ class AbstractParser(b3.parser.Parser):
                 self.debug("Shortmaplist sorted by distance : %s" % shortmaplist)
                 match = shortmaplist[:3]
             else:
-                easyNames = supportedEasyNames.keys()
+                easyNames = list(supportedEasyNames.keys())
                 easyNames.sort(key=lambda mn: levenshteinDistance(data, mn.strip()))
                 self.debug("Maplist sorted by distance : %s" % easyNames)
                 match = easyNames[:3]
@@ -1049,14 +1047,14 @@ class AbstractParser(b3.parser.Parser):
         if cvarName not in self._gameServerVars:
             self.warning('Unknown cvar: %s' % cvarName)
             return None
-        
+
         try:
             words = self.write(('vars.%s' % cvarName,))
-        except FrostbiteCommandFailedError, err:
+        except FrostbiteCommandFailedError as err:
             self.error(err)
             return
         self.debug('Get cvar %s = %s', cvarName, words)
-        
+
         if words:
             if len(words) == 0:
                 return b3.cvar.Cvar(cvarName, value=None)
@@ -1076,7 +1074,7 @@ class AbstractParser(b3.parser.Parser):
         self.debug('Set cvar %s = \'%s\'', cvarName, value)
         try:
             self.write(('vars.%s' % cvarName, value))
-        except FrostbiteCommandFailedError, err:
+        except FrostbiteCommandFailedError as err:
             self.error(err)
 
 ########################################################################################################################
@@ -1104,13 +1102,13 @@ def patch_b3_clients():
         if msg and len(msg.strip())>0:
             # do we have a queue?
             if not hasattr(self, 'messagequeue'):
-                self.messagequeue = Queue.Queue()
+                self.messagequeue = queue.Queue()
             # fill the queue
             text = self.console.stripColors(self.console.msgPrefix + ' [pm] ' + msg)
             for line in self.console.getWrap(text):
                 self.messagequeue.put(line)
             # create a thread that executes the worker and pushes out the queue
-            if not hasattr(self, 'messagehandler') or not self.messagehandler.isAlive():
+            if not hasattr(self, 'messagehandler') or not self.messagehandler.is_alive():
                 self.messagehandler = threading.Thread(target=self.messagequeueworker)
                 self.messagehandler.setDaemon(True)
                 self.messagehandler.start()

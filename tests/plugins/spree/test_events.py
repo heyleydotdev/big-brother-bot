@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,7 +21,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import Mock, call
+from unittest.mock import Mock, call
 from tests.plugins.spree import SpreeTestCase
 
 
@@ -77,6 +76,8 @@ class Test_events(SpreeTestCase):
             self.console.queueEvent(self.console.getEvent('EVT_CLIENT_KILL', client=self.bill, target=self.mike))
         self.console.queueEvent(self.console.getEvent('EVT_CLIENT_KILL', client=self.mike, target=self.bill))
         # THEN
+        # NOTE: do not expect "You're back in business Mike" here: that is the
+        # loosingspree-12 end message and Mike only died 10 times in this test
         self.console.say.assert_has_calls([call('Bill is on fire! (10 kills in a row)'),
                                            call('Mike iced Bill')])
 

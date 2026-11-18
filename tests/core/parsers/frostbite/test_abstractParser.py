@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -24,17 +23,23 @@
 
 import logging
 import re
-import unittest2 as unittest
+import unittest
 
-from mock import Mock, patch, call
+from unittest.mock import Mock, patch, call
 from b3.clients import Client
 from b3.plugins.admin import AdminPlugin
 from b3.config import XmlConfigParser
 from b3.parsers.frostbite.abstractParser import AbstractParser
+from b3.parsers.frostbite2.protocol import CommandFailedError
+from functools import reduce
 
 
 sleep_patcher = None
 def setUpModule():
+    # NOTE: the global is required: without it this assigns a local and
+    # tearDownModule never stops the patch, leaving time.sleep mocked for the
+    # whole pytest session (breaks timer based tests in other modules).
+    global sleep_patcher
     sleep_patcher = patch("time.sleep")
     sleep_patcher.start()
 

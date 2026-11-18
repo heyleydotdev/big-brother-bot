@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#  corestats.py (COREy STATS) 
+#  corestats.py (COREy STATS)
 #  Copyright (c) 2006-2007, Corey Goldberg (corey@goldb.org)
 #  updated on 2010-09 by GrosBedo
 #
@@ -32,41 +32,41 @@ import sys, math
 
 
 class Stats:
-    
+
     def sum(self, sequence):
-        if len(sequence) < 1: 
+        if len(sequence) < 1:
             return None
         else:
             return sum(sequence)
-    
-    
+
+
     def count(self, sequence):
         return len(sequence)
 
-    
+
     def min(self, sequence):
-        if len(sequence) < 1: 
+        if len(sequence) < 1:
             return None
         else:
             return min(sequence)
-    
-    
+
+
     def max(self, sequence):
-        if len(sequence) < 1: 
+        if len(sequence) < 1:
             return None
         else:
             return max(sequence)
-    
+
 
     def mean(self, sequence):
-        if len(sequence) < 1: 
+        if len(sequence) < 1:
             return None
-        else: 
-            return float(sum(sequence)) / len(sequence)    
-    
-    
+        else:
+            return float(sum(sequence)) / len(sequence)
+
+
     def median(self, sequence):
-        if len(sequence) < 1: 
+        if len(sequence) < 1:
             return None
         else:
             sequence.sort()
@@ -77,14 +77,14 @@ class Stats:
                 return float(median1 + median2) / 2
             else:
                 return sequence[int(element_idx)]
-            
+
 
     def modeold(self, sequence):
         results = {}
         for item in sequence:
             results.setdefault(item, 0) # if index does not already exists, create it and set a value of 0
             results[item] += 1
-        results = sorted(results.iteritems(), key=lambda (k,v):(v,k), reverse=True) # Sort by value (count), then if 2 keys have the same count, it will sort them by their keys
+        results = sorted(iter(results.items()), key=lambda k_v:(k_v[1],k_v[0]), reverse=True) # Sort by value (count), then if 2 keys have the same count, it will sort them by their keys
         return results
 
     def mode(self, sequence):
@@ -98,11 +98,11 @@ class Stats:
         for item in scores:
             freq.setdefault(item, 0) # if index does not already exists, create it and set a value of 0
             freq[item] = sequence.count(item)
-        results = sorted(freq.iteritems(), key=lambda (k,v):(v,k), reverse=True) # Sort by value (count), then if 2 keys have the same count, it will sort them by their keys
+        results = sorted(iter(freq.items()), key=lambda k_v1:(k_v1[1],k_v1[0]), reverse=True) # Sort by value (count), then if 2 keys have the same count, it will sort them by their keys
         return results
 
     def variance(self, sequence):
-        if len(sequence) < 1: 
+        if len(sequence) < 1:
             return None
         else:
             avg = self.mean(sequence)
@@ -112,9 +112,9 @@ class Stats:
             #sdsq = sum([(i - avg) ** 2 for i in sequence]) # this one-liner hogs a lot of memory, avoid
             variance = (float(sdsq) / (len(sequence) - 1))
             return variance
-    
+
     def stdev(self, sequence):
-        if len(sequence) < 1: 
+        if len(sequence) < 1:
             return None
         else:
             variance = self.variance(sequence)
@@ -122,7 +122,7 @@ class Stats:
             return stdev
 
     def valueforpercentile(self, sequence, percentile):
-        if len(sequence) < 1: 
+        if len(sequence) < 1:
             value = None
         elif (percentile > 100):
             sys.stderr.write('ERROR: percentile must be <= 100.  you supplied: %s\n'% percentile)
@@ -138,7 +138,7 @@ class Stats:
     def percentileforvalue(self, sequence, value):
         maxnb = max(sequence)
         minnb = min(sequence)
-        if len(sequence) < 1: 
+        if len(sequence) < 1:
             percentile = None
         elif (value > maxnb or value < minnb ):
             #sys.stderr.write('ERROR: value must be between %s < value < %s.  you supplied: %s\n'% (minnb, maxnb, value))
@@ -163,10 +163,10 @@ class Stats:
 
 
 # Sample script using this class:
-# -------------------------------------------    
+# -------------------------------------------
 #    #!/usr/bin/env python
 #    import corestats
-#    
+#
 #    sequence = [1, 2.5, 7, 13.4, 8.0]
 #    stats = corestats.Stats()
 #    print stats.mean(sequence)

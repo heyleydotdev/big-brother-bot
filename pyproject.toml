@@ -1,0 +1,116 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "b3"
+version = "2.0.0"
+description = "BigBrotherBot (B3) is a cross-platform, cross-game game administration bot"
+readme = "README.md"
+license = "GPL-2.0-or-later"
+authors = [
+    { name = "Michael Thornton (ThorN)" },
+    { name = "Tim ter Laak (ttlogic)" },
+    { name = "Mark Weirath (xlr8or)" },
+    { name = "Thomas Leveil (Courgette)" },
+    { name = "Daniele Pantaleone (Fenix)" },
+    { name = "Raveen (heyleydotdev)" },
+]
+requires-python = ">=3.11"
+dependencies = [
+    "pymysql>=1.1",
+    "python-dateutil>=2.9",
+    "feedparser>=6.0",
+    "requests>=2.32",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Logging",
+    "Topic :: Utilities",
+]
+
+[project.optional-dependencies]
+postgresql = ["psycopg[binary]>=3.2"]
+sftp = ["paramiko>=3.4"]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+    "mockito",
+    # pymysql needs this to authenticate against MySQL 8 default auth plugin (caching_sha2_password)
+    "cryptography",
+    # memory readings for bench/replay.py
+    "psutil",
+]
+build = [
+    "build",
+    "bump2version",
+    "wheel",
+]
+
+[project.urls]
+Homepage = "http://www.bigbrotherbot.net"
+Documentation = "http://doc.bigbrotherbot.net"
+
+[project.scripts]
+b3_run = "b3.run:main"
+
+[tool.setuptools.packages.find]
+# NOTE: the old setup.py used bare find_packages() which also shipped the
+# `tests` package inside the wheel; include=["b3*"] fixes that.
+include = ["b3*"]
+
+[tool.setuptools.package-data]
+b3 = [
+    "conf/*.xml",
+    "conf/*.ini",
+    "conf/templates/*.tpl",
+    "conf/templates/autodoc/*.html",
+    "docs/*.txt",
+    "docs/*.pdf",
+    "extplugins/*.*",
+    "plugins/*.*",
+    "sql/*.*",
+    "sql/mysql/*",
+    "sql/postgresql/*",
+    "sql/sqlite/*",
+]
+"b3.plugins.adv" = ["CHANGELOG"]
+"b3.plugins.banlist" = ["example/*.xml"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# xdist: each module runs in a single worker process (loadscope) so module
+# level patches and the shared FakeConsole/mockito state never leak across
+# modules; it also cuts the suite runtime several-fold.
+addopts = "-n auto --dist loadscope"
+# NOTE: no network-dependent tests remain (geolocation/update tests mock their
+# transports), so no deselect markers are needed.
+
+[tool.coverage.run]
+omit = [
+    "tests/*",
+    "b3/lib/*",
+    "b3/tools/*",
+    "b3/fake.py",
+]
+
+[tool.coverage.report]
+# floor near the measured port baseline (45%); keeps CI honest without
+# failing on harmless noise
+fail_under = 40

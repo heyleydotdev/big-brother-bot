@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,9 +21,9 @@
 #                                                                     #
 # ################################################################### #
 
-import unittest2 as unittest
+import unittest
 
-from mock import Mock
+from unittest.mock import Mock
 from tests.plugins.admin import Admin_TestCase, Admin_functional_test
 
 
@@ -67,7 +66,7 @@ class Test_getGroupLevel(Admin_TestCase):
         self.init()
 
     def test_nominal(self):
-        for test_data, expected in {
+        for test_data, expected in list({
             'NONE': 'none',
             '0': 0,
             '1': 1,
@@ -82,7 +81,7 @@ class Test_getGroupLevel(Admin_TestCase):
             '1-20': '1-20',
             '40-20': '40-20',
             'user-admin': '1-40',
-        }.items():
+        }.items()):
             result = self.p.getGroupLevel(test_data)
             if expected != result:
                 self.fail("%r, expecting %r but got %r" % (test_data, expected, result))

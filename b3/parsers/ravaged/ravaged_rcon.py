@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,7 +21,7 @@
 #                                                                     #
 # ################################################################### #
 
-import asyncore
+from b3.lib import netasync as asyncore
 import logging
 import re
 import time
@@ -33,8 +32,8 @@ from socket import SOCK_STREAM
 from threading import Thread
 from threading import Event
 from threading import Lock
-from Queue import Queue
-from Queue import Empty
+from queue import Queue
+from queue import Empty
 
 __author__ = 'Thomas LEVEIL'
 __version__ = '1.3'
@@ -322,7 +321,7 @@ class RavagedDispatcher(asyncore.dispatcher_with_send):
         Send a command to the server.
         """
         self.log.debug("send_command : %s " % repr(command))
-        self.send(unicode(command + "\n").encode('UTF-8'))
+        self.send(str(command + "\n").encode('UTF-8'))
 
     def get_packet_queue(self):
         return self.packet_queue
@@ -352,7 +351,7 @@ class RavagedDispatcher(asyncore.dispatcher_with_send):
         self._buffer_in += data
         self.log.debug('read %s char from server' % len(data))
         # cook meaningful packets
-        map(self.handle_packet, self.full_packets())
+        list(map(self.handle_packet, self.full_packets()))
 
     def handle_packet(self, packet):
         """

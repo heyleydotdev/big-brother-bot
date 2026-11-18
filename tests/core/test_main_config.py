@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -23,9 +22,9 @@
 # ################################################################### #
 
 import b3
-import ConfigParser
+import configparser
 import logging
-import unittest2 as unittest
+import unittest
 from b3 import getAbsolutePath
 from b3.config import CfgConfigParser
 from b3.config import MainConfig
@@ -58,7 +57,7 @@ class CommonDefaultTestMethodsMixin:
     def test_autodoc_section(self):
         self.assertEqual('html', self.conf.get('autodoc', 'type'))
         self.assertEqual('100', self.conf.get('autodoc', 'maxlevel'))
-        with self.assertRaises(ConfigParser.NoOptionError):
+        with self.assertRaises(configparser.NoOptionError):
             self.conf.get('autodoc', 'destination')
 
     def test_update_section(self):
@@ -107,7 +106,7 @@ class Test_XmlMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase)
         """
         self.assertListEqual(['admin', 'adv', 'censor', 'cmdmanager', 'pingwatch', 'pluginmanager', 'punkbuster', 'spamcontrol', 'stats',
                               'status', 'tk', 'welcome'],
-                             map(lambda x: x.get('name'), self.conf._config_parser.get('plugins/plugin')))
+                             [x.get('name') for x in self.conf._config_parser.get('plugins/plugin')])
 
 
 class Test_CfgMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase):
@@ -135,7 +134,7 @@ class TestConfig(unittest.TestCase):
         conf_cfg = MainConfig(cfg_parser)
 
         return conf_xml, conf_cfg
-    
+
     def test_empty_conf(self):
         self.init(r"""<configuration/>""", "")
 
@@ -149,9 +148,9 @@ class TestConfig(unittest.TestCase):
             [b3]
         """))
         # normalized path for empty string is the current directory ('.')
-        with self.assertRaises(ConfigParser.NoOptionError):
+        with self.assertRaises(configparser.NoOptionError):
             conf_xml.get_external_plugins_dir()
-        with self.assertRaises(ConfigParser.NoOptionError):
+        with self.assertRaises(configparser.NoOptionError):
             conf_cfg.get_external_plugins_dir()
 
     def test_external_dir_empty(self):

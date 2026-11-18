@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,7 +21,7 @@
 #                                                                     #
 # ################################################################### #
 
-import unittest2
+import unittest
 
 from textwrap import dedent
 from mockito import when
@@ -37,7 +36,7 @@ from b3.plugins.firstkill import FirstkillPlugin
 from tests import logging_disabled
 
 
-class FirstKillCase(unittest2.TestCase):
+class FirstKillCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):

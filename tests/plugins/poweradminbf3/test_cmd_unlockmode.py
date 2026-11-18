@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,7 +21,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import Mock
+from unittest.mock import Mock
 from mockito import when, verify
 import b3
 from b3.config import CfgConfigParser
@@ -41,7 +40,7 @@ unlockmode: 40
         self.p = Poweradminbf3Plugin(self.console, self.conf)
         self.p.onLoadConfig()
         self.p.onStartup()
-        when(self.console).write()
+        when(self.console, strict=False).write()
 
 
     def test_get_current_unlockmode(self):

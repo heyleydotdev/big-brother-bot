@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 
 #------------------------------------------------------------------------------
 # SourceLog - Python class for parsing logs of Source Dedicated Servers
@@ -30,7 +29,7 @@
 
 import re
 import socket
-import asyncore
+from b3.lib import netasync as asyncore
 
 PACKETSIZE=1400
 
@@ -48,8 +47,8 @@ TOKEN = {
     'numplayers': '(?P<numplayers>[0-9]+)',
     'player': '(?P<player_name>.*?)<(?P<player_uid>[0-9]*)><(?P<player_steamid>(Console|BOT|STEAM_[01]:[01]:[0-9]{1,12}))><(?P<player_team>[^<>"]*)>',
     'position': '^(?P<x>-?[0-9]+) (?P<y>-?[0-9]+) (?P<z>-?[0-9]+)',
-    'property': ' \((?P<property_key>[^() ]+) "(?P<property_value>[^"]*)"\)',
-    'propertybug': '(?P<rest>.*" disconnected) \((?P<property_key>reason) "(?P<proprety_value>[^"]*)',
+    'property': r' \((?P<property_key>[^() ]+) "(?P<property_value>[^"]*)"\)',
+    'propertybug': r'(?P<rest>.*" disconnected) \((?P<property_key>reason) "(?P<proprety_value>[^"]*)',
     'reason': '(?P<reason>.*)',
     'rest': '(?P<rest>.*)',
     'score': '(?P<score>-?[0-9]+)',
@@ -138,7 +137,7 @@ class SourceLogParser(object):
         if match.group('type') == 'RL':
             remote = True
 
-        timestamp = map(int, match.group('year', 'month', 'day', 'hour', 'minute', 'second'))
+        timestamp = list(map(int, match.group('year', 'month', 'day', 'hour', 'minute', 'second')))
 
         # parse properties (key "value"), optional
         properties = {}
@@ -222,8 +221,9 @@ class SourceLogListener(asyncore.dispatcher):
     def handle_read(self):
         data = self.recv(PACKETSIZE)
 
-        if data.startswith('\xff\xff\xff\xff') and data.endswith('\n\x00'):
-            self.parser.parse(data)
+        if data.startswith(b'\xff\xff\xff\xff') and data.endswith(b'\n\x00'):
+            # decode once at the boundary: source engine logs are utf-8
+            self.parser.parse(data.decode('utf-8', 'replace'))
 
         else:
             raise SourceLogListenerError("Received invalid packet.")

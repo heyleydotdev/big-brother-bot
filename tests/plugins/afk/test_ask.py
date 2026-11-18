@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -28,7 +27,7 @@ from textwrap import dedent
 from time import sleep
 
 from tests.plugins.afk import *
-from mock import call, Mock
+from unittest.mock import call, Mock
 
 # This test suite makes sure `kick_client` is called appropriately when `ask_client` is run
 
@@ -78,7 +77,7 @@ def test_no_response(plugin, joe):
     assert [call('Are you AFK?')] == joe.message.mock_calls
     assert [call("Joe is AFK, kicking in 0.005s")] == plugin.console.say.mock_calls
     # WHEN
-    sleep(.01)
+    sleep(.1)  # the timer callback runs in a thread: give it some slack
     # THEN
     assert [call(joe)] == plugin.kick_client.mock_calls
 

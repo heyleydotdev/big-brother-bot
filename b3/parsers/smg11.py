@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -26,7 +25,6 @@ __author__ = 'xlr8or, Courgette'
 __version__ = '0.9.6'
 
 import re
-import string
 import b3
 import b3.events
 import b3.parsers.punkbuster
@@ -43,7 +41,7 @@ class Smg11Parser(AbstractParser):
     _connectingSlots = []
     _logSync = 1
     _maplist = None
-    
+
     _line_length = 65
     _line_color_prefix = ''
 
@@ -210,7 +208,7 @@ class Smg11Parser(AbstractParser):
         # initialize connected clients
         self.info('Discover connected clients')
         plist = self.getPlayerList()
-        for cid, c in plist.iteritems():
+        for cid, c in plist.items():
             userinfostring = self.queryClientUserInfoByCid(cid)
             if userinfostring:
                 self.OnClientuserinfochanged(None, userinfostring)
@@ -236,13 +234,13 @@ class Smg11Parser(AbstractParser):
         if m:
             client = None
             target = None
-            
+
             try:
                 action = m.group('action').lower()
             except IndexError:
                 # special case for damage lines where no action group can be set
                 action = 'damage'
-            
+
             return m, action, m.group('data').strip(), client, target
 
         elif '------' not in line:
@@ -253,7 +251,7 @@ class Smg11Parser(AbstractParser):
         Parse an infostring.
         :param info: The infostring to be parsed.
         """
-        player_id, info = string.split(info, ' ', 1)
+        player_id, info = info.split(' ', 1)
 
         if info[:1] != '\\':
             info += '\\'
@@ -305,13 +303,13 @@ class Smg11Parser(AbstractParser):
             if cid in self._connectingSlots:
                 self.debug('Client on slot %s is already being connected' % cid)
                 return
-            
+
             self._connectingSlots.append(cid)
             client = self.clients.getByCID(cid)
 
             if client:
                 # update existing client
-                for k, v in bclient.iteritems():
+                for k, v in bclient.items():
                     setattr(client, k, v)
             else:
                 if 'name' not in bclient:
@@ -333,23 +331,23 @@ class Smg11Parser(AbstractParser):
 
                     self._connectingSlots.remove(cid)
                     return None
-                
+
                 if 'ip' not in bclient:
                     infoclient = self.parseUserInfo(self.queryClientUserInfoByCid(cid))
                     if 'ip' in infoclient:
                         bclient['ip'] = infoclient['ip']
                     else:
                         self.warning('Failed to get client ip')
-                
+
                 if 'ip' in bclient:
                     self.clients.newClient(cid, name=bclient['name'], ip=bclient['ip'],
                                            state=b3.STATE_ALIVE, guid=guid, data={'guid': guid},
                                            bot=False, money=20)
                 else:
                     self.warning('Failed to get connect client')
-                    
+
             self._connectingSlots.remove(cid)
-                
+
         return None
 
     def OnKill(self, action, data, match=None):
@@ -373,7 +371,7 @@ class Smg11Parser(AbstractParser):
         else:
             attacker = self.getByCidOrJoinPlayer(match.group('acid'))
         ## End fix attacker
-          
+
         if not attacker:
             self.debug('No attacker')
             return None
@@ -434,7 +432,7 @@ class Smg11Parser(AbstractParser):
         # Item: 0 pickup_money (5) picked up ($25)
         # Item: 0 weapon_schofield bought ($18/$20)
         # Item: 0 weapon_remington58 (7) picked up
-        cid, item = string.split(data, ' ', 1)
+        cid, item = data.split(' ', 1)
         client = self.getByCidOrJoinPlayer(cid)
         if client:
             if 'pickup_money' in item:
@@ -578,7 +576,7 @@ class Smg11Parser(AbstractParser):
         players = self.getPlayerList()
         self.verbose('connectClient() = %s' % players)
 
-        for cid, p in players.iteritems():
+        for cid, p in players.items():
             #self.debug('cid: %s, ccid: %s, p: %s' %(cid, ccid, p))
             if int(cid) == int(ccid):
                 self.debug('Client found in status/playerList')
@@ -697,7 +695,7 @@ class Smg11Parser(AbstractParser):
         """
         plist = self.getPlayerList()
         mlist = dict()
-        for cid, c in plist.iteritems():
+        for cid, c in plist.items():
             client = self.getByCidOrJoinPlayer(cid)
             if client:
                 if client.guid and 'guid' in c():
@@ -718,7 +716,7 @@ class Smg11Parser(AbstractParser):
                         client.disconnect()
                 else:
                     self.debug('no-sync: no guid or ip found')
-        
+
         return mlist
 
 # ---- Documentation ---------------------------------------------------------------------------------------------------

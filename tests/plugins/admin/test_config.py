@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -26,7 +25,7 @@ import b3
 import logging
 import sys
 
-from mock import patch, call, Mock
+from unittest.mock import patch, call, Mock
 from tests.plugins.admin import Admin_TestCase, Admin_functional_test
 
 
@@ -35,6 +34,7 @@ class Config_reading_TestCase(Admin_TestCase):
     Test case base class that ease assertions against calls to self.p.warning and self.p.error methods.
     """
     MESSAGE_BEACON = None
+    __test__ = False  # base class only: subclasses opt back in (pytest collects unittest.TestCase classes by identity)
 
     def __init__(self, *args, **kwargs):
         Admin_TestCase.__init__(self, *args, **kwargs)
@@ -87,6 +87,7 @@ class Test_conf_announce_registration(Config_reading_TestCase):
     """
     test the correct reading of admin config option 'announce_registration' from config section 'settings'
     """
+    __test__ = True
     MESSAGE_BEACON = 'announce_registration'
 
     def test_missing(self):
@@ -179,6 +180,7 @@ class Test_conf_regme_confirmation(Config_reading_TestCase):
     """
     test the correct reading of admin config option 'regme_confirmation' from config section 'messages'
     """
+    __test__ = True
     MESSAGE_BEACON = 'regme_confirmation'
 
     def test_missing(self):

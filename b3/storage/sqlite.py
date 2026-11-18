@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -60,7 +59,7 @@ class SqliteStorage(DatabaseStorage):
             is_new_database = not os.path.isfile(path)
             self.db = sqlite3.connect(path, check_same_thread=False)
             self.db.isolation_level = None  # set autocommit mode
-        except Exception, e:
+        except Exception as e:
             self.db = None
             self.console.error('Database connection failed: %s', e)
             if self._consoleNotice:
@@ -109,11 +108,11 @@ class SqliteStorage(DatabaseStorage):
         :return: List of strings.
         """
         tables = []
-        cursor = self.query("SELECT * FROM sqlite_master WHERE type='table'")
+        cursor = self.query("SELECT name FROM sqlite_master WHERE type='table'")
         if cursor and not cursor.EOF:
             while not cursor.EOF:
                 row = cursor.getRow()
-                tables.append(row.values()[0])
+                tables.append(row['name'])
                 cursor.moveNext()
         cursor.close()
         return tables

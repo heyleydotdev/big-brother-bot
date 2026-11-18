@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -23,7 +22,7 @@
 # ################################################################### #
 
 import time
-from mock import patch, call
+from unittest.mock import patch, call
 from mockito import verify, when
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminbf3 import Poweradminbf3Plugin
@@ -56,7 +55,7 @@ roundnext: 20
 
 
     def test_nominal(self):
-        when(self.console).write()
+        when(self.console, strict=False).write()
         self.superadmin.clearMessageHistory()
         self.superadmin.says('!roundnext')
         self.assertEqual([], self.superadmin.message_history)

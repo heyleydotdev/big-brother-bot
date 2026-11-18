@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -38,42 +37,42 @@ SAY_LINE_MAX_LENGTH = 100
 class MohParser(AbstractParser):
 
     gameName = 'moh'
-    
+
     _gameServerVars = (
-        'serverName', # vars.serverName [name] Set the server name 
-        'gamePassword', # vars.gamePassword [password] Set the game password for the server 
-        'punkBuster', # vars.punkBuster [enabled] Set if the server will use PunkBuster or not 
-        'hardCore', # vars.hardCore[enabled] Set hardcore mode 
-        'ranked', # vars.ranked [enabled] Set ranked or not 
-        'skillLimit', # vars.skillLimit [lower, upper] Set the skill limits allowed on to the server 
-        'noUnlocks', # vars.noUnlocks [enabled] Set if unlocks should be disabled 
-        'noAmmoPickups', # vars.noAmmoPickups [enabled] Set if pickups should be disabled 
-        'realisticHealth', # vars.realisticHealth [enabled] Set if health should be realistic 
-        'supportAction', # vars.supportAction [enabled] Set if support action should be enabled 
+        'serverName', # vars.serverName [name] Set the server name
+        'gamePassword', # vars.gamePassword [password] Set the game password for the server
+        'punkBuster', # vars.punkBuster [enabled] Set if the server will use PunkBuster or not
+        'hardCore', # vars.hardCore[enabled] Set hardcore mode
+        'ranked', # vars.ranked [enabled] Set ranked or not
+        'skillLimit', # vars.skillLimit [lower, upper] Set the skill limits allowed on to the server
+        'noUnlocks', # vars.noUnlocks [enabled] Set if unlocks should be disabled
+        'noAmmoPickups', # vars.noAmmoPickups [enabled] Set if pickups should be disabled
+        'realisticHealth', # vars.realisticHealth [enabled] Set if health should be realistic
+        'supportAction', # vars.supportAction [enabled] Set if support action should be enabled
         'preRoundLimit', # vars.preRoundLimit [upper, lower] Set pre round limits.
         'roundStartTimerPlayersLimit', # vars.roundStartTimerPlayersLimit [limit]
         'roundStartTimerDelay', # vars.roundStartTimerDelay [delay] If set to other than -1, this value overrides
                                 # the round start delay set on the individual levels.
         'tdmScoreCounterMaxScore', # vars.tdmScoreCounterMaxScore [score] If set to other than -1, this value overrides
                                   # the score needed to win a round of Team Assault, Sector Control or Hot Zone.
-        'clanTeams', # vars.clanTeams [enabled] Set if clan teams should be used 
-        'friendlyFire', # vars.friendlyFire [enabled] Set if the server should allow team damage 
-        'currentPlayerLimit', # vars.currentPlayerLimit Retrieve the current maximum number of players 
-        'maxPlayerLimit', # vars.maxPlayerLimit Retrieve the server-enforced maximum number of players 
-        'playerLimit', # vars.playerLimit [nr of players] Set desired maximum number of players 
-        'bannerUrl', # vars.bannerUrl [url] Set banner url 
-        'serverDescription', # vars.serverDescription [description] Set server description 
+        'clanTeams', # vars.clanTeams [enabled] Set if clan teams should be used
+        'friendlyFire', # vars.friendlyFire [enabled] Set if the server should allow team damage
+        'currentPlayerLimit', # vars.currentPlayerLimit Retrieve the current maximum number of players
+        'maxPlayerLimit', # vars.maxPlayerLimit Retrieve the server-enforced maximum number of players
+        'playerLimit', # vars.playerLimit [nr of players] Set desired maximum number of players
+        'bannerUrl', # vars.bannerUrl [url] Set banner url
+        'serverDescription', # vars.serverDescription [description] Set server description
         'noCrosshairs', # vars.noCrosshairs [enabled] Set if crosshairs for all weapons is hidden
-        'noSpotting', # vars.noSpotting [enabled] Set if spotted targets are disabled in the 3d-world 
-        'teamKillCountForKick', # vars.teamKillCountForKick [count] Set number of teamkills allowed during a round 
+        'noSpotting', # vars.noSpotting [enabled] Set if spotted targets are disabled in the 3d-world
+        'teamKillCountForKick', # vars.teamKillCountForKick [count] Set number of teamkills allowed during a round
         'teamKillValueForKick', # vars.teamKillValueForKick [count] Set max kill-value allowed for a player before
                                 # he/she is kicked
-        'teamKillValueIncrease', # vars.teamKillValueIncrease [count] Set kill-value increase for a teamkill 
+        'teamKillValueIncrease', # vars.teamKillValueIncrease [count] Set kill-value increase for a teamkill
         'teamKillValueDecreasePerSecond', # vars.teamKillValueDecreasePerSecond [count] Set kill-value decrease per second
         'idleTimeout', # vars.idleTimeout [time] Set idle timeout vars.profanityFilter [enabled] Set if profanity
                        # filter is enabled
     )
-    
+
     ####################################################################################################################
     #                                                                                                                  #
     #   PARSER INITIALIZATION                                                                                          #
@@ -94,7 +93,7 @@ class MohParser(AbstractParser):
         """
         self.info('Connecting all players...')
         plist = self.getPlayerList()
-        for cid, p in plist.iteritems():
+        for cid, p in plist.items():
             client = self.clients.getByCID(cid)
             if not client:
                 name = p['name']
@@ -157,7 +156,7 @@ class MohParser(AbstractParser):
                                             teamId=int(p['teamId']), data=p)
 
             self.queueEvent(self.getEvent('EVT_CLIENT_JOIN', p, client))
-        
+
         return client
 
     def getHardName(self, mapname):
@@ -440,12 +439,12 @@ class MohParser(AbstractParser):
         self.write(('banList.list',))
         ## also kick as the MoH server seems not to enforce all bans correctly
         self.write(self.getCommand('kick', cid=client.cid, reason=reason[:80]))
-        
+
         if not silent and fullreason != '':
             self.say(fullreason)
 
         self.queueEvent(self.getEvent('EVT_CLIENT_BAN_TEMP', {'reason': reason,
-                                                              'duration': duration, 
+                                                              'duration': duration,
                                                               'admin': admin} , client))
 
     def ban(self, client, reason='', admin=None, silent=False, *kwargs):
@@ -493,10 +492,10 @@ class MohParser(AbstractParser):
 
         if self.PunkBuster:
             self.PunkBuster.banGUID(client, reason)
-        
+
         if not silent:
             self.say(reason)
-        
+
         self.queueEvent(self.getEvent('EVT_CLIENT_BAN', {'reason': reason, 'admin': admin}, client))
 
 
@@ -561,7 +560,7 @@ class MohParser(AbstractParser):
                 nextIndex = 0
                 while nextIndex < len(levelnames) and levelnames[nextIndex] != mapname:
                     nextIndex += 1
-            
+
             self.say('Changing map to %s' % mapname)
             time.sleep(1)
             self.write(('mapList.nextLevelIndex', nextIndex))

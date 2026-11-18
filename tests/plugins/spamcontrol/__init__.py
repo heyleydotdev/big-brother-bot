@@ -17,7 +17,7 @@
 
 import logging
 
-from mock import patch
+from unittest.mock import patch
 from b3.config import CfgConfigParser
 from b3.plugins.spamcontrol import SpamcontrolPlugin
 from tests import B3TestCase
@@ -34,6 +34,7 @@ class SpamcontrolTestCase(B3TestCase):
 
         self.log = logging.getLogger('output')
         self.log.propagate = False
+        self._original_log_level = self.log.level
 
         B3TestCase.setUp(self)
         self.console.startup()
@@ -42,6 +43,8 @@ class SpamcontrolTestCase(B3TestCase):
     def tearDown(self):
         B3TestCase.tearDown(self)
         self.timer_patcher.stop()
+        # do not leave DEBUG logging enabled for the other test modules
+        self.log.setLevel(self._original_log_level)
 
     def init_plugin(self, config_content):
         self.conf = CfgConfigParser()

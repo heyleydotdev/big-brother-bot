@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -25,7 +24,7 @@
 from textwrap import dedent
 from time import time
 from tests.plugins.afk import *
-from mock import call, Mock
+from unittest.mock import call, Mock
 
 # This test suite makes sure clients are kicked appropriately when `kick_client` is run
 from b3 import TEAM_SPEC, TEAM_RED

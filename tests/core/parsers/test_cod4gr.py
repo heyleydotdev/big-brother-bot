@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -23,9 +22,9 @@
 # ################################################################### #
 
 import logging
-import unittest2 as unittest
+import unittest
 
-from mock import Mock, patch, ANY
+from unittest.mock import Mock, patch, ANY
 from mockito import mock, when, any as anything
 from b3.clients import Client
 from b3.config import XmlConfigParser
@@ -68,7 +67,7 @@ class Cod4grTestCase(unittest.TestCase):
 
         # simulate game server actions
         def write(*args, **kwargs):
-            pretty_args = map(repr, args) + ["%s=%s" % (k, v) for k, v in kwargs.iteritems()]
+            pretty_args = list(map(repr, args)) + ["%s=%s" % (k, v) for k, v in kwargs.items()]
             log.info("write(%s)" % ', '.join(pretty_args))
             return self.output_mock.write(*args, **kwargs)
         self.console.write = Mock(wraps=write)

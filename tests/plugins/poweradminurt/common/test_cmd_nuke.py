@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -23,8 +22,8 @@
 # ################################################################### #
 
 import time
-import thread
-from mock import patch, call, Mock
+import _thread
+from unittest.mock import patch, call, Mock
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminurt import PoweradminurtPlugin
 from tests.plugins.poweradminurt.iourt41 import Iourt41TestCase
@@ -82,7 +81,7 @@ panuke-nuke: 20
         def _start_new_thread(function, args):
             function(*args)
 
-        with patch.object(thread, 'start_new_thread', wraps=_start_new_thread):
+        with patch.object(_thread, 'start_new_thread', wraps=_start_new_thread):
             self.joe.connects('3')
             self.moderator.message_history = []
             self.moderator.says("!nuke joe 3")

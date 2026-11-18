@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,7 +21,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import patch
+from unittest.mock import patch
 from b3.config import CfgConfigParser
 from b3.plugins.customcommands import CustomcommandsPlugin
 from tests import logging_disabled
@@ -44,7 +43,7 @@ class Test_find_player(CustomcommandsTestCase):
             self.player2 = FakeClient(console=self.console, name="player2", guid="player2GUID", pbid="player2PBID", group_bits=1)
             self.player2.connects(cid="CID2")
             self.guest.connects(cid="guestCID")
-            
+
     def init(self, conf_content):
         with logging_disabled():
             self.conf.loadFromString(conf_content)
@@ -57,11 +56,11 @@ class Test_find_player(CustomcommandsTestCase):
 [guest commands]
 f00 = f00 #<ARG:FIND_PLAYER:NAME>#
         """)
-        
+
         # WHEN
         with patch.object(self.console, "write") as write_mock:
             self.guest.says("!f00")
-        
+
         # THEN
         self.assertListEqual(['Error: missing parameter'], self.guest.message_history)
         self.assertListEqual([], write_mock.mock_calls)
@@ -72,11 +71,11 @@ f00 = f00 #<ARG:FIND_PLAYER:NAME>#
 [guest commands]
 f00 = f00 #<ARG:FIND_PLAYER:NAME>#
         """)
-        
+
         # WHEN
         with patch.object(self.console, "write") as write_mock:
             self.guest.says("!f00 bar")
-        
+
         # THEN
         self.assertListEqual(['No players found matching bar'], self.guest.message_history)
         self.assertListEqual([], write_mock.mock_calls)
@@ -87,11 +86,11 @@ f00 = f00 #<ARG:FIND_PLAYER:NAME>#
 [guest commands]
 f00 = f00 #<ARG:FIND_PLAYER:NAME>#
         """)
-        
+
         # WHEN
         with patch.object(self.console, "write") as write_mock:
             self.guest.says("!f00 player")
-        
+
         # THEN
         self.assertListEqual(['Players matching player player1 [CID1], player2 [CID2]'], self.guest.message_history)
         self.assertListEqual([], write_mock.mock_calls)

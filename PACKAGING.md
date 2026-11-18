@@ -1,62 +1,58 @@
 BigBrotherBot (B3) packaging documentation
 ==========================================
 
-B3 is distributed as different packages:
-
-  - Python sources package as a zip file
-  - Python wheel package
-  - Win32 zip package
-  - Win32 installer package (built with InnoSetup Installer)
+B3 is distributed as a Python package (wheel) and a source distribution. The
+former cx_Freeze/InnoSetup frozen-build path is not maintained for the 2.0.0
+port; packaging is standard `pyproject.toml` based (see `pyproject.toml` for the
+single source of truth for metadata and dependencies).
 
 # Bumping the version number
 
-You need the bumpversion tool for that task. See https://pypi.python.org/pypi/bumpversion/
+Release tooling lives in the `build` extra of `pyproject.toml`:
 
-Usage:
+```bash
+pip install -e ".[build]"
+bump2version patch     # 2.0.0 -> 2.0.1
+bump2version minor     # 2.0.0 -> 2.1.0
+bump2version major     # 2.0.0 -> 3.0.0
+```
 
-    bumpversion patch # will change "1.10.0" to "1.10.1"
-    bumpversion minor # will change "1.10.0" to "1.11.0" 
-    bumpversion major # will change "1.10.0" to "2.0.0"
-
+`.bumpversion.cfg` updates `b3/__init__.py`; update the `version` field in
+`pyproject.toml` in the same change.
 
 # Packaging B3
 
-To be able to build B3 distribution packages you need to have installed Python 2.7 32bit on your system.
-You can check your python version by starting the python interpreter in a terminal window (or command 
-prompt on win32 platform). Also you need to make sure to have `python` in your PATH environment variable.  
-You also need to have installed [GIT](http://git-scm.com/) on your system and make sure that the `git` command
-is in your PATH environment. Once the building process is completed you will find the built package(s) inside the 
-*dist* directory.
+Requirements: Python 3.11+ and `git` in the PATH.
+
+```bash
+git clone https://github.com/BigBrotherBot/big-brother-bot.git
+cd big-brother-bot
+python -m venv .venv
+.venv/bin/pip install -e ".[build]"
+```
 
 ## Source and wheel distribution
 
-Open a terminal window (or command prompt if on win32 platform) and type the following commands:
+```bash
+.venv/bin/python -m build
+```
 
- - clone big brother bot repository:
-    - `git clone https://github.com/BigBrotherBot/big-brother-bot.git`
-    - `cd big-brother-bot`
- - build source and wheel packages:
-    - `python setup.py release`
+The built `sdist` and `wheel` are written to `dist/`.
+
+## Verifying a package
+
+```bash
+.venv/bin/pip install dist/b3-<version>-py3-none-any.whl
+.venv/bin/b3_run --help
+```
+
+## Database scripts
+
+Storage schema creation scripts for MySQL, PostgreSQL and SQLite ship inside the
+package (`b3/sql/`) and are also used by the test fixtures.
 
 ## Windows
 
-Install [Microsofts Visual C++ Compiler for Python2.7](http://www.microsoft.com/en-us/download/details.aspx?id=44266).  
-Install [InnoSetup](http://www.jrsoftware.org/isinfo.php).  
-Install [psycopg2](http://www.stickpeople.com/projects/python/win-psycopg/).  
-Install [pycripto](http://www.voidspace.org.uk/python/modules.shtml#pycrypto).  
-Install [paramiko](http://blog.victorjabur.com/2011/06/08/modules-python-library-compiled-for-windows-32-and-64-unofficial-windows-binaries-for-python/).  
-Install [cx_Freeze](https://pypi.python.org/pypi/cx_Freeze/4.3.4).  
-Make sure to have `pip` in your PATH environment.  
-  
-Open a command prompt window and type the following:
-
- - clone big brother bot repository:
-    - `git clone https://github.com/BigBrotherBot/big-brother-bot.git`
-    - `cd big-brother-bot`
- - install python requirements:
-    - `pip install -r requirements.txt`
-    - `pip install -r build-requirements.txt`
- - update `installer/innosetup/build.yaml` config file with the path to your InnoSetup compiler.
- - build the frozen application:
-    - `python setup.py egg_info`
-    - `python setup.py build_exe`
+Windows uses the same pip/wheel packaging path as every other platform. If a
+self-contained executable is ever needed, use `cx_Freeze` 7 or `pyinstaller` in
+a separate build job — do not add it to the runtime dependency set.

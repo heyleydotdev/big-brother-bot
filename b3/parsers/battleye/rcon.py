@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -43,10 +42,10 @@ class Rcon(object):
     def __init__(self, console, *args):
         self.console = console
         self.battleye_server = None
-        
+
     def set_battleye_server(self, battleye_server):
         self.battleye_server = battleye_server
-    
+
     def writelines(self, lines):
         for line in lines:
             self.write(line)
@@ -54,17 +53,17 @@ class Rcon(object):
     def write(self, cmd, *args, **kwargs):
         if not self.battleye_server or not self.battleye_server.connected:
             return
-        self.console.bot(u'RCON > %s' % repr(cmd))
+        self.console.bot('RCON > %s' % repr(cmd))
         response = None
         try:
             response = self.battleye_server.command(cmd)
-            self.console.bot(u'RCON < %s' % repr(response))
-        except CommandTimeoutError, err:
+            self.console.bot('RCON < %s' % repr(response))
+        except CommandTimeoutError as err:
             self.console.error("RCON # %s" % err)
-        except CommandError, err:
+        except CommandError as err:
             self.console.error("RCON ERROR : %s" % err, exc_info=err)
         return response
-        
+
     def flush(self):
         pass
 

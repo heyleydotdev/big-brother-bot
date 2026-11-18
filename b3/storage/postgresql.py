@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -44,11 +43,11 @@ class PostgresqlStorage(DatabaseStorage):
         :raise ImportError: If the system misses the necessary libraries needed to setup the storage module.
         """
         try:
-            # prefer pymysql
-            import psycopg2
+            # psycopg 3 (the maintained python 3 driver)
+            import psycopg
         except ImportError:
-            psycopg2 = None
-            raise ImportError("missing PostgreSQL connector driver. You need to install 'psycopg2': "
+            psycopg = None
+            raise ImportError("missing PostgreSQL connector driver. You need to install 'psycopg': "
                               "look for 'dependencies' in B3 documentation.")
 
         return super(PostgresqlStorage, cls).__new__(cls)
@@ -97,15 +96,16 @@ class PostgresqlStorage(DatabaseStorage):
 
             try:
 
-                import psycopg2
-                self.db = psycopg2.connect(host=self.dsnDict['host'],
-                                           port=self.dsnDict['port'],
-                                           user=self.dsnDict['user'],
-                                           password=self.dsnDict['password'],
-                                           database=self.dsnDict['path'][1:])
-
-                self.db.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-                self.db.set_client_encoding("UTF8")
+                import psycopg
+                self.db = psycopg.connect(host=self.dsnDict['host'],
+                                          port=self.dsnDict['port'],
+                                          user=self.dsnDict['user'],
+                                          password=self.dsnDict['password'],
+                                          dbname=self.dsnDict['path'][1:],
+                                          autocommit=True)
+                # NOTE: psycopg 3 has no set_isolation_level/set_client_encoding:
+                # autocommit is a connect kwarg and modern PostgreSQL defaults
+                # its client encoding to UTF8, so the old calls are dropped.
 
                 self.console.bot('Successfully established a connection with PostgreSQL database')
                 self._lastConnectAttempt = 0
@@ -122,14 +122,14 @@ class PostgresqlStorage(DatabaseStorage):
                     try:
                         self.console.info("Missing PostgreSQL database tables: importing SQL file: %s..." % b3.getAbsolutePath("@b3/sql/postgresql/b3.sql"))
                         self.queryFromFile("@b3/sql/postgresql/b3.sql")
-                    except Exception, e:
+                    except Exception as e:
                         self.shutdown()
                         self.console.critical("Missing PostgreSQL database tables. You need to create the necessary tables for "
                                               "B3 to work. You can do so by importing the following SQL script into your "
                                               "database: %s. An attempt of creating tables automatically just failed: %s" %
                                               (b3.getAbsolutePath("@b3/sql/postgresql/b3.sql"), e))
 
-            except Exception, e:
+            except Exception as e:
                 self.console.error('Database connection failed: working in remote mode: %s - %s', e, extract_tb(sys.exc_info()[2]))
                 self.db = None
                 self._lastConnectAttempt = time()
@@ -173,7 +173,7 @@ class PostgresqlStorage(DatabaseStorage):
         if cursor and not cursor.EOF:
             while not cursor.EOF:
                 row = cursor.getRow()
-                tables.append(row.values()[0])
+                tables.append(list(row.values())[0])
                 cursor.moveNext()
         cursor.close()
         return tables
@@ -235,7 +235,7 @@ class PostgresqlStorage(DatabaseStorage):
                     dbcursor.lastrowid = cursor.fetchone()[0]
                     dbcursor._cursor.lastrowid = dbcursor.lastrowid
                     cursor.close()
-                except Exception, e:
+                except Exception as e:
                     # can't recover in any case
                     pass
 
@@ -274,7 +274,7 @@ def patch_query_builder(console):
         Escape quotes from a given string.
         :param word: The string on which to perform the escape
         """
-        if isinstance(word, int) or isinstance(word, long) or isinstance(word, complex) or isinstance(word, float):
+        if isinstance(word, int) or isinstance(word, int) or isinstance(word, complex) or isinstance(word, float):
             return str(word)
         elif word is None:
             return "'None'"

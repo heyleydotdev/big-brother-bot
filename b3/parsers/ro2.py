@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -27,12 +26,11 @@ import b3.cron
 import ftplib
 import os
 import re
-import string
 import sys
 import time
-import urllib
-import urllib2
-import cookielib
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
+import http.cookiejar
 import hashlib
 
 from b3 import functions
@@ -50,7 +48,7 @@ class Ro2Parser(Parser):
     """
     gameName = 'ro2'
     privateMsg = True
-    PunkBuster = None 
+    PunkBuster = None
     ftpconfig = None
     prefix = '%s: '
 
@@ -125,7 +123,7 @@ class Ro2Parser(Parser):
             self.username = self.config.get('server', 'ro2admin')
         else:
             self.username = "Admin"
-        
+
         if self.config.has_option('server','inifile'):
             # open ini file
             ini_file = self.config.get('server','inifile')
@@ -139,14 +137,14 @@ class Ro2Parser(Parser):
                 self.bot('getting configs from %s', ini_file)
                 f = self.config.getpath('server', 'inifile')
                 if os.path.isfile(f):
-                    self.input  = file(f, 'r')
+                    self.input  = open(f, 'r')
                     self._ini_file = f
 
         if not self._ini_file:
             self.debug('Incorrect ini file or no ini file specified: map commands other than nextmap not available')
 
         self.cron.add(b3.cron.CronTab(self.retrievePlayerList, second='*/%s' % self._playerlistInterval))
-    
+
         self.user_agent = 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'
         self.headers = {'User-Agent': self.user_agent,
                         "Accept": "ext/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -205,26 +203,26 @@ class Ro2Parser(Parser):
                     self.handle_chat(chat_data)
 
                 time.sleep(.5)
-                
+
         self.bot('Stop listening...')
 
         if self.exiting.acquire(1) and self.exitcode:
             sys.exit(self.exitcode)
-    
+
     ####################################################################################################################
     #                                                                                                                  #
     #   EVENT HANDLERS                                                                                                 #
     #                                                                                                                  #
     ####################################################################################################################
-    
+
     def handle_chat(self, data):
         """
         Handle the chat from players.
         """
-        if string.capitalize(data['div_class']) == 'Chatnotice':
+        if data['div_class'].capitalize() == 'Chatnotice':
             return
-        
-        func = 'onChat_type%s' % (string.capitalize(data['div_class']))
+
+        func = 'onChat_type%s' % (data['div_class'].capitalize())
         if hasattr(self, func):
             self.debug('routing ----> %s' % func)
             func = getattr(self, func)
@@ -293,18 +291,18 @@ class Ro2Parser(Parser):
             referer = data_url
         else:
             referer += self.url
-            
+
         self.headers['Referer'] = referer
-        
+
         try:
-            request_console = urllib2.Request(data_url, data, self.headers)
+            request_console = urllib.request.Request(data_url, data, self.headers)
             console_read = self.opener.open(request_console)
             console_data = console_read.read()
             return console_data
         except Exception:
             self.debug('Failed to open URL')
             self.webconnect()
-            return 
+            return
 
     def webconnect(self):
         """
@@ -314,16 +312,16 @@ class Ro2Parser(Parser):
         password = ''
         login_url = self.url + '/'
         headers = {'Content-type' : 'application/x-www-form-urlencoded', 'User-Agent' : self.user_agent}
-        self.cj = cookielib.LWPCookieJar()
-        self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cj))
-        urllib2.install_opener(self.opener)
+        self.cj = http.cookiejar.LWPCookieJar()
+        self.opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(self.cj))
+        urllib.request.install_opener(self.opener)
         findpage_attempt = 0
         self._paused = True
         response = ""
         while findpage_attempt < 11:
             try:
-                request = urllib2.Request(login_url, None, headers)
-                page = urllib2.urlopen(request)
+                request = urllib.request.Request(login_url, None, headers)
+                page = urllib.request.urlopen(request)
                 response = page.read()
                 break
             except Exception:
@@ -335,7 +333,7 @@ class Ro2Parser(Parser):
                 else:
                     time.sleep(1)
                     self.debug('Failed to find Web page %s - wait 1 second' % findpage_attempt)
-                    
+
         #<input type="hidden" name="token" value="3309899D" />
         token_start = response.partition('<input type="hidden" name="token" value="')
         token = token_start[2]
@@ -343,18 +341,18 @@ class Ro2Parser(Parser):
 
         login_url = self.url + '/'
         referer = login_url
-        data = urllib.urlencode({'token': token_value,
+        data = urllib.parse.urlencode({'token': token_value,
                                  'password_hash': self.password_hash,
                                  'username': self.username,
                                  'password': password,
                                  'remember': remember })
         self.headers['Referer'] = referer
-        
+
         login_attempt = 1
         while login_attempt < 11:
             try:
                 self.debug('Login attempt %s' % login_attempt)
-                request_console = urllib2.Request(login_url, data, self.headers)
+                request_console = urllib.request.Request(login_url, data, self.headers)
                 self.opener.open(request_console)
                 self._paused = False
                 return True
@@ -374,25 +372,25 @@ class Ro2Parser(Parser):
             message_text = self.addplus(message)
         else:
             message_text=''
-    
+
         #<div class="chatmessage">
         #<span class="teamcolor" style="background: #8FB9B0;">&#160;</span>
         #<span class="username">&lt;82ndAB&gt;1LT.Bravo17 </span>:
         #<span class="message">test message from game</span>
         #</div>
-        
+
         #<div class="chatmessage">
         #<span class="teamcolor" style="background: #8FB9B0;">&#160;</span>
         #<span class="teamnotice" style="color: #8FB9B0;">(Team)</span>
         #<span class="username" title="Axis">&lt;82ndAB&gt;1LT.Bravo17 </span>:
         #<span class="message">Team chat</span>
         #</div>
-        
+
         #<div class="chatnotice">
         #<span class="noticesymbol">***</span> [<span class="username"></span>]
         #<span class="message">82ndAB ADMIN: No offensive names.</span>
         #</div>
-        
+
         chatdata_url = '/current/chat/data'
         #data = 'ajax=1&message=message+from+b3&teamsay=-1'
         data = 'ajax=1' + message_text
@@ -414,7 +412,7 @@ class Ro2Parser(Parser):
         message = '&message=' + message + '&teamsay=-1'
         self.debug(message)
         return message
-        
+
     def decode_chat_data(self, data):
         """
         Decode the data reeived from the web interface and extract the chat data"""
@@ -433,20 +431,20 @@ class Ro2Parser(Parser):
                 data_split = data.partition('</span>')
                 chat_decoded[span_class] = data_split[0]
                 data = data_split[2]
-                
+
             data = data.partition('div class="')[2]
             chat_decoded['username'] = self.getUsername(chat_decoded['username'])
             if chat_decoded['username'] == self.username:
                 return
-            #Ignore new format for server messages 
+            #Ignore new format for server messages
             if chat_decoded['username'] == '' and chat_decoded['noticesymbol'] == '***':
                 return
-                
+
             if chat_decoded['message'].find('#G') != -1:
                 chat_decoded['message'] = chat_decoded['message'].rpartition('#G')[0]
-                
+
             self._read_queue.append(chat_decoded)
-        
+
     def getUsername(self, name):
         """
         Retrieve the username and make it 'safe'.
@@ -460,10 +458,10 @@ class Ro2Parser(Parser):
         if name.find('&') != -1:
             name = name.replace('&lt;', '<')
             name = name.replace('&gt;', '>')
-            
-        self.debug('nameafter = %s' % name)            
+
+        self.debug('nameafter = %s' % name)
         return name
- 
+
     def decodeplayers(self, data):
         """
         Get the list of players from the web data.
@@ -480,7 +478,7 @@ class Ro2Parser(Parser):
             players[str(next_player_decoded['playerid'])] = next_player_decoded
 
         return players
-        
+
     def decode_nextplayer(self, data):
         """
         Get the next players details from the web data.
@@ -512,7 +510,7 @@ class Ro2Parser(Parser):
             player['team'] = self.getTeam('2')
         else:
             player['team'] = self.getTeam(color[0])
-        
+
         return player
 
     def decodeBans(self, data):
@@ -531,7 +529,7 @@ class Ro2Parser(Parser):
             data = data.partition('<input type="hidden" name="banid" value="')[2]
             ban_no = data.partition('"')[0]
             ban_list[str(banid)] = ban_no
-            
+
         return ban_list
 
     def getTeam(self, team):
@@ -595,7 +593,7 @@ class Ro2Parser(Parser):
                    "Content-type": "application/x-www-form-urlencoded",
                    "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
                    "Referer": referer}
-        request_banlist = urllib2.Request(banlist_url, None, headers)
+        request_banlist = urllib.request.Request(banlist_url, None, headers)
         banlist_read = self.opener.open(request_banlist)
         banlist_data = banlist_read.read()
         ban_list = self.decodeBans(banlist_data)
@@ -624,7 +622,7 @@ class Ro2Parser(Parser):
             self.verbose("Connection successful: remote file size is %s" % remoteSize)
             ftp.retrlines('RETR ' + os.path.basename(self.ftpconfig['path']), handleDownload)
 
-        except ftplib.all_errors, e:
+        except ftplib.all_errors as e:
             self.debug(str(e))
             try:
                 ftp.close()
@@ -655,7 +653,7 @@ class Ro2Parser(Parser):
     #   B3 PARSER INTERFACE IMPLEMENTATION                                                                             #
     #                                                                                                                  #
     ####################################################################################################################
-    
+
     def getPlayerList(self):
         """
         Query the game server for connected players.
@@ -680,7 +678,7 @@ class Ro2Parser(Parser):
             for line in msg:
                 self.write(line)
                 time.sleep(0.1)
-            
+
     def writeAdminCommand(self, cmd):
         """
         Write an Admin command via the Web interface console (Limited in what actually works).
@@ -693,7 +691,7 @@ class Ro2Parser(Parser):
                    "Content-type": "application/x-www-form-urlencoded",
                    "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
                    "Referer": consoledata_url}
-        request_console = urllib2.Request(consoledata_url, data, headers)
+        request_console = urllib.request.Request(consoledata_url, data, headers)
         adminconsole_read = self.opener.open(request_console)
         adminconsole_read.read()
 
@@ -712,9 +710,9 @@ class Ro2Parser(Parser):
         else:
             clients = self.decodeplayers(playerlist_data)
             self.debug (clients)
-        
+
         return clients
-            
+
     def authorizeClients(self):
         """
         For all connected players, fill the client object with properties allowing to find 
@@ -722,7 +720,7 @@ class Ro2Parser(Parser):
         Client.auth() method 
         """
         pass
-    
+
     def findNewPlayers(self, c_client_list):
         """
         Gets a list of non-authed players on the server.
@@ -731,8 +729,8 @@ class Ro2Parser(Parser):
             cl = c_client_list[c]
             uid = cl['guid']
             if len(uid) != 18:
-                self.warning(u"weird UID : [%s]" % uid)
-            
+                self.warning("weird UID : [%s]" % uid)
+
             # try to get the client by guid
             client = self.clients.getByGUID(uid)
             if not client:
@@ -761,7 +759,7 @@ class Ro2Parser(Parser):
         if required call the client.disconnect() method to remove a client from self.clients.
         """
         client_cid_list = []
-        for cl in connected_clients.values():
+        for cl in list(connected_clients.values()):
             client_cid_list.append(cl['playerid'])
 
         for client in self.clients.getList():
@@ -778,7 +776,7 @@ class Ro2Parser(Parser):
         """
         if connected_clients is None:
             connected_clients = self.getPlayerList()
-            
+
         self.debug("Synchronizing clients")
         mlist = {}
 
@@ -863,20 +861,20 @@ class Ro2Parser(Parser):
 
         if not silent and fullreason != '':
             self.say(fullreason)
-        
+
         banid = client.guid
         bandata_url = '/policy/bans'
         data = 'action=add&uniqueid=' + banid
         referer = None
         self.debug('Ban data %s' % data)
         self.readwriteweb(data, referer, bandata_url)
-        
+
         self.queueEvent(self.getEvent('EVT_CLIENT_BAN', {'reason': reason, 'admin': admin}, client))
 
         c = self.clients.getByGUID(banid)
         if c:
             self.writeAdminCommand(self.getCommand('kick', playerid=c.cid))
-        
+
         client.disconnect()
 
     def unban(self, client, reason='', admin=None, silent=False, *kwargs):
@@ -905,10 +903,10 @@ class Ro2Parser(Parser):
             self.readwriteweb(data, referer, bandata_url)
             if admin:
                 admin.message('Removed %s from server banlist' %client.name)
-        
+
         if admin:
             admin.message('Removed %s from B3 banlist' %client.name)
-            
+
         self.queueEvent(self.getEvent('EVT_CLIENT_UNBAN', reason, client))
 
     def tempban(self, client, reason='', duration=2, admin=None, silent=False, *kwargs):
@@ -929,7 +927,7 @@ class Ro2Parser(Parser):
             banduration = b3.functions.minutesStr(duration)
             variables = self.getMessageVariables(client=client, reason=reason, banduration=banduration)
             fullreason = self.getMessage('temp_banned', variables)
-        
+
         fullreason = self.stripMsgColors(fullreason)
         reason = self.stripMsgColors(reason)
 
@@ -965,7 +963,7 @@ class Ro2Parser(Parser):
                             break
 
                 f.close()
-                
+
             map_line = self.map_cycles[str(self.active_map_cycle)]
             map_line = map_line.partition('Maps=("')[2]
             map_line = map_line.partition('"),RoundLimits=')[0]
@@ -990,7 +988,7 @@ class Ro2Parser(Parser):
             self.readwriteweb(data, referer, mapchange_url)
         else:
             self.write(self.getCommand('say',  prefix=self.msgPrefix, message='Incorrect Gametype-Map combination'))
-            
+
     def getMap(self):
         """
         Return the current map/level name.
@@ -1009,7 +1007,7 @@ class Ro2Parser(Parser):
         current_data = current_data.partition('<dd><code>')[2]
         mapname = current_data.partition('</code>')[0]
         return mapname
-    
+
     def getNextMap(self):
         """
         Return the next map/level name to be played.
@@ -1026,7 +1024,7 @@ class Ro2Parser(Parser):
         else:
             nextmap = 'Unknown'
         return nextmap
-        
+
     def getPlayerPings(self, filter_client_ids=None):
         """
         Returns a dict having players' id for keys and players' ping for values
@@ -1035,7 +1033,7 @@ class Ro2Parser(Parser):
         pings = {}
         clients = self.clients.getList()
         if filter_client_ids:
-             clients = filter(lambda client: client.cid in filter_client_ids, clients)
+             clients = [client for client in clients if client.cid in filter_client_ids]
 
         for c in clients:
             try:
@@ -1043,7 +1041,7 @@ class Ro2Parser(Parser):
             except AttributeError:
                 pass
         return pings
-        
+
     def getPlayerScores(self):
         """
         Returns a dict having players' id for keys and players' scores for values

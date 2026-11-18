@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,7 +21,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import Mock, call
+from unittest.mock import Mock, call
 from mockito import when
 
 from b3.plugins.poweradminbf3 import Poweradminbf3Plugin

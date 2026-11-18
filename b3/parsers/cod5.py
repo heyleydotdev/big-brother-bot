@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -27,7 +26,6 @@ __version__ = '1.4.2'
 
 import b3.functions
 import b3.parsers.cod2
-import string
 
 from b3.events import Event
 
@@ -37,7 +35,7 @@ class Cod5Parser(b3.parsers.cod2.Cod2Parser):
     IpsOnly = False
 
     _guidLength = 8
-    
+
     _commands = {
         'message': 'tell %(cid)s %(message)s',
         'say': 'say %(message)s',
@@ -82,7 +80,7 @@ class Cod5Parser(b3.parsers.cod2.Cod2Parser):
             self._guidLength = self.config.getint('b3', 'guid_length')
             self.info('Min guid length has been set to %s', self._guidLength)
 
-    
+
     ####################################################################################################################
     #                                                                                                                  #
     #   PARSING                                                                                                        #
@@ -99,8 +97,8 @@ class Cod5Parser(b3.parsers.cod2.Cod2Parser):
             return False
 
         match, action, data, client, target = m
-        func = 'On%s' % string.capwords(action).replace(' ','')
-        
+        func = 'On%s' % ''.join(word.capitalize() for word in action.split())
+
         if hasattr(self, func):
             func = getattr(self, func)
             event = func(action, data, match)
@@ -175,7 +173,7 @@ class Cod5Parser(b3.parsers.cod2.Cod2Parser):
             if not client:
                 return None
         client.team = self.getTeam(match.group('team'))
-        
+
     ####################################################################################################################
     #                                                                                                                  #
     #   B3 PARSER INTERFACE IMPLEMENTATION                                                                             #
@@ -193,7 +191,7 @@ class Cod5Parser(b3.parsers.cod2.Cod2Parser):
         plist = self.getPlayerList(maxRetries=4)
         mlist = {}
 
-        for cid, c in plist.iteritems():
+        for cid, c in plist.items():
             cid = str(cid)
             client = self.clients.getByCID(cid)
             if client:
@@ -215,5 +213,5 @@ class Cod5Parser(b3.parsers.cod2.Cod2Parser):
                         client.disconnect()
                 else:
                     self.debug('no-sync: no guid or ip found')
-        
+
         return mlist

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,7 +21,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import Mock
+from unittest.mock import Mock
 from mockito import verify, when
 import b3
 from b3.config import CfgConfigParser
@@ -68,7 +67,7 @@ swap: 20
 
 
     def test_superadmin_swap_joe(self):
-        when(self.console).write()
+        when(self.console, strict=False).write()
         self.joe.connects('Joe')
         self.joe.teamId = 1
         self.joe.squad = 7
@@ -115,7 +114,7 @@ swap: 20
 
 
     def test_superadmin_swap_players_from_same_team_and_but_different_squads(self):
-        when(self.console).write()
+        when(self.console, strict=False).write()
         self.joe.connects('joe')
         self.joe.teamId = 1
         self.joe.squad = 6
@@ -151,7 +150,7 @@ no_level_check_level: 20
 
     def test_above__no_level_check_level(self):
 
-        when(self.console).write()
+        when(self.console, strict=False).write()
         assert self.p.no_level_check_level == 20
 
         self.superadmin.connects('God')

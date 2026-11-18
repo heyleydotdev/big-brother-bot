@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -26,7 +25,7 @@ __version__ = '1.2'
 
 import logging
 import time
-import asyncore
+from b3.lib import netasync as asyncore
 import socket
 import threading
 import hashlib
@@ -55,18 +54,19 @@ def EncodeInt32(size):
 
 def DecodeInt32(data):
     return unpack('<I', data[0 : 4])[0]
-    
-    
+
+
 def EncodeWords(words):
     size = 0
-    encodedWords = ''
+    encodedWords = b''
     for word in words:
-        strWord = str(word)
-        encodedWords += EncodeInt32(len(strWord))
-        encodedWords += strWord
-        encodedWords += '\x00'
-        size += len(strWord) + 5
-    
+        # words are str, the wire format only knows cp1252 bytes
+        encodedWord = word if isinstance(word, bytes) else str(word).encode('cp1252', 'replace')
+        encodedWords += EncodeInt32(len(encodedWord))
+        encodedWords += encodedWord
+        encodedWords += b'\x00'
+        size += len(encodedWord) + 5
+
     return size, encodedWords
 
 
@@ -75,9 +75,9 @@ def DecodeWords(size, data):
     words = []
     offset = 0
     while offset < size:
-        wordLen = DecodeInt32(data[offset : offset + 4])        
+        wordLen = DecodeInt32(data[offset : offset + 4])
         word = data[offset + 4 : offset + 4 + wordLen]
-        words.append(word)
+        words.append(word.decode('cp1252', 'replace'))
         offset += wordLen + 5
 
     return words
@@ -120,7 +120,7 @@ def EncodeClientRequest(words):
     clientSequenceNr = (clientSequenceNr + 1) & 0x3fffffff
     return packet
 
-    
+
 def EncodeClientResponse(sequence, words):
     """
     Encode a response packet.
@@ -133,29 +133,29 @@ def printPacket(packet):
     Display contents of packet in user-friendly format, useful for debugging purposes.
     """
     if packet[0]:
-        print "IsFromServer, ",
+        print("IsFromServer, ", end=' ')
     else:
-        print "IsFromClient, ",
-    
-    if packet[1]:
-        print "Response, ",
-    else:
-        print "Request, ",
+        print("IsFromClient, ", end=' ')
 
-    print "Sequence: " + str(packet[2]),
+    if packet[1]:
+        print("Response, ", end=' ')
+    else:
+        print("Request, ", end=' ')
+
+    print("Sequence: " + str(packet[2]), end=' ')
 
     if packet[3]:
-        print " Words:",
+        print(" Words:", end=' ')
         for word in packet[3]:
-            print "\"" + word + "\"",
+            print("\"" + word + "\"", end=' ')
 
-    print ""
+    print("")
 
 
 def generatePasswordHash(salt, password):
     m = hashlib.new('md5')
     m.update(salt)
-    m.update(password)
+    m.update(password if isinstance(password, bytes) else password.encode('cp1252', 'replace'))
     return m.digest()
 
 def containsCompletePacket(data):
@@ -224,7 +224,7 @@ class FrostbiteDispatcher(asyncore.dispatcher_with_send):
         :param port: The Frostbite2 server port
         """
         asyncore.dispatcher_with_send.__init__(self)
-        self._buffer_in = ''
+        self._buffer_in = b''
         self.getLogger().info("connecting")
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         asyncore.dispatcher_with_send.connect(self, (host, port))
@@ -248,7 +248,7 @@ class FrostbiteDispatcher(asyncore.dispatcher_with_send):
         Register a function that will be called when the Frosbite server sends us a command reply.
         """
         self._frostbite_command_response_handler = func
-        
+
     def send_command(self, *command):
         """
         Send a command to the Frosbite server and return the command
@@ -276,10 +276,10 @@ class FrostbiteDispatcher(asyncore.dispatcher_with_send):
 
     def getLogger(self):
         return logging.getLogger("FrostbiteDispatcher")
-    
+
     def handle_connect(self):
         self.getLogger().debug("handle_connect")
-    
+
     def handle_close(self):
         """
         Called when the socket is closed.
@@ -302,7 +302,7 @@ class FrostbiteDispatcher(asyncore.dispatcher_with_send):
             packet = self._buffer_in[0:packetSize]
             self._buffer_in = self._buffer_in[packetSize:len(self._buffer_in)]
             self.handle_packet(packet)
-            
+
     def handle_packet(self, packet):
         """
         Called when a full Frosbite packet has been received.
@@ -334,7 +334,7 @@ class FrostbiteDispatcher(asyncore.dispatcher_with_send):
         self.getLogger().debug("received a response for command #%i from frosbite server: %s" % (command_id, repr(words)))
         if self._frostbite_command_response_handler is not None:
             self._frostbite_command_response_handler(command_id, words)
-    
+
 
 class FrostbiteServer(threading.Thread):
     """
@@ -369,7 +369,7 @@ class FrostbiteServer(threading.Thread):
         Add func from Frosbite events listeners.
         """
         self.observers.add(func)
-        
+
     def unsubscribe(self, func):
         """
         Remove func from Frosbite events listeners.
@@ -384,7 +384,7 @@ class FrostbiteServer(threading.Thread):
         """
         if not self.connected:
             raise NetworkError("not connected")
-        
+
         self.getLogger().info("command : %s " % repr(command))
         if command is None:
             return None
@@ -392,7 +392,7 @@ class FrostbiteServer(threading.Thread):
         command_id = self.frostbite_dispatcher.send_command(*command)
         self.pending_commands[command_id] = None
         self.getLogger().debug("command #%i sent. %s " % (command_id, repr(command)))
-        
+
         response = self._wait_for_response(command_id)
         if response[0] in ('CommandDisallowedOnRanked', 'CommandDisallowedOnOfficial'):
             raise CommandDisallowedError(response)
@@ -410,9 +410,10 @@ class FrostbiteServer(threading.Thread):
         self.getLogger().info("starting authentication")
         hash_token = self.command('login.hashed')
         # Given the salt and the password, combine them and compute hash value
-        salt = hash_token[0].decode("hex")
+        # (py2's str.decode("hex") / str.encode("hex") are gone: bytes.fromhex / bytes.hex replace them)
+        salt = bytes.fromhex(hash_token[0])
         passwordHash = generatePasswordHash(salt, self.password)
-        passwordHashHexString = passwordHash.encode("hex").upper()
+        passwordHashHexString = passwordHash.hex().upper()
         # Send password hash to server
         self.command("login.hashed", passwordHashHexString)
         self.getLogger().info("authentication done")
@@ -423,7 +424,7 @@ class FrostbiteServer(threading.Thread):
     def stop(self):
         self._stopEvent.set()
         self.close()
-    
+
     ####################################################################################################################
     #                                                                                                                  #
     #   OTHER METHODS                                                                                                  #
@@ -434,7 +435,7 @@ class FrostbiteServer(threading.Thread):
     def test_connectivity(host, port):
         sock = socket.create_connection((host, port), timeout=2)
         sock.close()
-    
+
     def __getattr__(self, name):
         if name == 'connected':
             return self.frostbite_dispatcher.connected
@@ -696,4 +697,3 @@ class FrostbiteServer(threading.Thread):
 #
 #     #run_low_level()
 #     run_FrosbiteServer()
-    

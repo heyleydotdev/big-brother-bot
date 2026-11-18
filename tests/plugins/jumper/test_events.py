@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,7 +21,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import Mock
+from unittest.mock import Mock
 from b3 import TEAM_FREE, TEAM_SPEC
 from b3.plugins.jumper import JumpRun
 from tests import logging_disabled
@@ -142,7 +141,7 @@ class Test_events(JumperTestCase):
         # WHEN
         self.console.queueEvent(self.console.getEvent('EVT_CLIENT_JUMP_RUN_START', client=self.mike, data={'way_id' : '1'}))
         self.console.queueEvent(self.console.getEvent('EVT_CLIENT_JUMP_RUN_START', client=self.bill, data={'way_id' : '1'}))
-        self.console.queueEvent(self.console.getEvent('EVT_GAME_MAP_CHANGE', data='\sv_allowdownload\0\g_matchmode\0\g_gametype\9\sv_maxclients\32\sv_floodprotect\1'))
+        self.console.queueEvent(self.console.getEvent('EVT_GAME_MAP_CHANGE', data='\\sv_allowdownload\0\\g_matchmode\0\\g_gametype\\9\\sv_maxclients\32\\sv_floodprotect\1'))
         # THEN
         self.assertEqual(False, self.mike.isvar(self.p, 'jumprun'))
         self.assertEqual(False, self.bill.isvar(self.p, 'jumprun'))

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -87,7 +86,7 @@ RE_HL_LOG_LINE = r'''^L [01]\d/[0-3]\d/\d+ - [0-2]\d:[0-5]\d:[0-5]\d:\s*(?P<data
 
 # Regular expression able to extract properties from HalfLife game engine log line as described at
 # https://developer.valvesoftware.com/wiki/HL_Log_Standard#Notes
-RE_HL_LOG_PROPERTY = re.compile('''\((?P<key>[^\s\(\)]+)(?P<data>| "(?P<value>[^"]*)")\)''')
+RE_HL_LOG_PROPERTY = re.compile(r'''\((?P<key>[^\s\(\)]+)(?P<data>| "(?P<value>[^"]*)")\)''')
 
 # Regular expression to parse cvar queries responses
 RE_CVAR = re.compile(r'''^"(?P<cvar>\S+?)" = "(?P<value>.*?)" \( def. "(?P<default>.*?)".*$''', re.MULTILINE)
@@ -479,7 +478,7 @@ class CsgoParser(Parser):
         """
         plist = self.getPlayerList()
         mlist = {}
-        for cid, c in plist.iteritems():
+        for cid, c in plist.items():
             client = self.clients.getByCID(cid)
             if client:
                 mlist[cid] = client
@@ -541,7 +540,7 @@ class CsgoParser(Parser):
         :param silent: Whether or not to announce this kick
         """
         self.debug('kick reason: [%s]' % reason)
-        if isinstance(client, basestring):
+        if isinstance(client, str):
             clients = self.clients.getByMagic(client)
             if len(clients) != 1:
                 return
@@ -575,7 +574,7 @@ class CsgoParser(Parser):
             return
 
         self.debug('BAN : client: %s, reason: %s', client, reason)
-        if isinstance(client, basestring):
+        if isinstance(client, str):
             clients = self.clients.getByMagic(client)
             if len(clients) != 1:
                 return
@@ -647,7 +646,7 @@ class CsgoParser(Parser):
             return
 
         self.debug('TEMPBAN : client: %s -  duration: %s - reason: %s', client, duration, reason)
-        if isinstance(client, basestring):
+        if isinstance(client, str):
             clients = self.clients.getByMagic(client)
             if len(clients) != 1:
                 return
@@ -705,7 +704,7 @@ class CsgoParser(Parser):
         Return a list of suggested map names in cases it fails to recognize the map that was provided.
         """
         rv = self.getMapsSoundingLike(map_name)
-        if isinstance(rv, basestring):
+        if isinstance(rv, str):
             self.output.write('sm_map %s' % map_name)
         else:
             return rv
@@ -716,7 +715,7 @@ class CsgoParser(Parser):
         """
         clients = self.queryServerInfo()
         pings = {}
-        for cid, client in clients.iteritems():
+        for cid, client in clients.items():
             pings[cid] = client.ping
         return pings
 
@@ -728,7 +727,7 @@ class CsgoParser(Parser):
         return dict()
 
     def inflictCustomPenalty(self, penalty_type, client, reason=None, duration=None, admin=None, data=None):
-        """
+        r"""
         Called if b3.admin.penalizeClient() does not know a given penalty type.
         Overwrite this to add customized penalties for your game like 'slap', 'nuke',
         'mute', 'kill' or anything you want.
@@ -759,13 +758,13 @@ class CsgoParser(Parser):
             return
         if line.startswith("mp\x08 \x08\x08 \x08"):
             line = line[8:]
-        m = re.match(RE_HL_LOG_LINE, line.decode('UTF-8', 'replace'))
+        m = re.match(RE_HL_LOG_LINE, line)
         if m:
             data = m.group('data')
             if data:
                 hfunc, param_dict = ger.getHandler(data)
                 if hfunc:
-                    self.verbose2("calling %s%r" % (hfunc.func_name, param_dict))
+                    self.verbose2("calling %s%r" % (hfunc.__name__, param_dict))
                     event = hfunc(self, **param_dict)
                     if event:
                         self.queueEvent(event)

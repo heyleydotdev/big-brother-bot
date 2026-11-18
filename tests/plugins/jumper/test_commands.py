@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -335,4 +334,4 @@ class Test_commands(JumperTestCase):
         self.mike.clearMessageHistory()
         self.mike.says('!map f00')
         # THEN
-        self.assertListEqual(['do you mean: ut42_bstjumps_u2, ut4_mars_b1, ut42_jupiter?'], self.mike.message_history)
+        self.assertListEqual(['do you mean: ut4_mars_b1, ut42_jupiter, ut42_bstjumps_u2?'], self.mike.message_history)

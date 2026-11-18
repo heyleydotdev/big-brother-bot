@@ -18,7 +18,7 @@
 import unittest
 import logging
 
-from mock import Mock
+from unittest.mock import Mock
 from mockito.mockito import when
 from b3.config import XmlConfigParser, CfgConfigParser
 from b3.parsers.iourt41 import Iourt41Parser
@@ -29,7 +29,7 @@ from b3.plugins.urtserversidedemo import UrtserversidedemoPlugin
 
 
 def write(*args, **kwargs):
-    print "WRITE: %s" % args[0]
+    print("WRITE: %s" % args[0])
     return ""
 
 class Iourt41_TestCase_mixin(unittest.TestCase):
@@ -70,6 +70,9 @@ class Iourt41TestCase(Iourt41_TestCase_mixin):
 
         # make sure the admin plugin obtained by other plugins is our admin plugin
         when(self.console).getPlugin('admin').thenReturn(self.adminPlugin)
+        # mockito 2 raises on unstubbed invocations; these plugins are absent by default
+        when(self.console).getPlugin('haxbusterurt').thenReturn(None)
+        when(self.console).getPlugin('follow').thenReturn(None)
 
     def tearDown(self):
         self.console.working = False

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -35,6 +34,10 @@ DEFAULT_XLRSTATS_CONFIG_FILE = os.path.join(os.path.dirname(b3_module__file__), 
 
 
 class XlrstatsTestCase(B3TestCase):
+
+    def tearDown(self):
+        # do not leave DEBUG logging enabled for the other test modules
+        logging.getLogger('output').setLevel(logging.WARNING)
 
     def setUp(self):
         """
@@ -1558,8 +1561,8 @@ class Test_conf_settings_auto_purge(Conf_settings_test_case):
         self.init('auto_purge: false')
         # THEN
         self.assertFalse(self.p.auto_purge)
-        
-        
+
+
 class Conf_tables_test_case(XlrstatsTestCase):
 
     def init(self, option_snippet=''):

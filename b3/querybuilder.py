@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -39,7 +38,7 @@ class QueryBuilder(object):
         Escape quotes from a given string.
         :param word: The string on which to perform the escape
         """
-        if isinstance(word, int) or isinstance(word, long) or isinstance(word, complex) or isinstance(word, float):
+        if isinstance(word, int) or isinstance(word, int) or isinstance(word, complex) or isinstance(word, float):
             return str(word)
         elif word is None:
             return '"None"'
@@ -145,7 +144,7 @@ class QueryBuilder(object):
             if len(fields) == 1 and len(values) == 1:
                 sql.append(self.FieldClause(fields[0], values[0]))
             else:
-                print fields
+                print(fields)
                 for k, field in enumerate(fields):
                     v = values[k]
                     sql.append(self.FieldClause(field, v))
@@ -167,7 +166,7 @@ class QueryBuilder(object):
                 sql.append(self.FieldClause(field, ''))
 
         elif isinstance(fields, dict):
-            for k, v in fields.iteritems():
+            for k, v in fields.items():
                 sql.append(self.FieldClause(k, v))
 
         else:
@@ -208,7 +207,7 @@ class QueryBuilder(object):
 
         return " ".join(sql)
 
-    def UpdateQuery(self, data, table, where, delayed=None): 
+    def UpdateQuery(self, data, table, where, delayed=None):
         """
         Construct a SQL update query.
         :param data: A dictionary of key-value pairs for the update.
@@ -224,7 +223,7 @@ class QueryBuilder(object):
         sql += table + " SET "
 
         sets = []
-        for k, v in data.iteritems():
+        for k, v in data.items():
             sets.append(self.FieldClause(k, v))
 
         sql += ", ".join(sets)
@@ -232,7 +231,7 @@ class QueryBuilder(object):
 
         return sql
 
-    def InsertQuery(self, data, table, delayed=None): 
+    def InsertQuery(self, data, table, delayed=None):
         """
         Construct a SQL insert query.
         :param data: A dictionary of key-value pairs for the update.
@@ -248,7 +247,7 @@ class QueryBuilder(object):
 
         keys = []
         values = []
-        for k, v in data.iteritems():
+        for k, v in data.items():
             keys.append(k)
             values.append(self.escape(v))
 
@@ -256,7 +255,7 @@ class QueryBuilder(object):
 
         return sql
 
-    def ReplaceQuery(self, data, table, delayed=None): 
+    def ReplaceQuery(self, data, table, delayed=None):
         """
         Construct a SQL replace query.
         :param data: A dictionary of key-value pairs for the update.
@@ -272,7 +271,7 @@ class QueryBuilder(object):
 
         keys = []
         values = []
-        for k, v in data.iteritems():
+        for k, v in data.items():
             keys.append(k)
             values.append(self.escape(v))
 

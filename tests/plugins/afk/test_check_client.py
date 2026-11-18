@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -25,7 +24,7 @@
 from textwrap import dedent
 from time import time
 from tests.plugins.afk import *
-from mock import call, Mock
+from unittest.mock import call, Mock
 from b3.events import Event
 
 # This test suite makes sure `ask_client` is called appropriately when `check_client` is run

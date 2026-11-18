@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -23,7 +22,7 @@
 # ################################################################### #
 
 import unittest
-from mock import Mock # http://www.voidspace.org.uk/python/mock/mock.html
+from unittest.mock import Mock # http://www.voidspace.org.uk/python/mock/mock.html
 from b3.plugins.poweradminbf3 import Poweradminbf3Plugin
 
 

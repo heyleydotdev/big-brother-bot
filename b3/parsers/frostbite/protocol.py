@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -55,18 +54,19 @@ def EncodeInt32(size):
 
 def DecodeInt32(data):
     return unpack('<I', data[0 : 4])[0]
-    
-    
+
+
 def EncodeWords(words):
     size = 0
-    encodedWords = ''
+    encodedWords = b''
     for word in words:
-        strWord = str(word)
-        encodedWords += EncodeInt32(len(strWord))
-        encodedWords += strWord
-        encodedWords += '\x00'
-        size += len(strWord) + 5
-    
+        # words are str, the wire format only knows cp1252 bytes
+        encodedWord = word if isinstance(word, bytes) else str(word).encode('cp1252', 'replace')
+        encodedWords += EncodeInt32(len(encodedWord))
+        encodedWords += encodedWord
+        encodedWords += b'\x00'
+        size += len(encodedWord) + 5
+
     return size, encodedWords
 
 
@@ -75,9 +75,9 @@ def DecodeWords(size, data):
     words = []
     offset = 0
     while offset < size:
-        wordLen = DecodeInt32(data[offset : offset + 4])        
+        wordLen = DecodeInt32(data[offset : offset + 4])
         word = data[offset + 4 : offset + 4 + wordLen]
-        words.append(word)
+        words.append(word.decode('cp1252', 'replace'))
         offset += wordLen + 5
 
     return words
@@ -118,7 +118,7 @@ def EncodeClientRequest(words):
     clientSequenceNr = (clientSequenceNr + 1) & 0x3fffffff
     return packet
 
-    
+
 def EncodeClientResponse(sequence, words):
     """
     Encode a response packet.
@@ -131,31 +131,31 @@ def printPacket(packet):
     Display contents of packet in user-friendly format, useful for debugging purposes.
     """
     if packet[0]:
-        print "IsFromServer, ",
+        print("IsFromServer, ", end=' ')
     else:
-        print "IsFromClient, ",
-    
-    if packet[1]:
-        print "Response, ",
-    else:
-        print "Request, ",
+        print("IsFromClient, ", end=' ')
 
-    print "Sequence: " + str(packet[2]),
+    if packet[1]:
+        print("Response, ", end=' ')
+    else:
+        print("Request, ", end=' ')
+
+    print("Sequence: " + str(packet[2]), end=' ')
 
     if packet[3]:
-        print " Words:",
+        print(" Words:", end=' ')
         for word in packet[3]:
-            print "\"" + word + "\"",
+            print("\"" + word + "\"", end=' ')
 
-    print ""
+    print("")
 
 
 def generatePasswordHash(salt, password):
     m = newmd5()
     m.update(salt)
-    m.update(password)
+    m.update(password if isinstance(password, bytes) else password.encode('cp1252', 'replace'))
     return m.digest()
-    
+
 
 def containsCompletePacket(data):
     if len(data) < 8:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -21,7 +20,7 @@
 #  02110-1301, USA.                                                   #
 #                                                                     #
 # ################################################################### #
- 
+
 __version__ = '1.10'
 __author__ = 'Bakes, Courgette'
 
@@ -32,7 +31,7 @@ import threading
 import ftplib
 import time
 
-from ConfigParser import NoOptionError
+from configparser import NoOptionError
 from ftplib import FTP
 from b3 import functions
 
@@ -62,7 +61,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
     _nbConsecutiveConnFailure = 0
     _logAppend = False
     _ftplib_debug_level = 0         # 0: no debug, 1: normal debug, 2: extended debug
-    
+
     _gamelog_read_delay = 0.150
     _use_windows_cache_fix = False
     _cache_refresh_delay = 1
@@ -79,7 +78,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
         """
         if self.console.config.has_option('server', 'delay'):
             self._gamelog_read_delay = self.console.config.getfloat('server', 'delay')
-        
+
         if self.console.config.has_option('server', 'local_game_log'):
             self.lgame_log = self.console.config.getpath('server', 'local_game_log')
         else:
@@ -90,12 +89,12 @@ class FtpytailPlugin(b3.plugin.Plugin):
 
         if self.console.config.get('server', 'game_log')[0:6] == 'ftp://':
             self.init_thread(self.console.config.get('server', 'game_log'))
-            
+
         if self.console.config.has_option('server', 'log_append'):
             self._logAppend = self.console.config.getboolean('server', 'log_append')
         else:
             self._logAppend = False
-    
+
     def onLoadConfig(self):
         """
         Load plugin configuration.
@@ -107,7 +106,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
         except NoOptionError:
             self.debug('could not find server/use_windows_cache_fix in B3 config file, '
                        'using default: %s' % self._use_windows_cache_fix)
-        except ValueError, e:
+        except ValueError as e:
             self.error('could not load server/use_windows_cache_fix config value from B3 config file: %s' % e)
             self.debug('using default value (%s) for use_windows_cache_fix' % self._use_windows_cache_fix)
 
@@ -119,7 +118,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
             except NoOptionError:
                 self.debug('could not find server/cache_refresh_delay in B3 config file, '
                          'using default: %s' % self._cache_refresh_delay)
-            except ValueError, e:
+            except ValueError as e:
                 self.error('could not load server/cache_refresh_delay config value from B3 config file: %s' % e)
                 self.debug('using default value (%s) for server/cache_refresh_delay' % self._cache_refresh_delay)
 
@@ -133,7 +132,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
         except NoOptionError:
             self.warning('could not find settings/timeout in config file, '
                          'using default: %s' % self._connectionTimeout)
-        except ValueError, e:
+        except ValueError as e:
             self.error('could not load settings/timeout config value: %s' % e)
             self.debug('using default value (%s) for settings/timeout' % self._connectionTimeout)
 
@@ -143,7 +142,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
         except NoOptionError:
             self.warning('could not find settings/maxGapBytes in config file, '
                          'using default: %s' % self._maxGap)
-        except ValueError, e:
+        except ValueError as e:
             self.error('could not load settings/maxGapBytes config value: %s' % e)
             self.debug('using default value (%s) for settings/maxGapBytes' % self._maxGap)
 
@@ -153,7 +152,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
         except NoOptionError:
             self.warning('could not find settings/max_consecutive_failures in config file, '
                          'using default: %s' % self._maxConsecutiveConnFailure)
-        except ValueError, e:
+        except ValueError as e:
             self.error('could not load settings/max_consecutive_failures config value: %s' % e)
             self.debug('using default value (%s) for settings/max_consecutive_failures' % self._maxConsecutiveConnFailure)
 
@@ -163,7 +162,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
         except NoOptionError:
             self.warning('could not find settings/short_delay in config file, '
                          'using default: %s' % self._short_delay)
-        except ValueError, e:
+        except ValueError as e:
             self.error('could not load settings/short_delay config value: %s' % e)
             self.debug('using default value (%s) for settings/short_delay' % self._short_delay)
 
@@ -173,7 +172,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
         except NoOptionError:
             self.warning('could not find settings/long_delay in config file, '
                          'using default: %s' % self._long_delay)
-        except ValueError, e:
+        except ValueError as e:
             self.error('could not load settings/long_delay config value: %s' % e)
             self.debug('using default value (%s) for settings/long_delay' % self._long_delay)
 
@@ -206,11 +205,11 @@ class FtpytailPlugin(b3.plugin.Plugin):
                 self.buffer = block
             else:
                 self.buffer = self.buffer + block
-        
+
         def force_windows_cache_reload(_):
             # no need to do anything here so
             return
-            
+
         ftp = None
         self.file = open(self.lgame_log, 'ab')
         self.file.write('\r\n')
@@ -225,7 +224,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
 
                     try:
                         ftp = self.ftpconnect()
-                    except Exception, e:
+                    except Exception as e:
                         self.error('could not connect with FTP server: %s' % e)
                         self.console.working = False
                         break
@@ -235,13 +234,13 @@ class FtpytailPlugin(b3.plugin.Plugin):
                         self.verbose("connection successful: remote file size is %s" % remotesize)
                         if self._remoteFileOffset is None:
                             self._remoteFileOffset = remotesize
-                        
+
                 if self._use_windows_cache_fix:
                     time.sleep(self._cache_refresh_delay)
                     ftp.retrbinary('RETR ' + os.path.basename(self.url_path),
                                    force_windows_cache_reload, 1,
                                    rest=self._remoteFileOffset)
-                    
+
                 remotesize = ftp.size(os.path.basename(self.url_path))
                 if remotesize < self._remoteFileOffset:
                     self.debug("remote file rotation detected")
@@ -267,7 +266,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
                         self.console.unpause()
                         self.debug('unpausing')
 
-            except ftplib.all_errors, e:
+            except ftplib.all_errors as e:
                 self.debug(str(e))
                 self._nbConsecutiveConnFailure += 1
                 if self.console._paused is False:
@@ -295,7 +294,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
                     pass
 
                 ftp = None
-                
+
                 if self._nbConsecutiveConnFailure <= self._maxConsecutiveConnFailure:
                     time.sleep(self._short_delay)
                 else:
@@ -313,7 +312,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
             self.file.close()
         except Exception:
             pass
-    
+
     def ftpconnect(self):
         self.verbose('connecting to %s:%s ...' % (self.ftpconfig["host"], self.ftpconfig["port"]))
         ftp = FTP()
@@ -326,12 +325,12 @@ class FtpytailPlugin(b3.plugin.Plugin):
         ftp.cwd(d)
         self.console.clients.sync()
         return ftp
-    
-    
+
+
 if __name__ == '__main__':
     from b3.fake import fakeConsole
-    
-    print "------------------------------------"
+
+    print("------------------------------------")
     config = b3.config.XmlConfigParser()
     config.setXml("""
     <configuration plugin="ftpytail">

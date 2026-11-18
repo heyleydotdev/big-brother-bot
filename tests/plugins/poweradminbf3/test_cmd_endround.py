@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -24,7 +23,7 @@
 
 import time
 # http://www.voidspace.org.uk/python/mock/mock.html
-from mock import patch
+from unittest.mock import patch
 from mockito import when, verify
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminbf3 import Poweradminbf3Plugin
@@ -94,7 +93,7 @@ endround: 20
 
 
     def test_0(self):
-        when(self.console).write().thenReturn()
+        when(self.console, strict=False).write().thenReturn()
         self.superadmin.message_history = []
         self.superadmin.says("!endround 0")
         verify(self.console).write(('mapList.endRound', '0'))
@@ -102,7 +101,7 @@ endround: 20
 
 
     def test_1(self):
-        when(self.console).write().thenReturn()
+        when(self.console, strict=False).write().thenReturn()
         self.superadmin.message_history = []
         self.superadmin.says("!endround 1")
         verify(self.console).write(('mapList.endRound', '1'))

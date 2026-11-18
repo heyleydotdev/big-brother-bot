@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -37,7 +36,7 @@ class Cod4Parser(b3.parsers.cod2.Cod2Parser):
     IpsOnly = False
 
     _guidLength = 32
-    
+
     _commands = {
         'message': 'tell %(cid)s %(message)s',
         'say': 'say %(message)s',
@@ -159,7 +158,7 @@ class Cod4Parser(b3.parsers.cod2.Cod2Parser):
             if client.pbid:
                 result = self.PunkBuster.unBanGUID(client)
 
-                if result:                    
+                if result:
                     admin.message('^3Unbanned^7: %s^7: %s' % (client.exactName, result))
 
                 if admin:
@@ -192,7 +191,7 @@ class Cod4Parser(b3.parsers.cod2.Cod2Parser):
         self.verbose2('plist: %s' % plist)
         mlist = {}
 
-        for cid, c in plist.iteritems():
+        for cid, c in plist.items():
             client = self.clients.getByCID(cid)
             if client:
                 self.verbose2('client found: %s' % client.name)
@@ -216,7 +215,7 @@ class Cod4Parser(b3.parsers.cod2.Cod2Parser):
                     self.debug('no-sync: no guid or ip found')
             else:
                 self.verbose2('no client found for cid: %s' % cid)
-        
+
         return mlist
 
     def authorizeClients(self):
@@ -227,7 +226,7 @@ class Cod4Parser(b3.parsers.cod2.Cod2Parser):
         """
         players = self.getPlayerList()
         self.verbose('authorizeClients() = %s' % players)
-        for cid, p in players.iteritems():
+        for cid, p in players.items():
             if self.PunkBuster:
                 # Use guid since we already get the guid in the log file
                 sp = self.clients.getByGUID(p['guid'])
@@ -268,10 +267,10 @@ def patch_b3_clients():
             pbid = self.pbid
             try:
                 inStorage = self.console.storage.getClient(self)
-            except KeyError, msg:
+            except KeyError as msg:
                 self.console.debug('User not found %s: %s', self.guid, msg)
                 inStorage = False
-            except Exception, e:
+            except Exception as e:
                 self.console.error('Auth self.console.storage.getClient(client) - %s' % self, exc_info=e)
                 self.authorizing = False
                 return False

@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 
 #------------------------------------------------------------------------------
 # SourceLib - Python implementation of Source Server Query/RCON/Log protocols.
@@ -24,6 +23,6 @@
 # THE SOFTWARE.
 #------------------------------------------------------------------------------
 
-import SourceQuery
-import SourceRcon
-import SourceLog
+from . import SourceQuery
+from . import SourceRcon
+from . import SourceLog

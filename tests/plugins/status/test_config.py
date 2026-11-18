@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -23,7 +22,7 @@
 # ################################################################### #
 
 from textwrap import dedent
-from mock import patch
+from unittest.mock import patch
 from tests import B3TestCase
 from b3.plugins.status import StatusPlugin
 from b3.config import CfgConfigParser

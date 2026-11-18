@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -24,7 +23,7 @@
 
 import binascii
 import logging
-import Queue
+import queue
 import select
 import socket
 import sys
@@ -120,9 +119,9 @@ class BattleyeServer(Thread):
         self.port = port
         self.password = password
 
-        self.command_queue = Queue.Queue([])    # put here commands to be sent
+        self.command_queue = queue.Queue([])    # put here commands to be sent
         self.observers = set()                  # functions to call when a BattleEye event is received
-        self.read_queue = Queue.Queue([])       # get here packets received
+        self.read_queue = queue.Queue([])       # get here packets received
         self.sent_data_seq = []
         self.server = None
         self.write_queue = deque([])            # put here packets to be sent
@@ -168,7 +167,7 @@ class BattleyeServer(Thread):
         while not self.isStopped():
             #self.getLogger().debug("Is socket ready")
             readable, writable, exception = select.select([self.server],[self.server],[self.server], .5)
-            
+
             if not exception:
                 if readable:
                     try:
@@ -179,7 +178,7 @@ class BattleyeServer(Thread):
                     except socket.timeout:
                         # We've read all the data that there is currently, so move on.
                         pass
-                    except socket.error, err: 
+                    except socket.error as err:
                         self.getLogger().error("socket error %s" % err)
                         self.stop()
                 elif writable:
@@ -188,13 +187,13 @@ class BattleyeServer(Thread):
                         self.getLogger().debug("data to send: %s" % repr(data))
                         try:
                             self.server.send(data)
-                        except Exception, err:
+                        except Exception as err:
                             self.getLogger().error("data send error, trying again: %s" % err, exc_info=err)
                             self.write_queue.appendleft(data)
                         else:
                             #store seq_no, type, data
-                            if data[7:8] == chr(1):
-                                seq = ord(data[8:9])
+                            if data[7:8] == b'\x01':
+                                seq = data[8]
                                 self.getLogger().debug("sent sequence was %s" % seq)
                                 self.sent_data_seq.append(seq)
                     readable, writable, exception = select.select([self.server],[],[], .05)
@@ -246,18 +245,18 @@ class BattleyeServer(Thread):
                     except ValueError:
                         pass
                     self.crc_error_count = 0
-                    if data[0:1] == chr(0):
-                        data = self._handle_multipacket_part(ord(data[1]), ord(data[2]), data[3:])
+                    if data[0:1] == b'\x00':
+                        data = self._handle_multipacket_part(data[1], data[2], data[3:])
                     if data:
                         self._on_command_response(data.decode('UTF-8', 'replace'))
                 elif tp == 255:
                     #CRC Error
                     self.crc_error_count += 1
-            except Queue.Empty:
+            except queue.Empty:
                 pass
-            except Exception, err:
+            except Exception as err:
                 self.getLogger().error("error in reading_thread", exc_info=err)
-                
+
         self.getLogger().info("ending reading thread")
 
 
@@ -276,10 +275,10 @@ class BattleyeServer(Thread):
         while self._isconnected and not self.isStopped():
             try:
                 enqueue_packet(self.command_queue.get(timeout=2))
-            except Queue.Empty:
+            except queue.Empty:
                 if self.last_write_time + 30 < time.time():
                     enqueue_packet(None) # keep connection alive
-            except Exception, err:
+            except Exception as err:
                 self.getLogger().error("error in writing_thread", exc_info=err)
 
         self.getLogger().info("ending writing thread")
@@ -299,11 +298,11 @@ class BattleyeServer(Thread):
                 packet = self.read_queue.get(timeout = 0.1)
                 tp, logged_in, data =  self.decode_server_packet(packet)
                 self.getLogger().debug("login response was %s %s %s" % (tp, logged_in, data))
-                if tp == chr(255):
+                if tp == 255:
                     self.getLogger().warning('invalid packet')
                 elif tp == 0:
                     login_response = True
-            except Queue.Empty:
+            except queue.Empty:
                 pass
 
         if login_response:
@@ -334,7 +333,7 @@ class BattleyeServer(Thread):
         self._command_lock.acquire() # this will eventually wait for the lock to be released
 
         try:
-            if timeout or not any(filter(lambda x: cmd.startswith(x + ' '), COMMANDS_WITH_NO_RESPONSE)):
+            if timeout or not any([x for x in COMMANDS_WITH_NO_RESPONSE if cmd.startswith(x + ' ')]):
                 return self._command_and_wait(cmd, timeout)
             else:
                 return self._command_no_wait(cmd)
@@ -342,9 +341,9 @@ class BattleyeServer(Thread):
             raise
         except BattleyeError:
             raise
-        except Exception, err:
+        except Exception as err:
             tp, value, traceback = sys.exc_info()
-            raise CommandFailedError, ("command \"%s\" failed: %s" % (cmd, err), tp, value), traceback
+            raise CommandFailedError("command \"%s\" failed: %s" % (cmd, err), tp, value).with_traceback(traceback)
         finally:
             self._command_lock.release() # release the lock so another command can be sent
 
@@ -395,27 +394,26 @@ class BattleyeServer(Thread):
             return response
 
     def compute_crc(self, data):
-        buf = buffer(data)
-        crc = binascii.crc32(buf) & 0xffffffff
-        crc32 = '0x%08x' % crc
+        crc = binascii.crc32(bytes(data)) & 0xffffffff
         # self.getLogger().debug("crc32 = %s" % crc)
-        return int(crc32[8:10], 16), int(crc32[6:8], 16), int(crc32[4:6], 16), int(crc32[2:4], 16)
+        # least significant byte first, as the former '%08x' string slicing produced
+        return crc & 0xff, (crc >> 8) & 0xff, (crc >> 16) & 0xff, (crc >> 24) & 0xff
 
     def decode_server_packet(self, packet):
         if packet[0:2] != b'BE':
             return 255, '', ''
 
-        packet_crc = packet[2:6]
+        packet_crc = bytes(packet[2:6])
         #self.getLogger().debug("Packet crc: %s" % repr(packet_crc))
         crc1, crc2, crc3, crc4 =  self.compute_crc(packet[6:])
-        computed_crc = chr(crc1) + chr(crc2) + chr(crc3) + chr(crc4)
+        computed_crc = bytes((crc1, crc2, crc3, crc4))
         # self.getLogger().debug("Computed crc: %s" % repr(computed_crc))
         if packet_crc != computed_crc:
             self.getLogger().debug('invalid CRC')
             return 255, '', ''
 
-        tp = ord(packet[7:8])
-        sequence_no = ord(packet[8:9])
+        tp = packet[7]
+        sequence_no = packet[8]
         data = packet[9:]
         return tp, sequence_no, data
 
@@ -428,7 +426,7 @@ class BattleyeServer(Thread):
         if seq is not None:
             data_to_send.append(seq)
         if data:
-            data_to_send.extend(unicode(data).encode('UTF-8', 'replace'))
+            data_to_send.extend(data if isinstance(data, bytes) else str(data).encode('UTF-8', 'replace'))
         crc1, crc2, crc3, crc4 = self.compute_crc(data_to_send)
         # request =  "B" + "E" + chr(crc1) + chr(crc2) + chr(crc3) + chr(crc4) + data_to_send
         request = bytearray(b'BE')
@@ -447,15 +445,15 @@ class BattleyeServer(Thread):
         self._multi_packet_response[current_packet_index] = data
         if current_packet_index == total_num_packets - 1:
             # we got all the packets that make a full command response
-            data = ''
+            data = b''
             for p in range(0, total_num_packets):
                 if p in self._multi_packet_response:
                     data = data + self._multi_packet_response[p]
                 else:
                     self.getLogger().debug('part #%s of multi packet response is missing' % p)
                     for pp in range(0, total_num_packets-1):
-                        self._multi_packet_response[pp] = ''
-                    return 'Error retrieving Bans list from server'
+                        self._multi_packet_response[pp] = b''
+                    return b'Error retrieving Bans list from server'
 
             # Packet reconstituted, so delete segments
             for pp in range(0, total_num_packets-1):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -54,5 +53,5 @@ class Cod8Parser(b3.parsers.cod6.Cod6Parser):
         Called after the parser is created before run().
         """
         b3.parsers.cod6.Cod6Parser.startup(self)
-        
+
 

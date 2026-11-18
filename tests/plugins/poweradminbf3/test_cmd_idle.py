@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -23,7 +22,7 @@
 # ################################################################### #
 
 import logging
-from mock import Mock
+from unittest.mock import Mock
 from mockito import when, verify, unstub
 from b3.parsers.frostbite2.protocol import CommandFailedError
 from tests.plugins.poweradminbf3 import Bf3TestCase, logging_disabled
@@ -117,6 +116,7 @@ idle: 40
 
         # ON
         unstub()
+        when(self.console, strict=False)
         when(self.console).write(('vars.idleTimeout',)).thenReturn(['0'])
         self.superadmin.message_history = []
         self.superadmin.says("!idle on")
@@ -127,6 +127,7 @@ idle: 40
 
         # OFF
         unstub()
+        when(self.console, strict=False)
         when(self.console).write(('vars.idleTimeout',)).thenReturn(['300'])
         self.superadmin.message_history = []
         self.superadmin.says("!idle off")
@@ -137,17 +138,19 @@ idle: 40
 
         # ON
         unstub()
+        when(self.console, strict=False)
         when(self.console).write(('vars.idleTimeout',)).thenReturn(['0'])
         self.superadmin.message_history = []
         self.superadmin.says("!idle on")
         verify(self.console).write(('vars.idleTimeout', '300'))
         self.assertEqual(['Idle kick is now [5 min]'], self.superadmin.message_history)
         self.assertFalse(self.p.error.called)
-        
+
         self.assertEqual('300', self.p._last_idleTimeout)
 
         # 15
         unstub()
+        when(self.console, strict=False)
         when(self.console).write(('vars.idleTimeout',)).thenReturn(['300'])
         self.superadmin.message_history = []
         self.superadmin.says("!idle 15")
@@ -158,6 +161,7 @@ idle: 40
 
         # ON
         unstub()
+        when(self.console, strict=False)
         when(self.console).write(('vars.idleTimeout',)).thenReturn([str(15*60)])
         self.superadmin.message_history = []
         self.superadmin.says("!idle on")
@@ -167,6 +171,7 @@ idle: 40
 
         # OFF
         unstub()
+        when(self.console, strict=False)
         when(self.console).write(('vars.idleTimeout',)).thenReturn([str(15*60)])
         self.superadmin.message_history = []
         self.superadmin.says("!idle off")

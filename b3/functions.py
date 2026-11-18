@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -31,7 +30,7 @@ import re
 import sys
 import shutil
 import string
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import zipfile
 
 from hashlib import md5
@@ -132,13 +131,13 @@ def confirm(client):
     msg = 'No confirmation...'
     try:
         # First test again known guids
-        f = urllib2.urlopen('http://www.bigbrotherbot.net/confirm.php?uid=%s' % client.guid)
+        f = urllib.request.urlopen('http://www.bigbrotherbot.net/confirm.php?uid=%s' % client.guid)
         response = f.read()
         if not response == 'Error' and not response == 'False':
             msg = '%s is confirmed to be %s!' % (client.name, response)
         else:
             # If it fails, try ip (must be static)
-            f = urllib2.urlopen('http://www.bigbrotherbot.net/confirm.php?ip=%s' % client.ip)
+            f = urllib.request.urlopen('http://www.bigbrotherbot.net/confirm.php?ip=%s' % client.ip)
             response = f.read()
             if not response == 'Error' and not response == 'False':
                 msg = '%s is confirmed to be %s!' % (client.name, response)
@@ -232,7 +231,7 @@ def escape(text, esc):
     :param esc: The character to escape
     :return: string
     """
-    return string.replace(text, esc, '\\%s' % esc)
+    return text.replace(esc, '\\%s' % esc)
 
 
 def decode(text):
@@ -241,7 +240,9 @@ def decode(text):
     :param text: the text to decode
     :return: string
     """
-    return text.decode(sys.getfilesystemencoding())
+    if isinstance(text, bytes):
+        return text.decode(sys.getfilesystemencoding())
+    return text
 
 
 def clamp(value, minv=None, maxv=None):
@@ -269,8 +270,8 @@ def console_exit(message=''):
         if sys.stdout != sys.__stdout__:
             sys.stdout = sys.__stdout__
             sys.stderr = sys.__stderr__
-        print message
-        raw_input("press any key to continue...")
+        print(message)
+        input("press any key to continue...")
         raise SystemExit()
     else:
         raise SystemExit(message)
@@ -318,14 +319,16 @@ def soundex(s1):
     """
     Return the soundex value to a string argument.
     """
-    ignore = "~!@#$%^&*()_+=-`[]\|;:'/?.,<>\" \t\f\v"
-    table = string.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZ', '01230120022455012623010202')
+    ignore = b"~!@#$%^&*()_+=-`[]\\|;:'/?.,<>\" \t\f\v"
+    table = bytes.maketrans(b'ABCDEFGHIJKLMNOPQRSTUVWXYZ', b'01230120022455012623010202')
 
-    s1 = string.strip(string.upper(s1))
+    s1 = s1.upper().strip()
     if not s1:
         return "Z000"
     s2 = s1[0]
-    s1 = string.translate(s1.encode('ascii', 'ignore'), table, ignore)
+    # translate in the bytes domain (py3 has no string.translate) then get
+    # back to str so the per-character comparisons below keep py2 semantics
+    s1 = s1.encode('ascii', 'ignore').translate(table, ignore).decode('ascii')
     if not s1:
         return "Z000"
     prev = s1[0]
@@ -339,7 +342,7 @@ def soundex(s1):
 
 
 def meanstdv(x):
-    """
+    r"""
     Calculate mean and standard deviation of data x[]:
         mean = {\sum_i x_i \over n}
         std = sqrt(\sum_i (x_i - mean)^2 \over n-1)
@@ -383,7 +386,7 @@ def fuzzyGuidMatch(a, b):
         distance = levenshteinDistance(a, b)
         if distance <= 1:
             return True
-    
+
     return False
 
 def sanitizeMe(s):
@@ -423,14 +426,14 @@ def getStuffSoundingLike(stuff, expected_stuff):
         match = [clean_expected_stuff[clean_stuff]]
     else:
         # stuff could be a substring of one of the expected value
-        matching_subset = filter(lambda x: x.lower().find(clean_stuff) >= 0, clean_expected_stuff.keys())
+        matching_subset = [x for x in list(clean_expected_stuff.keys()) if x.lower().find(clean_stuff) >= 0]
         if len(matching_subset) == 1:
             match = [clean_expected_stuff[matching_subset[0]]]
         elif len(matching_subset) > 1:
             match = [clean_expected_stuff[i] for i in matching_subset]
         else:
             # no luck with subset lookup, fallback on soundex magic
-            for m in clean_expected_stuff.keys():
+            for m in list(clean_expected_stuff.keys()):
                 s = soundex(m)
                 if s == soundex1:
                     match.append(clean_expected_stuff[m])
@@ -438,13 +441,19 @@ def getStuffSoundingLike(stuff, expected_stuff):
     if not len(match):
         match = sorted(list(expected_stuff))
         match.sort(key=lambda _map: levenshteinDistance(clean_stuff, _map.strip()))
-    return list(set(match))
+    # py2 used set() here whose iteration order was arbitrary (but happened
+    # to be stable given deterministic str hashing): python 3 randomizes str
+    # hashes per process, so dedupe order-preserving to stay deterministic
+    return list(dict.fromkeys(match))
 
 
 def hash_password(password):
     """
     Calculate the MD5 digest of a given string.
     """
+    # py3 hashlib needs bytes: encode text here so callers can pass str
+    if isinstance(password, str):
+        password = password.encode('utf-8')
     return md5(password).hexdigest()
 
 
@@ -502,9 +511,9 @@ def corrent_spell(c_word, wordbook):
 def prefixText(prefixes, text):
     """
     Add prefixes to a given text.
-    :param prefixes: list[basestring] the list of prefixes to preprend to the text
-    :param text: basestring the text to be prefixed
-    :return basestring
+    :param prefixes: list[str] the list of prefixes to prepend to the text
+    :param text: str the text to be prefixed
+    :return str
 
     >>> prefixText(None, None)
     ''

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -29,7 +28,6 @@ import b3
 import b3.events
 import b3.parsers.punkbuster
 import re
-import string
 import threading
 
 from b3.parsers.q3a.abstractParser import AbstractParser
@@ -125,7 +123,7 @@ class SmgParser(AbstractParser):
                             r'(?P<port>[0-9-]+)\s+'
                             r'(?P<qport>[0-9]+)\s+'
                             r'(?P<rate>[0-9]+)$', re.IGNORECASE)
-    
+
     _reColor = re.compile(r'(\^.)|[\x00-\x20]|[\x7E-\xff]')
 
 
@@ -237,7 +235,7 @@ class SmgParser(AbstractParser):
         Parse an infostring.
         :param info: The infostring to be parsed.
         """
-        player_id, info = string.split(info, ' ', 1)
+        player_id, info = info.split(' ', 1)
         if info[:1] != '\\':
             info += '\\'
 
@@ -254,7 +252,7 @@ class SmgParser(AbstractParser):
 
         # split port from ip field
         if 'ip' in data:
-            tip = string.split(data['ip'], ':', 1)
+            tip = data['ip'].split(':', 1)
             data['ip'] = tip[0]
             data['port'] = tip[1]
 
@@ -296,7 +294,7 @@ class SmgParser(AbstractParser):
 
             if client:
                 # update existing client
-                for k, v in bclient.iteritems():
+                for k, v in bclient.items():
                     setattr(client, k, v)
             else:
                 if not 'name' in bclient:
@@ -341,7 +339,7 @@ class SmgParser(AbstractParser):
         else:
             attacker = self.clients.getByCID(match.group('acid'))
         ## end fix attacker
-          
+
         if not attacker:
             self.debug('No attacker')
             return None
@@ -361,7 +359,7 @@ class SmgParser(AbstractParser):
         # if not defined we need a general hitloc (for xlrstats)
         if not hasattr(victim, 'hitloc'):
             victim.hitloc = 'body'
-        
+
         victim.state = b3.STATE_DEAD
         # need to pass some amount of damage for the teamkill plugin - 100 is a kill
         return self.getEvent(eventkey, (100, weapon, victim.hitloc, damagetype), attacker, victim)
@@ -526,7 +524,7 @@ class SmgParser(AbstractParser):
         """
         plist = self.getPlayerList()
         mlist = dict()
-        for cid, c in plist.iteritems():
+        for cid, c in plist.items():
             client = self.clients.getByCID(cid)
             if client:
                 if client.guid and 'guid' in c:
@@ -547,7 +545,7 @@ class SmgParser(AbstractParser):
                         client.disconnect()
                 else:
                     self.debug('no-sync: no guid or ip found')
-        
+
         return mlist
 
     def connectClient(self, ccid):
@@ -559,7 +557,7 @@ class SmgParser(AbstractParser):
         players = self.getPlayerList()
         self.verbose('connectClient() = %s' % players)
 
-        for cid, p in players.iteritems():
+        for cid, p in players.items():
             if int(cid) == int(ccid):
                 self.debug('client found in status/playerList')
                 return p
@@ -591,7 +589,7 @@ class SmgParser(AbstractParser):
             t = threading.Timer(4, self.newPlayer, (cid, guid, name))
             t.start()
             return None
-            
+
         self.clients.newClient(cid, name=name, ip=ip, state=b3.STATE_ALIVE, guid=guid, bot=False, data={'guid': guid})
 
 # ---- Documentation ---------------------------------------------------------------------------------------------------

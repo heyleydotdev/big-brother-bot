@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -22,7 +21,7 @@
 #                                                                     #
 # ################################################################### #
 
-from mock import Mock # http://www.voidspace.org.uk/python/mock/mock.html
+from unittest.mock import Mock # http://www.voidspace.org.uk/python/mock/mock.html
 from b3.config import CfgConfigParser
 from b3.cvar import Cvar
 from b3.parsers.frostbite2.protocol import CommandFailedError

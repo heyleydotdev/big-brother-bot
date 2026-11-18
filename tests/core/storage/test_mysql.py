@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -24,8 +23,7 @@
 
 import os
 
-import nose
-import unittest2 as unittest
+import unittest
 
 from b3.functions import splitDSN
 from b3.storage.mysql import MysqlStorage
@@ -46,7 +44,7 @@ MYSQL_TEST_PASSWORD = os.environ.get('MYSQL_TEST_PASSWORD', 'test')
 MYSQL_TEST_DB = os.environ.get('MYSQL_TEST_DB', 'b3_test')
 
 #===============================================================================
-# 
+#
 # Test if we can run the MySQL tests
 #
 #===============================================================================
@@ -66,17 +64,17 @@ except ImportError:
 if is_mysql_ready:
     try:
         driver.connect(host=MYSQL_TEST_HOST, user=MYSQL_TEST_USER, passwd=MYSQL_TEST_PASSWORD)
-    except driver.Error, err:
+    except driver.Error as err:
         is_mysql_ready = False
-        no_mysql_reason = "%s" % err[1]
-    except Exception, err:
+        no_mysql_reason = "%s" % err
+    except Exception as err:
         is_mysql_ready = False
         no_mysql_reason = "%s" % err
 
 #===============================================================================
-# 
+#
 # Load the tests
-# 
+#
 #===============================================================================
 
 @unittest.skipIf(not is_mysql_ready, no_mysql_reason)
@@ -89,7 +87,7 @@ class Test_MySQL(B3TestCase, StorageAPITest):
 
         try:
             db = driver.connect(host=MYSQL_TEST_HOST, user=MYSQL_TEST_USER, password=MYSQL_TEST_PASSWORD)
-        except driver.OperationalError, message:
+        except driver.OperationalError as message:
             self.fail("Error %d:\n%s" % (message[0], message[1]))
 
         db.query("DROP DATABASE IF EXISTS `%s`" % MYSQL_TEST_DB)
@@ -116,6 +114,7 @@ class Test_MySQL(B3TestCase, StorageAPITest):
             ]), set(self.storage.getTables()))
 
 if __name__ == '__main__':
-    nose.main()
-    
-    
+    import unittest
+    unittest.main()
+
+

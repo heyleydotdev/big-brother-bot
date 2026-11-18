@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -27,9 +26,9 @@ import sys
 
 from b3.plugins.tk import TkPlugin
 from b3.config import CfgConfigParser
-from ConfigParser import NoOptionError
+from configparser import NoOptionError
 from textwrap import dedent
-from mock import patch, call
+from unittest.mock import patch, call
 from tests import B3TestCase
 from tests.plugins.tk import Test_Tk_plugin
 
@@ -343,7 +342,7 @@ class Test_get_config_for_levels(Test_Tk_plugin):
             ], self.error_mock.mock_calls)
         else:
             self.assertListEqual([
-                call('value for kill_multiplier is invalid. could not convert string to float: f00'),
+                call("value for kill_multiplier is invalid. could not convert string to float: 'f00'"),
             ], self.error_mock.mock_calls)
 
     def test_bad_damage_multiplier(self):
@@ -370,7 +369,7 @@ class Test_get_config_for_levels(Test_Tk_plugin):
             ], self.error_mock.mock_calls)
         else:
             self.assertListEqual([
-                call('value for damage_multiplier is invalid. could not convert string to float: f00'),
+                call("value for damage_multiplier is invalid. could not convert string to float: 'f00'"),
             ], self.error_mock.mock_calls)
 
     def test_bad_ban_length(self):
@@ -445,5 +444,5 @@ class Test_Tk_default_config(B3TestCase):
             if conf_message != self.p._default_messages[conf_message_id]:
                 self.fail("default message in the _default_messages dict for %s does not match the message from the config file" % conf_message_id)
         for default_message_id in self.p._default_messages:
-            if default_message_id not in zip(*conf_items)[0]:
+            if default_message_id not in list(zip(*conf_items))[0]:
                 self.fail("%s exists in the _default_messages dict, but not in the config file" % default_message_id)

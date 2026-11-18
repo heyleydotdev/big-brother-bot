@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -28,13 +27,13 @@ __version__ = '1.3'
 import b3
 import b3.plugin
 import b3.cron
-import StringIO
+import io
 import ftplib
 import time
 
 from b3 import functions
 from b3.functions import getCmd
-from ConfigParser import NoOptionError
+from configparser import NoOptionError
 
 
 class PunkbusterPlugin(b3.plugin.Plugin):
@@ -82,7 +81,7 @@ class PunkbusterPlugin(b3.plugin.Plugin):
         try:
             self._bansFile = self.config.get('settings', 'bans_file')
             self.debug('loaded settings/bans_file: %s' % self._bansFile)
-        except NoOptionError, e:
+        except NoOptionError as e:
             self.error('could not load settings/bans_file config value: %s' % e)
             self.debug('using default value (%s) for settings/bans_file' % self._bansFile)
 
@@ -96,7 +95,7 @@ class PunkbusterPlugin(b3.plugin.Plugin):
         try:
             self._rebuildBans = self.config.get('settings', 'rebuild_bans')
             self.debug('loaded settings/rebuild_bans: %s' % self._rebuildBans)
-        except NoOptionError, e:
+        except NoOptionError as e:
             self.error('could not load settings/rebuild_bans config value: %s' % e)
             self.debug('using default value (%s) for settings/rebuild_bans' % self._rebuildBans)
 
@@ -128,13 +127,13 @@ class PunkbusterPlugin(b3.plugin.Plugin):
 
         i = 0
         if self._remoteBansFile:
-            f = StringIO.StringIO()
+            f = io.StringIO()
         else:
-            f = file(self._bansFile, 'w')
+            f = open(self._bansFile, 'w')
 
         while not cursor.EOF:
             r = cursor.getRow()
-            if r['reason'] != '':            
+            if r['reason'] != '':
                 f.write('[%s] %s "%s" "%s" %s" ""\r\n\r\n' % (time.strftime('%m.%d.%Y %H:%M:%S',
                                                               time.localtime(int(r['time_add']))),
                                                               r['pbid'], r['name'], r['ip'], r['reason']))
@@ -153,7 +152,7 @@ class PunkbusterPlugin(b3.plugin.Plugin):
             f.seek(0)
             try:
                 ftp.storbinary('STOR %s' % self._ftpConfig['path'], f)
-            except Exception, err:
+            except Exception as err:
                 self.error('ERROR: %s' % err)
             ftp.quit()
             self.debug('uploaded pbbans.dat to FTP server successfully')

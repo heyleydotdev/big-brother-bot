@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -311,9 +310,9 @@ class Poweradminurt42Plugin(Poweradminurt41Plugin):
         if not data:
             self.printgear(client=client, cmd=cmd)
             # display help text
-            client.message('^7Usage: ^3!^7pagear [+/-][%s]' % '|'.join(self._weapons.keys()))
-            client.message('^7Load weapon groups: ^3!^7pagear [+/-][%s]' % '|'.join(self._weapon_groups.keys()))
-            client.message('^7Load defaults: ^3!^7pagear [%s]' % '|'.join(self._gears.keys()))
+            client.message('^7Usage: ^3!^7pagear [+/-][%s]' % '|'.join(list(self._weapons.keys())))
+            client.message('^7Load weapon groups: ^3!^7pagear [+/-][%s]' % '|'.join(list(self._weapon_groups.keys())))
+            client.message('^7Load defaults: ^3!^7pagear [%s]' % '|'.join(list(self._gears.keys())))
             return
 
         def update_gear(gear_set, param_data):
@@ -326,7 +325,7 @@ class Poweradminurt42Plugin(Poweradminurt41Plugin):
             cleaned_data = re.sub(r'\s', "", param_data)
 
             # set a predefined gear
-            if cleaned_data in self._gears.keys():
+            if cleaned_data in list(self._gears.keys()):
                 gear_set.clear()
                 gear_set.add(self._gears[cleaned_data])
                 return
@@ -490,7 +489,7 @@ class Poweradminurt42Plugin(Poweradminurt41Plugin):
     def getTime(self):
         """ just to ease automated tests """
         return self.console.time()
-    
+
     def get_weapon_code(self, name):
         """
         try its best to guess the weapon code given a name.

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -27,18 +26,18 @@ import os
 import re
 import sys
 import platform
-import pkg_handler
+from . import pkg_handler
 import traceback
 import time
 import signal
 import shutil
 
 from tempfile import TemporaryFile
-from ConfigParser import NoOptionError
-from ConfigParser import NoSectionError
+from configparser import NoOptionError
+from configparser import NoSectionError
 
 __author__ = 'ThorN'
-__version__ = '1.12'
+__version__ = '2.0.0'
 
 modulePath = pkg_handler.resource_directory(__name__)
 
@@ -91,10 +90,10 @@ def getHomePath():
     """
     Return the path to the B3 home directory.
     """
-    path = os.path.normpath(os.path.expanduser('~/.b3')).decode(sys.getfilesystemencoding())
+    path = os.path.normpath(os.path.expanduser('~/.b3'))
 
     ## RENAME v1.10.1 -> v1.10.7
-    path_1 = os.path.normpath(os.path.expanduser('~/BigBrotherBot')).decode(sys.getfilesystemencoding())
+    path_1 = os.path.normpath(os.path.expanduser('~/BigBrotherBot'))
     if os.path.isdir(path_1):
         shutil.move(path_1, path)
 
@@ -136,6 +135,11 @@ def getConfPath(decode=False, conf=None):
             path = os.path.dirname(conf.fileName)
         else:
             raise TypeError('invalid configuration type specified: expected str|XmlConfigParser|CfgConfigParser|MainConfig, got %s instead' % type(conf))
+    elif console is not None and getattr(getattr(console, 'config', None), 'fileName', None):
+        # a running console knows where its own main config lives: use it to
+        # resolve @conf paths (restores the issue xlr8or #18 behavior which
+        # was previously only guaranteed right after b3.start() set confdir)
+        path = os.path.dirname(console.config.fileName)
     else:
         path = confdir
 
@@ -328,13 +332,13 @@ def start(mainconfig, options):
         console.start()
     except KeyboardInterrupt:
         console.shutdown()
-        print 'Goodbye'
+        print('Goodbye')
         return
-    except SystemExit, msg:
-        print 'EXITING: %s' % msg
+    except SystemExit as msg:
+        print('EXITING: %s' % msg)
         raise
-    except Exception, msg:
-        print 'ERROR: %s' % msg
+    except Exception as msg:
+        print('ERROR: %s' % msg)
         traceback.print_exc()
         sys.exit(223)
 

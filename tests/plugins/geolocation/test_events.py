@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -24,7 +23,7 @@
 
 import time
 
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from b3.events import Event
 from b3.plugins.geolocation.location import Location
 from tests.plugins.geolocation import GeolocationTestCase

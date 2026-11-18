@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -26,7 +25,7 @@ import b3
 import os
 import re
 import sys
-import thread
+import _thread
 
 from b3.clients import Client
 from b3.clients import ClientBan
@@ -64,7 +63,7 @@ class DatabaseStorage(Storage):
         self.dsnDict = dsnDict
         self.console = console
         self.db = None
-        self._lock = thread.allocate_lock()
+        self._lock = _thread.allocate_lock()
 
     ####################################################################################################################
     #                                                                                                                  #
@@ -128,7 +127,7 @@ class DatabaseStorage(Storage):
         :param client: The client object to fill with fetch data.
         """
         self.console.debug('Storage: getClient %s' % client)
-        where = {'id': client.id} if client.id > 0 else {'guid': client.guid}
+        where = {'id': client.id} if client.id else {'guid': client.guid}
 
         try:
 
@@ -137,7 +136,7 @@ class DatabaseStorage(Storage):
                 raise KeyError('no client matching guid %s' % client.guid)
 
             found = False
-            for k, v in cursor.getRow().iteritems():
+            for k, v in cursor.getRow().items():
                 #if hasattr(client, k) and getattr(client, k):
                 #    # don't set already set items
                 #    continue
@@ -153,7 +152,7 @@ class DatabaseStorage(Storage):
         except Exception:
             # query failed, try local cache
             if self.console.config.has_option('admins_cache', client.guid):
-                data = self.console.config.get('admins_cache', client.guid, True)
+                data = self.console.config.get('admins_cache', client.guid, raw=True)
                 self.console.debug('pulling user form admins_cache %s' % data)
                 cid, name, level = data.split(',')
                 client.id = cid.strip()
@@ -175,7 +174,7 @@ class DatabaseStorage(Storage):
         while not cursor.EOF:
             g = cursor.getRow()
             client = Client()
-            for k, v in g.iteritems():
+            for k, v in g.items():
                 setattr(client, self.getVar(k), v)
             clients.append(client)
             cursor.moveNext()
@@ -194,14 +193,14 @@ class DatabaseStorage(Storage):
                   'guid', 'pbid', 'name', 'time_add', 'auto_login',
                   'mask_level', 'group_bits', 'login', 'password')
 
-        data = {'id': client.id} if client.id > 0 else {}
+        data = {'id': client.id} if client.id else {}
 
         for f in fields:
             if hasattr(client, self.getVar(f)):
                 data[f] = getattr(client, self.getVar(f))
 
         self.console.debug('Storage: setClient data %s' % data)
-        if client.id > 0:
+        if client.id:
             self.query(QueryBuilder(self.db).UpdateQuery(data, 'clients', {'id': client.id}))
         else:
             cursor = self.query(QueryBuilder(self.db).InsertQuery(data, 'clients'))
@@ -241,7 +240,7 @@ class DatabaseStorage(Storage):
         :return: The alias object given in input with all the fields set.
         """
         self.console.debug('Storage: getClientAlias %s' % alias)
-        if hasattr(alias, 'id') and alias.id > 0:
+        if hasattr(alias, 'id') and alias.id:
             query = QueryBuilder(self.db).SelectQuery('*', 'aliases', {'id': alias.id}, None, 1)
         elif hasattr(alias, 'alias') and hasattr(alias, 'clientId'):
             query = QueryBuilder(self.db).SelectQuery('*', 'aliases', {'alias': alias.alias,
@@ -319,7 +318,7 @@ class DatabaseStorage(Storage):
         :return: The ip alias object given in input with all the fields set.
         """
         self.console.debug('Storage: getClientIpAddress %s' % ipalias)
-        if hasattr(ipalias, 'id') and ipalias.id > 0:
+        if hasattr(ipalias, 'id') and ipalias.id:
             query = QueryBuilder(self.db).SelectQuery('*', 'ipaliases', {'id': ipalias.id}, None, 1)
         elif hasattr(ipalias, 'ip') and hasattr(ipalias, 'clientId'):
             query = QueryBuilder(self.db).SelectQuery('*', 'ipaliases', {'ip': ipalias.ip,
@@ -400,16 +399,15 @@ class DatabaseStorage(Storage):
             penalty.keyword = ''
 
         if penalty.reason:
-            # decode the reason data, as the name may need it
+            # in python 3 text is already text: only convert when we actually get
+            # raw bytes (parsers deliver bytes at the boundary). the old py2
+            # decode->encode round trip silently turned str reasons into bytes
             if hasattr(self.console, "encoding") and self.console.encoding:
-                try:
-                    penalty.reason = penalty.reason.decode(self.console.encoding)
-                except Exception, msg:
-                    self.console.warning('ERROR: decoding reason: %r', msg)
-                try:
-                    penalty.reason = penalty.reason.encode('UTF-8', 'replace')
-                except Exception, msg:
-                    self.console.warning('ERROR: encoding reason: %r', msg)
+                if isinstance(penalty.reason, bytes):
+                    try:
+                        penalty.reason = penalty.reason.decode(self.console.encoding, 'replace')
+                    except Exception as msg:
+                        self.console.warning('ERROR: decoding reason: %r', msg)
 
         for f in fields:
             if hasattr(penalty, self.getVar(f)):
@@ -629,7 +627,7 @@ class DatabaseStorage(Storage):
         try:
             # always return a cursor instance (also when EOF is reached)
             return self._query(query=query, bindata=bindata)
-        except Exception, e:
+        except Exception as e:
             # log so we can inspect the issue and raise again
             self.console.error('Query failed [%s] %r: %s', query, bindata, e)
             raise e

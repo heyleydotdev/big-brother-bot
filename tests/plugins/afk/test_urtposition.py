@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -25,7 +24,7 @@
 from types import MethodType
 from textwrap import dedent
 from tests.plugins.afk import *
-from mock import call, Mock
+from unittest.mock import call, Mock
 
 # This test suite makes sure `check_client` is called appropriately
 
@@ -50,8 +49,8 @@ def plugin(console):
         kick_reason: AFK for too long on this server
         are_you_afk: Are you AFK?
     """))
-    p.evt_client_move = MethodType(evt_client_move, p, AfkPlugin)
-    p.evt_client_standing = MethodType(evt_client_standing, p, AfkPlugin)
+    p.evt_client_move = MethodType(evt_client_move, p)
+    p.evt_client_standing = MethodType(evt_client_standing, p)
     p.MIN_INGAME_PLAYERS = 0  # disable this check by default
     p.onLoadConfig()
     p.onStartup()

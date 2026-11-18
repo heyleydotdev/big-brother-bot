@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -33,7 +32,7 @@ import b3.events
 import b3.functions
 
 from b3 import __version__ as b3_version
-from ConfigParser import NoOptionError
+from configparser import NoOptionError
 
 
 class Plugin(object):
@@ -131,7 +130,7 @@ class Plugin(object):
                 # this is mostly used by automated tests which are loading plugins manually
                 try:
                     self.loadConfig(config)
-                except b3.config.ConfigFileNotValid, e:
+                except b3.config.ConfigFileNotValid as e:
                     self.critical("The configuration file syntax is broken: %s" % e)
                     self.critical("TIP: make use of a text editor with syntax highlighting to "
                                   "modify your config files: it makes easy to spot errors")
@@ -283,7 +282,7 @@ class Plugin(object):
 
         def _get_list(value):
             """process the given value by extracting tokens"""
-            return [x for x in re.split('\W+', value) if x]
+            return [x for x in re.split(r'\W+', value) if x]
 
         handlers = {
             b3.STRING: _get_string,
@@ -302,7 +301,7 @@ class Plugin(object):
             return default
 
         try:
-            val = self.config.get(section, option, value_type == b3.TEMPLATE)
+            val = self.config.get(section, option, raw=(value_type == b3.TEMPLATE))
         except b3.config.NoOptionError:
             self.warning('could not find %s::%s in configuration file, using default : %s', section, option, default)
             val = default
@@ -312,18 +311,18 @@ class Plugin(object):
             except KeyError:
                 val = default
                 self.warning('could not convert %s::%s : invalid value type specified (%s) : expecting one of (%s), '
-                             'using default : %s', section, option , value_type, ', '.join(map(str, handlers.keys())), default)
+                             'using default : %s', section, option , value_type, ', '.join(map(str, list(handlers.keys()))), default)
             else:
                 try:
                     val = func(val)
-                except (ValueError, KeyError), e:
+                except (ValueError, KeyError) as e:
                     self.warning('could not convert %s::%s (%s) : %s, using default : %s', section, option , val, e, default)
                     val = default
 
         if validate:
             try:
                 val = validate(val)
-            except ValueError, e:
+            except ValueError as e:
                 self.warning('invalid value specified for %s::%s (%s) : %s,  using default : %s', section, option, val, e, default)
                 val = default
 
@@ -352,14 +351,14 @@ class Plugin(object):
         if len(args) == 1 and type(args[0]) is dict:
             try:
                 return _msg % args[0]
-            except KeyError, err:
+            except KeyError as err:
                 self.error("failed to format message %r (%r) with parameters %r: "
                            "missing value for %s", msg, _msg, args, err)
                 raise
         else:
             try:
                 return _msg % args
-            except TypeError, err:
+            except TypeError as err:
                 self.error("failed to format message %r (%r) with parameters %r: %s", msg, _msg, args, err)
                 raise
 
@@ -411,12 +410,12 @@ class Plugin(object):
             for hook in args:
                 try:
                     self.registerEventHook(event_id, hook)
-                except (AssertionError, AttributeError), e:
+                except (AssertionError, AttributeError) as e:
                     self.error('could not create mapping for event %s: %s' % (event_name, e))
         else:
             try:
                 self.registerEventHook(event_id, self.onEvent)
-            except (AssertionError, AttributeError), e:
+            except (AssertionError, AttributeError) as e:
                 self.error('could not create mapping for event %s: %s' % (event_name, e))
 
     def createEvent(self, key, name):
@@ -436,7 +435,7 @@ class Plugin(object):
         for func in collection:
             try:
                 func(event)
-            except TypeError, e:
+            except TypeError as e:
                 self.error('could not parse event %s: %s' % (self.console.getEventName(event.type), e))
 
         if event.type == self.console.getEventID('EVT_EXIT') or event.type == self.console.getEventID('EVT_STOP'):
@@ -475,19 +474,19 @@ class Plugin(object):
     def warning(self, msg, *args, **kwargs):
         """
         Log a WARNING message to the main log.
-        """        
+        """
         self.console.warning('%s: %s' % (self.__class__.__name__, msg), *args, **kwargs)
 
     def info(self, msg, *args, **kwargs):
         """
         Log an INFO message to the main log.
-        """        
+        """
         self.console.info('%s: %s' % (self.__class__.__name__, msg), *args, **kwargs)
 
     def exception(self, msg, *args, **kwargs):
         """
         Log an EXCEPTION message to the main log.
-        """        
+        """
         self.console.exception('%s: %s' % (self.__class__.__name__, msg), *args, **kwargs)
 
     def critical(self, msg, *args, **kwargs):

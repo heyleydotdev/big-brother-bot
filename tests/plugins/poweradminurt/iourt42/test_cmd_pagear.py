@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -23,7 +22,7 @@
 # ################################################################### #
 
 import time
-from mock import patch, call
+from unittest.mock import patch, call
 from mockito import when
 from b3.config import CfgConfigParser
 from b3.cvar import Cvar
@@ -63,17 +62,17 @@ weapon_codes = (
     ('beretta', G_BERETTA_92FS),
     ('beret', G_BERETTA_92FS),
     ('ber', G_BERETTA_92FS),
-    
+
     ('desert eagle', G_50_DESERT_EAGLE),
     ('desert', G_50_DESERT_EAGLE),
     ('des', G_50_DESERT_EAGLE),
     ('.50', G_50_DESERT_EAGLE),
     ('deagle', G_50_DESERT_EAGLE),
     ('eagle', G_50_DESERT_EAGLE),
-    
+
     ('spas12', G_SPAS_12),
     ('spas', G_SPAS_12),
-    
+
     ('mp5k', G_MP5K),
     ('mp5', G_MP5K),
     ('mp', G_MP5K),
@@ -153,11 +152,11 @@ weapon_codes = (
 
 
 def all_gear_but(*args):
-    return "".join(sorted(G_ALL.translate(None, "".join(args))))
+    return "".join(sorted(G_ALL.translate(str.maketrans('', '', "".join(args)))))
 
 
 def only_gear(*args):
-    return "".join(sorted(G_ALL.translate(None, all_gear_but(*args))))
+    return "".join(sorted(G_ALL.translate(str.maketrans('', '', all_gear_but(*args)))))
 
 
 class Test_cmd_pagear(Iourt42TestCase):
@@ -207,10 +206,10 @@ pagear-gear: 20
         self.superadmin.message_history = []
         self.superadmin.says("!gear")
         # THEN
-        self.assertListEqual(["current gear: med:ON, vest:ON, ak:ON, de:ON, psg:ON, nvg:ON, hk:ON, mac:ON, mp5:ON, las:ON, ber:ON, ump:ON, g36:ON, neg:ON, glo:ON, smo:ON, m4:ON, lr:ON, hel:ON, spas:ON, sr8:ON, he:ON, colt:ON, ammo:ON, sil:ON",
-                              "Usage: !pagear [+/-][med|vest|ak|de|psg|nvg|hk|mac|mp5|las|ber|ump|g36|neg|glo|smo|m4|lr|hel|spas|sr8|he|colt|ammo|sil]",
-                              "Load weapon groups: !pagear [+/-][all_nades|all_auto|all_pistols|all_snipers]",
-                              "Load defaults: !pagear [reset|all|none]"],
+        self.assertListEqual(["current gear: ber:ON, de:ON, glo:ON, colt:ON, spas:ON, mp5:ON, ump:ON, mac:ON, hk:ON, lr:ON, g36:ON, psg:ON, sr8:ON, ak:ON, neg:ON, m4:ON, he:ON, smo:ON, vest:ON, hel:ON, sil:ON, las:ON, med:ON, nvg:ON, ammo:ON",
+                              "Usage: !pagear [+/-][ber|de|glo|colt|spas|mp5|ump|mac|hk|lr|g36|psg|sr8|ak|neg|m4|he|smo|vest|hel|sil|las|med|nvg|ammo]",
+                              "Load weapon groups: !pagear [+/-][all_nades|all_snipers|all_pistols|all_auto]",
+                              "Load defaults: !pagear [none|all|reset]"],
                               self.superadmin.message_history)
 
     def test_reset(self):

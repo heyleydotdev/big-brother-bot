@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -26,7 +25,7 @@ import b3
 import b3.events
 import logging
 
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from b3.fake import FakeClient
 from tests import B3TestCase
 from b3.plugins.censorurt import CensorurtPlugin
@@ -58,6 +57,8 @@ class CensorurtTestCase(B3TestCase):
     def tearDown(self):
         B3TestCase.tearDown(self)
         self.timer_patcher.stop()
+        # do not leave DEBUG logging enabled for the other test modules
+        logging.getLogger('output').setLevel(logging.WARNING)
 
     def init_plugin(self, config_content):
         self.conf.setXml(config_content)
@@ -93,7 +94,7 @@ class Detection_TestCase(CensorurtTestCase):
         mock_client.exactName = name
 
         self.p.checkBadName(mock_client)
-        self.assertEquals(count, self.p.penalizeClientBadname.call_count, "name '%s' should have been penalized %s time" % (name, count))
+        self.assertEqual(count, self.p.penalizeClientBadname.call_count, "name '%s' should have been penalized %s time" % (name, count))
 
     def assert_name_is_penalized(self, name):
         self.assert_name_penalized_count(name, 1)
@@ -109,8 +110,8 @@ class Detection_TestCase(CensorurtTestCase):
         try:
             self.p.checkBadWord(text, mock_client)
             self.fail("text [%s] should have raised a VetoEvent" % text)
-        except b3.events.VetoEvent, e:
-            self.assertEquals(1, self.p.penalizeClient.call_count, "text [%s] should have been penalized" % text)
+        except b3.events.VetoEvent as e:
+            self.assertEqual(1, self.p.penalizeClient.call_count, "text [%s] should have been penalized" % text)
             return self.p.penalizeClient.call_args[0] if len(self.p.penalizeClient.call_args) else None
 
     def assert_chat_is_not_penalized(self, text):
@@ -121,7 +122,7 @@ class Detection_TestCase(CensorurtTestCase):
 
         try:
             self.p.checkBadWord(text, mock_client)
-        except b3.events.VetoEvent, e:
+        except b3.events.VetoEvent as e:
             self.fail("text [%s] should not have raised a VetoEvent" % text)
         else:
-            self.assertEquals(0, self.p.penalizeClient.call_count, "text [%s] should not have been penalized" % text)
+            self.assertEqual(0, self.p.penalizeClient.call_count, "text [%s] should not have been penalized" % text)

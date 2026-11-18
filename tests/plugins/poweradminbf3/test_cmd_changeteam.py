@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -26,7 +25,7 @@ import b3
 from b3.config import CfgConfigParser
 from b3.parsers.frostbite2.protocol import CommandFailedError
 from b3.plugins.poweradminbf3 import Poweradminbf3Plugin
-from mock import call, patch, Mock
+from unittest.mock import call, patch, Mock
 from mockito import when, verify
 from tests.plugins.poweradminbf3 import Bf3TestCase, logging_disabled
 

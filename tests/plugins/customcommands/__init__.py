@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -23,15 +22,15 @@
 # ################################################################### #
 
 import time
-import unittest2
-from mock import Mock, patch
+import unittest
+from unittest.mock import Mock, patch
 from mockito import when
 from b3.config import XmlConfigParser
 from b3.plugins.admin import AdminPlugin
 from tests import logging_disabled
 
 
-class CustomcommandsTestCase(unittest2.TestCase):
+class CustomcommandsTestCase(unittest.TestCase):
 
     def setUp(self):
         self.sleep_patcher = patch("time.sleep")

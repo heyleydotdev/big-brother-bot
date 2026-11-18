@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -24,10 +23,10 @@
 
 import operator
 from b3.clients import Client, Group
-from mock import Mock, patch, ANY
+from unittest.mock import Mock, patch, ANY
 from b3 import TEAM_UNKNOWN, TEAM_RED, TEAM_BLUE
 from b3.clients import Alias, IpAlias
-import unittest2 as unittest
+import unittest
 from tests import B3TestCase
 
 
@@ -53,7 +52,7 @@ class Test_Client(B3TestCase):
         m = Mock()
         self.client.team = m
         self.assertEqual(self.client.team, m)
-        
+
     def test_team_change(self):
         # GIVEN
         self.client._team = TEAM_RED
@@ -81,7 +80,7 @@ class Test_Client(B3TestCase):
         self.client.id = 123
         self.console.storage.getClientAlias = Mock(side_effect = KeyError())
         self.client.makeAlias("bar")
-        self.assertEquals(self.console.storage.getClientAlias.call_count, 1)
+        self.assertEqual(self.console.storage.getClientAlias.call_count, 1)
         alias = self.console.storage.getClientAlias.call_args[0][0]
         self.assertIsInstance(alias, Alias)
         self.assertEqual(alias.alias, "bar")
@@ -95,7 +94,7 @@ class Test_Client(B3TestCase):
         aliasFoo.numUsed = 48
         self.console.storage.getClientAlias = Mock(side_effect = lambda x: aliasFoo)
         self.client.makeAlias("whatever")
-        self.assertEquals(self.console.storage.getClientAlias.call_count, 1)
+        self.assertEqual(self.console.storage.getClientAlias.call_count, 1)
         self.assertIsInstance(aliasFoo, Alias)
         self.assertEqual(aliasFoo.alias, "foo")
         self.assertEqual(aliasFoo.numUsed, 49)
@@ -117,12 +116,12 @@ class Test_Client(B3TestCase):
         self.assertEqual(self.client._ip, "1.2.3.4")
         self.client.ip = "5.6.7.8:27960"
         self.assertEqual(self.client._ip, "5.6.7.8")
-        
+
     def test_makeIpAlias_new(self):
         self.client.id = 123
         self.console.storage.getClientIpAddress = Mock(side_effect = KeyError())
         self.client.makeIpAlias("1.4.7.8")
-        self.assertEquals(self.console.storage.getClientIpAddress.call_count, 1)
+        self.assertEqual(self.console.storage.getClientIpAddress.call_count, 1)
         alias = self.console.storage.getClientIpAddress.call_args[0][0]
         self.assertIsInstance(alias, IpAlias)
         self.assertEqual(alias.ip, "1.4.7.8")
@@ -136,7 +135,7 @@ class Test_Client(B3TestCase):
         aliasFoo.numUsed = 8
         self.console.storage.getClientIpAddress = Mock(side_effect = lambda x: aliasFoo)
         self.client.makeIpAlias("whatever")
-        self.assertEquals(self.console.storage.getClientIpAddress.call_count, 1)
+        self.assertEqual(self.console.storage.getClientIpAddress.call_count, 1)
         self.assertIsInstance(aliasFoo, IpAlias)
         self.assertEqual(aliasFoo.ip, "9.5.4.4")
         self.assertEqual(aliasFoo.numUsed, 9)
@@ -158,9 +157,9 @@ class Test_Client_groups(B3TestCase):
         self.group_superadmin = self.console.storage.getGroup(Group(keyword="superadmin"))
 
     def assertGroups(self, groups):
-        keywords = map(operator.attrgetter('keyword'), groups)
-        self.assertListEqual(keywords, map(operator.attrgetter('keyword'), self.client.groups))
-        self.assertListEqual(keywords, map(operator.attrgetter('keyword'), self.client.getGroups()))
+        keywords = list(map(operator.attrgetter('keyword'), groups))
+        self.assertListEqual(keywords, list(map(operator.attrgetter('keyword'), self.client.groups)))
+        self.assertListEqual(keywords, list(map(operator.attrgetter('keyword'), self.client.getGroups())))
 
     def test_addGroup(self):
         # GIVEN
@@ -217,16 +216,16 @@ class Test_Client_groups(B3TestCase):
 
 
 class Test_Client_events(B3TestCase):
-    
+
     def setUp(self):
         B3TestCase.setUp(self)
         self.queueEvent_patcher = patch.object(self.console, 'queueEvent')
         self.queueEvent_mock = self.queueEvent_patcher.start()
-        
+
         self.admin = Client(console=self.console)
         self.client = Client(console=self.console)
         self.client.save()
-    
+
     def tearDown(self):
         B3TestCase.tearDown(self)
         self.queueEvent_patcher.stop()
@@ -243,11 +242,11 @@ class Test_Client_events(B3TestCase):
 
     def test_notice(self):
         with self.assertRaiseEvent(event_type="EVT_CLIENT_NOTICE", event_client=self.client, event_data={
-            'notice': "keep a eye on this guy", 
+            'notice': "keep a eye on this guy",
             'admin': self.admin,
             'timeAdd': ANY
         }):
             self.client.notice(notice="keep a eye on this guy", spare=None, admin=self.admin)
-        
+
 if __name__ == '__main__':
     unittest.main()

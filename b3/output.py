@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -76,33 +75,33 @@ class OutputHandler(logging.Logger):
         """
         Log 'msg % args' with severity 'CONSOLE'.
         """
-        self.log(CONSOLE, msg, *args, **kwargs) 
+        self.log(CONSOLE, msg, *args, **kwargs)
 
     def bot(self, msg, *args, **kwargs):
         """
         Log 'msg % args' with severity 'BOT'.
         """
-        self.log(BOT, msg, *args, **kwargs) 
+        self.log(BOT, msg, *args, **kwargs)
 
     def verbose(self, msg, *args, **kwargs):
         """
         Log 'msg % args' with severity 'VERBOSE'.
         """
-        self.log(VERBOSE, msg, *args, **kwargs) 
+        self.log(VERBOSE, msg, *args, **kwargs)
 
     def verbose2(self, msg, *args, **kwargs):
         """
         Log 'msg % args' with severity 'VERBOSE2'.
         """
-        self.log(VERBOSE2, msg, *args, **kwargs) 
+        self.log(VERBOSE2, msg, *args, **kwargs)
 
     def raiseError(self, raiseError, msg, *args, **kwargs):
         """
         Log 'msg % args' with severity 'ERROR'.
         And raises the exception.
         """
-        self.log(logging.ERROR, msg, *args, **kwargs) 
-        raise raiseError, msg % args
+        self.log(logging.ERROR, msg, *args, **kwargs)
+        raise raiseError(msg % args)
 
 
 class STDOutLogger:

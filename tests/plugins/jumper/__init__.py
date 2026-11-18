@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -23,7 +22,7 @@
 # ################################################################### #
 
 import json
-import unittest2
+import unittest
 
 from textwrap import dedent
 from mockito import when
@@ -42,7 +41,7 @@ MAPDATA_JSON = '''{"ut4_uranus_beta1a": {"size": 1841559, "nom": "Uranus", "njum
 "pk3": "ut4_crouchtraining_a1", "level": 79, "id": 346, "utversion": 2, "nway": 1, "howjump": "", "mapper": "spidercochon"}}'''
 
 
-class JumperTestCase(unittest2.TestCase):
+class JumperTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -84,6 +83,7 @@ class JumperTestCase(unittest2.TestCase):
 
         # make sure the admin plugin obtained by other plugins is our admin plugin
         when(self.console).getPlugin('admin').thenReturn(self.adminPlugin)
+        when(self.console).getPlugin('poweradminurt').thenReturn(None)
 
         self.conf = CfgConfigParser()
         self.conf.loadFromString(dedent(r"""

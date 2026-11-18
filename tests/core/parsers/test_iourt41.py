@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -24,10 +23,10 @@
 
 import b3
 import logging
-import unittest2 as unittest
+import unittest
 
 from mockito import mock, when, any as anything, verify
-from mock import Mock, patch, ANY
+from unittest.mock import Mock, patch, ANY
 from b3.clients import Client
 from b3.config import XmlConfigParser
 from b3.events import Event
@@ -62,7 +61,7 @@ class Iourt41TestCase(unittest.TestCase):
         self.output_mock = mock()
         # simulate game server actions
         def write(*args, **kwargs):
-            pretty_args = map(repr, args) + ["%s=%s" % (k, v) for k, v in kwargs.iteritems()]
+            pretty_args = list(map(repr, args)) + ["%s=%s" % (k, v) for k, v in kwargs.items()]
             log.info("write(%s)" % ', '.join(pretty_args))
             return self.output_mock.write(*args, **kwargs)
         self.console.write = write
@@ -81,18 +80,15 @@ class Iourt41TestCase(unittest.TestCase):
             assert queueEvent.called, "No event was fired"
             args = queueEvent.call_args
 
-        if type(event_type) is basestring:
-            event_type_name = event_type
-        else:
-            event_type_name = self.console.getEventName(event_type)
-            self.assertIsNotNone(event_type_name, "could not find event with name '%s'" % event_type)
+        event_type_name = self.console.getEventName(event_type)
+        self.assertIsNotNone(event_type_name, "could not find event with name '%s'" % event_type)
 
         eventraised = args[0][0]
         self.assertIsInstance(eventraised, Event)
-        self.assertEquals(self.console.getEventName(eventraised.type), event_type_name)
-        self.assertEquals(eventraised.data, event_data)
-        self.assertEquals(eventraised.target, event_target)
-        self.assertEquals(eventraised.client, event_client)
+        self.assertEqual(self.console.getEventName(eventraised.type), event_type_name)
+        self.assertEqual(eventraised.data, event_data)
+        self.assertEqual(eventraised.target, event_target)
+        self.assertEqual(eventraised.client, event_client)
 
 
 class Test_parser_API_implementation(Iourt41TestCase):
@@ -419,7 +415,7 @@ num score ping name            lastmsg  address              qport rate
         self.assertDictEqual({'10': 5, '12': 27}, pings)
 
     def test_inflictCustomPenalty(self):
-        """
+        r"""
         Called if b3.admin.penalizeClient() does not know a given penalty type.
         Overwrite this to add customized penalties for your game like 'slap', 'nuke',
         'mute', 'kill' or anything you want.
@@ -655,10 +651,10 @@ class Test_OnKill(Iourt41TestCase):
             eventraised = args[0][0]
             self.assertIsInstance(eventraised, Event)
             self.assertIn(self.console.getEventKey(eventraised.type), event_type_name)
-            self.assertEquals(eventraised.data[0], 100)
-            self.assertEquals(eventraised.data[1], getattr(self.console, kill_mod_name))
-            self.assertEquals(eventraised.data[2], 'body')
-            self.assertEquals(eventraised.data[3], kill_mod_name)
+            self.assertEqual(eventraised.data[0], 100)
+            self.assertEqual(eventraised.data[1], getattr(self.console, kill_mod_name))
+            self.assertEqual(eventraised.data[2], 'body')
+            self.assertEqual(eventraised.data[3], kill_mod_name)
 
         assert_mod('1', 'MOD_WATER')
         assert_mod('3', 'MOD_LAVA')

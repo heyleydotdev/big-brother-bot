@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -26,13 +25,13 @@ import b3
 
 from b3.clients import Clients, Client
 from tests import B3TestCase
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 
 class TestClients(B3TestCase):
     clients = None
     joe = None
-    
+
     def setUp(self):
         B3TestCase.setUp(self)
         Clients.authorizeClients = Mock()
@@ -45,15 +44,15 @@ class TestClients(B3TestCase):
         clients = self.clients.getClientsByName('joe')
         self.assertEqual(1, len(clients))
         self.assertEqual(1, clients[0].cid)
-        
+
         clients = self.clients.getClientsByName('oe')
         self.assertEqual(1, len(clients))
         self.assertEqual(1, clients[0].cid)
-        
+
         clients = self.clients.getClientsByName('hax')
         self.assertEqual(1, len(clients))
         self.assertEqual(2, clients[0].cid)
-        
+
         clients = self.clients.getClientsByName('qsdfqsdf fqsd fsqd fsd f')
         self.assertEqual([], clients)
 

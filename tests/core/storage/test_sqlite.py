@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -21,8 +20,6 @@
 #  02110-1301, USA.                                                   #
 #                                                                     #
 # ################################################################### #
-
-import nose
 
 from b3.functions import splitDSN
 from b3.storage.sqlite import SqliteStorage
@@ -58,6 +55,6 @@ class Test_sqlite(B3TestCase, StorageAPITest):
             ]), set(self.storage.getTables()))
 
 if __name__ == '__main__':
-    nose.main()
-    
-    
+    import unittest
+    unittest.main()
+

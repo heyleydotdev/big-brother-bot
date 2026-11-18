@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -30,15 +29,15 @@ import b3.cron
 import b3.events
 import b3.plugin
 import sys
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 import socket
 import os
 import random
 
 from b3 import functions
 from b3.functions import getModule
-from ConfigParser import NoOptionError
+from configparser import NoOptionError
 from time import strftime
 
 
@@ -70,13 +69,13 @@ class PublistPlugin(b3.plugin.Plugin):
             self.debug('using second url: %s' % self._secondUrl)
         except NoOptionError:
             pass
-        
+
         try:
             self._initial_heartbeat_delay_minutes = self.config.getint('settings', 'delay')
             self.debug('loaded settings/delay: %s' % self._initial_heartbeat_delay_minutes)
         except (NoOptionError, ValueError):
             pass
-            
+
     def onStartup(self):
         """
         Initialize the plugin.
@@ -90,13 +89,13 @@ class PublistPlugin(b3.plugin.Plugin):
         if self.console._publicIp == '127.0.0.1':
             self.info("publist will not send heartbeat to master server as publicIp is not public")
             return
-        
+
         rmin = random.randint(0, 59)
         rhour = random.randint(0, 23)
         self.debug("publist will send heartbeat at %02d:%02d every day" % (rhour, rmin))
         self._cronTab = b3.cron.PluginCronTab(self, self.update, 0, rmin, rhour, '*', '*', '*')
         self.console.cron + self._cronTab
-        
+
         # planning initial heartbeat
         # v1.9.1: Changing the threaded timer to a one time crontab to enable quick shutdown of the bot.
         _im = int(strftime('%M')) + self._initial_heartbeat_delay_minutes
@@ -132,7 +131,7 @@ class PublistPlugin(b3.plugin.Plugin):
         """
         try:
             self.console.cron - self._cronTab
-        except KeyError: 
+        except KeyError:
             pass
 
     def shutdown(self):
@@ -148,14 +147,14 @@ class PublistPlugin(b3.plugin.Plugin):
         }
         # self.debug(info)
         self.sendInfo(info)
-    
+
     def update(self):
         """
         Send an update heartbeat to B3 master server.
         """
         self.debug('sending heartbeat to B3 master...')
         socket.setdefaulttimeout(10)
-        
+
         plugins = []
         for pname in self.console._plugins:
             try:
@@ -163,9 +162,9 @@ class PublistPlugin(b3.plugin.Plugin):
                 p_module = getModule(pl.__module__)
                 p_version = getattr(p_module, '__version__', 'unknown')
                 plugins.append("%s/%s" % (pname, p_version))
-            except Exception, e:
+            except Exception as e:
                 self.warning("could not get version for plugin named '%s'" % pname, exc_info=e)
-          
+
         try:
             database = functions.splitDSN(self.console.storage.dsn)['protocol']
         except Exception:
@@ -175,7 +174,7 @@ class PublistPlugin(b3.plugin.Plugin):
         if b3.functions.main_is_frozen():
             version_info = b3.getB3versionInfo()
             version = '%s %s%s' % (version, version_info[1], version_info[2])
-            
+
         info = {
             'action': 'update',
             'ip': self.console._publicIp,
@@ -190,7 +189,7 @@ class PublistPlugin(b3.plugin.Plugin):
             'python_version': sys.version,
             'default_encoding': sys.getdefaultencoding()
         }
-        
+
         if self.console.gameName in ('bfbc2', 'moh', 'bf3'):
             try:
                 cvar_description = self.console.getCvar('serverDescription')
@@ -199,12 +198,12 @@ class PublistPlugin(b3.plugin.Plugin):
                 cvar_banner_url = self.console.getCvar('bannerUrl')
                 if cvar_banner_url is not None:
                     info.update({'bannerUrl': cvar_banner_url.value})
-            except Exception, e:
+            except Exception as e:
                 self.debug(e)
-        
+
         self.debug(info)
         self.sendInfo(info)
-    
+
     def sendInfo(self, info=None):
         """
         Send information to the B3 master server.
@@ -215,7 +214,7 @@ class PublistPlugin(b3.plugin.Plugin):
         self._heartbeat_sent = True
         if self._secondUrl is not None:
             self.sendInfoToMaster(self._secondUrl, info)
-    
+
     def sendInfoToMaster(self, url, info=None):
         """
         Send data to the B3 master server.
@@ -223,13 +222,13 @@ class PublistPlugin(b3.plugin.Plugin):
         if info is None:
             info = {}
         try:
-            request = urllib2.Request('%s?%s' % (url, urllib.urlencode(info)))
+            request = urllib.request.Request('%s?%s' % (url, urllib.parse.urlencode(info)))
             request.add_header('User-Agent', "B3 Publist plugin/%s" % __version__)
-            opener = urllib2.build_opener()
+            opener = urllib.request.build_opener()
             replybody = opener.open(request).read()
             if len(replybody) > 0:
                 self.debug("master replied: %s" % replybody)
-        except IOError, e:
+        except IOError as e:
             if hasattr(e, 'reason'):
                 self.error('unable to reach B3 masterserver: maybe the service is down or internet was unavailable')
                 self.debug(e.reason)
@@ -245,4 +244,4 @@ class PublistPlugin(b3.plugin.Plugin):
                     self.debug(e)
         except Exception:
             self.warning('unable to reach B3 masterserver: unknown error')
-            print sys.exc_info()
+            print(sys.exc_info())

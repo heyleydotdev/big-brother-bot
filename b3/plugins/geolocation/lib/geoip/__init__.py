@@ -100,16 +100,16 @@ class GeoIP(object):
                "Virgin Islands, U.S.","Vietnam","Vanuatu","Wallis and Futuna","Samoa","Yemen","Mayotte","Yugoslavia",
                "South Africa","Zambia","Zaire","Zimbabwe", "Anonymous Proxy","Satellite Provider")
 
-    __RE_IP_DOTTED_FORM = re.compile("^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
+    __RE_IP_DOTTED_FORM = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
 
     GEOIP_STANDARD = 0 # TODO
 
     @staticmethod
     def addr_to_num(ip_address):
         """Convert IP-address to number."""
-        # a = [int(s) for s in re.split('\.', ip_address)]
-        a = map(int, re.split('\.', ip_address))
-        return a[0] * 16777216L + a[1] * 65536L + a[2] * 256L + a[3]
+        # a = [int(s) for s in re.split(r'\.', ip_address)]
+        a = list(map(int, re.split(r'\.', ip_address)))
+        return a[0] * 16777216 + a[1] * 65536 + a[2] * 256 + a[3]
 
     @staticmethod
     def open(db_file, flags):
@@ -134,13 +134,13 @@ class GeoIP(object):
         record_length = self.record_length
         databaseSegments = self.databaseSegments
         offset = 0
-        for depth in nreverse(range(32)):
+        for depth in nreverse(list(range(32))):
             fh.seek(offset * 2 * record_length, 0)
             x0 = fh.read(record_length)
             x1 = fh.read(record_length)
-            x0, = struct.unpack("<1l", x0 + "\0")
-            x1, = struct.unpack("<1l", x1 + "\0")
-            if ipnum & (1L << depth):
+            x0, = struct.unpack("<1l", x0 + b"\0")
+            x1, = struct.unpack("<1l", x1 + b"\0")
+            if ipnum & (1 << depth):
                 if x1 >= databaseSegments:
                     return x1
                 offset = x1

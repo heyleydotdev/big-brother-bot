@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -27,9 +26,8 @@ __version__ = '1.8.1'
 
 
 import re
-import string
 import time
-import new
+import types
 import b3
 import b3.events
 import b3.clients
@@ -105,7 +103,7 @@ class AbstractParser(b3.parser.Parser):
         re.compile(r'^(?P<action>[a-z]+):\s*(?P<data>(?P<cid>[0-9]+)\s(?P<text>.*))$', re.IGNORECASE),
         re.compile(r'^(?P<action>[a-z]+):\s*(?P<data>.*)$', re.IGNORECASE)
     )
-    
+
     # num score ping guid   name            lastmsg address               qport rate
     # --- ----- ---- ------ --------------- ------- --------------------- ----- -----
     # 2     0   29 465030   ThorN                50 68.63.6.62:-32085      6597  5000
@@ -182,10 +180,10 @@ class AbstractParser(b3.parser.Parser):
         Parse a log line returning extracted tokens.
         :param line: The line to be parsed
         """
-        line = re.sub(self._lineClear, '', line, 1)
+        line = self._lineClear.sub('', line, 1)
         m = None
         for f in self._lineFormats:
-            m = re.match(f, line)
+            m = f.match(line)
             if m:
                 #self.debug('line matched %s' % f.pattern)
                 break
@@ -206,8 +204,8 @@ class AbstractParser(b3.parser.Parser):
             return False
 
         match, action, data, client, target = m
-        func = 'On%s' % string.capwords(action).replace(' ', '')
-        
+        func = 'On%s' % ''.join(word.capitalize() for word in action.split())
+
         if hasattr(self, func):
             func = getattr(self, func)
             event = func(action, data, match)
@@ -226,7 +224,7 @@ class AbstractParser(b3.parser.Parser):
         :param info: The infostring to be parsed.
         """
         # 0 \g_password\none\cl_guid\0A337702493AF67BB0B0F8565CE8BC6C\cl_wwwDownload\1\name\thorn\rate\25000...
-        cid, info = string.split(info, ' ', 1)
+        cid, info = info.split(' ', 1)
         if info[:1] != '\\':
             info = '\\' + info
 
@@ -259,7 +257,7 @@ class AbstractParser(b3.parser.Parser):
     ####################################################################################################################
 
     def OnSay(self, action, data, match=None):
-        msg = string.split(data, ': ', 1)
+        msg = data.split(': ', 1)
         if not len(msg) == 2:
             return None
 
@@ -278,7 +276,7 @@ class AbstractParser(b3.parser.Parser):
         return None
 
     def OnSayteam(self, action, data, match=None):
-        msg = string.split(data, ': ', 1)
+        msg = data.split(': ', 1)
         if not len(msg) == 2:
             return None
 
@@ -321,7 +319,7 @@ class AbstractParser(b3.parser.Parser):
 
             if client:
                 # update existing client
-                for k, v in bclient.iteritems():
+                for k, v in bclient.items():
                     setattr(client, k, v)
             else:
                 self.clients.newClient(bclient['cid'], **bclient)
@@ -448,7 +446,7 @@ class AbstractParser(b3.parser.Parser):
         for line in self.getWrap(message):
             lines.append(self.getCommand('say', message=line))
         self.writelines(lines)
-    
+
     def saybig(self, text):
         """
         Broadcast a message to all players in a way that will catch their attention.
@@ -480,7 +478,7 @@ class AbstractParser(b3.parser.Parser):
         message = message.strip()
         wrapped = self.getWrap(message)
         for client in self.clients.getClientsByState(b3.STATE_DEAD):
-            if client.cid:                
+            if client.cid:
                 for line in wrapped:
                     lines.append(self.getCommand('message', cid=client.cid, message=line))
         self.writelines(lines)
@@ -493,7 +491,7 @@ class AbstractParser(b3.parser.Parser):
         :param admin: The admin who performed the kick
         :param silent: Whether or not to announce this kick
         """
-        if isinstance(client, basestring) and re.match('^[0-9]+$', client):
+        if isinstance(client, str) and re.match('^[0-9]+$', client):
             self.write(self.getCommand('kick', cid=client, reason=reason))
             return
 
@@ -527,7 +525,7 @@ class AbstractParser(b3.parser.Parser):
         """
         # We get here if a name was given, and the name was not found as a client
         # This will allow the kicking of non autenticated players
-        if 'kickbyfullname' in self._commands.keys():
+        if 'kickbyfullname' in list(self._commands.keys()):
             self.debug('Trying kick by full name: %s for %s' % (client, reason))
             result = self.write(self.getCommand('kickbyfullname', name=client))
             if result.endswith('is not on the server\n'):
@@ -587,9 +585,9 @@ class AbstractParser(b3.parser.Parser):
             if client.pbid:
                 result = self.PunkBuster.unBanGUID(client)
 
-                if result:                    
+                if result:
                     admin.message('^3Unbanned^7: %s^7: %s' % (client.exactName, result))
-                
+
                 if admin:
                     variables = self.getMessageVariables(client=client, reason=reason, admin=admin)
                     fullreason = self.getMessage('unbanned_by', variables)
@@ -656,7 +654,7 @@ class AbstractParser(b3.parser.Parser):
         self.say('^7Changing map to next map')
         time.sleep(1)
         self.write('map_rotate 0')
-        
+
     def changeMap(self, mapname):
         """
         Load a given map/level.
@@ -679,12 +677,12 @@ class AbstractParser(b3.parser.Parser):
             m = re.match(self._regPlayerShort, line)
             if not m:
                 m = re.match(self._regPlayer, line.strip())
-            
+
             if m:
                 players[str(m.group('slot'))] = int(m.group('ping'))
-        
+
         return players
-        
+
     def getPlayerScores(self):
         """
         Returns a dict having players' id for keys and players' scores for values.
@@ -699,12 +697,12 @@ class AbstractParser(b3.parser.Parser):
             m = re.match(self._regPlayerShort, line)
             if not m:
                 m = re.match(self._regPlayer, line.strip())
-            
-            if m:  
+
+            if m:
                 players[str(m.group('slot'))] = int(m.group('score'))
             #elif '------' not in line and 'map: ' not in line and 'num score ping' not in line:
                 #self.verbose('getPlayerScores() = Line did not match format: %s' % line)
-        
+
         return players
 
     def getPlayerList(self, maxRetries=None):
@@ -729,7 +727,7 @@ class AbstractParser(b3.parser.Parser):
                         lastslot = int(m.group('slot'))
                         d['pbid'] = None
                         players[str(m.group('slot'))] = d
-                        
+
                     else:
                         self.debug('Duplicate or incorrect slot number - '
                                    'client ignored %s last slot %s' % (m.group('slot'), lastslot))
@@ -816,10 +814,10 @@ class AbstractParser(b3.parser.Parser):
         plist = self.getPlayerList()
         mlist = {}
 
-        for cid, c in plist.iteritems():
+        for cid, c in plist.items():
             client = self.clients.getByCID(cid)
             if client:
-                if client.guid and 'guid' in c.keys():
+                if client.guid and 'guid' in list(c.keys()):
                     if client.guid == c['guid']:
                         # player matches
                         self.debug('in-sync %s == %s', client.guid, c['guid'])
@@ -827,7 +825,7 @@ class AbstractParser(b3.parser.Parser):
                     else:
                         self.debug('no-sync %s <> %s', client.guid, c['guid'])
                         client.disconnect()
-                elif client.ip and 'ip' in c.keys():
+                elif client.ip and 'ip' in list(c.keys()):
                     if client.ip == c['ip']:
                         # player matches
                         self.debug('in-sync %s == %s', client.ip, c['ip'])
@@ -837,7 +835,7 @@ class AbstractParser(b3.parser.Parser):
                         client.disconnect()
                 else:
                     self.debug('no-sync: no guid or ip found')
-        
+
         return mlist
 
     def authorizeClients(self):
@@ -849,7 +847,7 @@ class AbstractParser(b3.parser.Parser):
         players = self.getPlayerList(maxRetries=4)
         self.verbose('authorizeClients() = %s' % players)
 
-        for cid, p in players.iteritems():
+        for cid, p in players.items():
             sp = self.clients.getByCID(cid)
             if sp:
                 # Only set provided data, otherwise use the currently set data
@@ -909,5 +907,5 @@ class AbstractParser(b3.parser.Parser):
 
         admin_plugin = self.getPlugin('admin')
         command = admin_plugin._commands['kick']
-        command.func = new.instancemethod(new_cmd_kick, admin_plugin)
+        command.func = types.MethodType(new_cmd_kick, admin_plugin)
         command.help = new_cmd_kick.__doc__.strip()

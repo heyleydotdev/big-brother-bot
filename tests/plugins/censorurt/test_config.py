@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -83,8 +82,8 @@ class Test_urbanterror_mute(CensorurtTestCase):
             </configuration>
         """)
         self.assertFalse(self.p._mute)
-        
-        
+
+
 class Test_urbanterror_slap(CensorurtTestCase):
     def test_missing(self):
         self.init_plugin("""
@@ -141,8 +140,8 @@ class Test_urbanterror_slap(CensorurtTestCase):
             </configuration>
         """)
         self.assertFalse(self.p._slap)
-        
-        
+
+
 class Test_urbanterror_muteduration1(CensorurtTestCase):
     def test_missing(self):
         self.init_plugin("""
@@ -199,8 +198,8 @@ class Test_urbanterror_muteduration1(CensorurtTestCase):
             </configuration>
         """)
         self.assertEqual(0, self.p._muteduration1)
-        
-        
+
+
 class Test_urbanterror_muteduration2(CensorurtTestCase):
     def test_missing(self):
         self.init_plugin("""
@@ -257,8 +256,8 @@ class Test_urbanterror_muteduration2(CensorurtTestCase):
             </configuration>
         """)
         self.assertEqual(0, self.p._muteduration2)
-        
-        
+
+
 class Test_urbanterror_muteduration3(CensorurtTestCase):
     def test_missing(self):
         self.init_plugin("""
@@ -315,8 +314,8 @@ class Test_urbanterror_muteduration3(CensorurtTestCase):
             </configuration>
         """)
         self.assertEqual(0, self.p._muteduration3)
-        
-        
+
+
 class Test_urbanterror_warn_after(CensorurtTestCase):
     def test_missing(self):
         self.init_plugin("""

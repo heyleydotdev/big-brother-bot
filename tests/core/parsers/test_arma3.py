@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -23,8 +22,8 @@
 # ################################################################### #
 
 import logging
-import unittest2 as unittest
-from mock import Mock, patch
+import unittest
+from unittest.mock import Mock, patch
 from mockito import when
 from b3.clients import Client
 from b3.parsers.arma3 import Arma3Parser
@@ -99,7 +98,7 @@ class EventParsingTestCase(Arma3TestCase):
         """
         assert that self.evt_queue contains at least one event for the given type that has the given characteristics.
         """
-        assert isinstance(event_type, basestring)
+        assert isinstance(event_type, str)
 
         def assert_event_equals(expected_event, actual_event):
             if expected_event is None:
@@ -125,7 +124,7 @@ class EventParsingTestCase(Arma3TestCase):
                     return
                 except AssertionError:
                     pass
-            self.fail("expecting event %s. Got instead: %s" % (expected_event, map(str, self.evt_queue)))
+            self.fail("expecting event %s. Got instead: %s" % (expected_event, list(map(str, self.evt_queue))))
 
 
     ################################################################################################################
@@ -140,9 +139,9 @@ class Test_game_events_parsing(EventParsingTestCase):
         # GIVEN
         self.clear_events()
         # WHEN
-        self.parser.routeBattleyeEvent(u'Player #8 Max (111.222.200.50:2304) connected')
-        self.parser.routeBattleyeEvent(u'Player #8 Max - GUID: 73c5e50a7860475f0000000000000000 (unverified)')
-        self.parser.routeBattleyeEvent(u'Verified GUID (73c5e50a7860475f0000000000000000) of player #8 Max')
+        self.parser.routeBattleyeEvent('Player #8 Max (111.222.200.50:2304) connected')
+        self.parser.routeBattleyeEvent('Player #8 Max - GUID: 73c5e50a7860475f0000000000000000 (unverified)')
+        self.parser.routeBattleyeEvent('Verified GUID (73c5e50a7860475f0000000000000000) of player #8 Max')
         # THEN
         self.assertEqual(2, len(self.evt_queue))
         event1, event2 = self.evt_queue
@@ -169,15 +168,15 @@ class Test_game_events_parsing(EventParsingTestCase):
         # GIVEN
         self.clear_events()
         # WHEN
-        self.parser.routeBattleyeEvent(u'Player #8 Max (111.222.200.50:2304) connected')
-        self.parser.routeBattleyeEvent(u'Player #8 Max - GUID: 73c5e50a7860475f0000000000000000 (unverified)')
-        when(self.parser.output).write('players').thenReturn(u'''Players on server:
+        self.parser.routeBattleyeEvent('Player #8 Max (111.222.200.50:2304) connected')
+        self.parser.routeBattleyeEvent('Player #8 Max - GUID: 73c5e50a7860475f0000000000000000 (unverified)')
+        when(self.parser.output).write('players').thenReturn('''Players on server:
 [#] [IP Address]:[Port] [Ping] [GUID] [Name]
 --------------------------------------------------
 8   111.222.200.50:2304   -1   73c5e50a7860475f0000000000000000(?)  Max (Lobby)
 (14 players in total)''')
         self.parser.sync()
-        self.parser.routeBattleyeEvent(u'Verified GUID (73c5e50a7860475f0000000000000000) of player #8 Max')
+        self.parser.routeBattleyeEvent('Verified GUID (73c5e50a7860475f0000000000000000) of player #8 Max')
         # THEN check events were raised
         self.assert_has_event("EVT_CLIENT_CONNECT")
         self.assert_has_event("EVT_CLIENT_AUTH")
@@ -224,8 +223,8 @@ Players on server:
 
     def test_connected_client_with_unverified_guid(self):
         # GIVEN
-        self.parser.routeBattleyeEvent(u'Player #8 Max (111.222.200.50:2304) connected')
-        self.parser.routeBattleyeEvent(u'Player #8 Max - GUID: 73c5e50a7860475f0000000000000000 (unverified)')
+        self.parser.routeBattleyeEvent('Player #8 Max (111.222.200.50:2304) connected')
+        self.parser.routeBattleyeEvent('Player #8 Max - GUID: 73c5e50a7860475f0000000000000000 (unverified)')
         self.assertDictContainsSubset({'clients': 1}, self.parser.storage.getCounts())
         self.assertIn('8', self.parser.clients)
         self.clear_events()
@@ -259,9 +258,9 @@ Players on server:
 
     def test_connected_client_with_verified_guid(self):
         # GIVEN
-        self.parser.routeBattleyeEvent(u'Player #8 Max (111.222.200.50:2304) connected')
-        self.parser.routeBattleyeEvent(u'Player #8 Max - GUID: 73c5e50a7860475f0000000000000000 (unverified)')
-        self.parser.routeBattleyeEvent(u'Verified GUID (73c5e50a7860475f0000000000000000) of player #8 Max')
+        self.parser.routeBattleyeEvent('Player #8 Max (111.222.200.50:2304) connected')
+        self.parser.routeBattleyeEvent('Player #8 Max - GUID: 73c5e50a7860475f0000000000000000 (unverified)')
+        self.parser.routeBattleyeEvent('Verified GUID (73c5e50a7860475f0000000000000000) of player #8 Max')
         self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
         self.assertIn('8', self.parser.clients)
         # GIVEN that the player exists in database
