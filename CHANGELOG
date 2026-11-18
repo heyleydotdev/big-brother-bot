@@ -19,6 +19,8 @@ Fixes
   (portable to PostgreSQL).
 - `Command.secretLevel` was never assigned, so `hidecmd_level` had no effect
   and every command could be used silently. Hidden commands are gated again.
+- q3-family RCON crashed at startup when the server did not answer the initial
+  status test (a bytes value reached a string regex).
 
 1.12 -> 2.0.0
 ----

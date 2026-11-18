@@ -166,10 +166,11 @@ class Rcon(object):
         if maxRetries is None:
             maxRetries = 2
 
-        data = data.strip()
+        command = data.strip()
         # encode the data
+        data = command
         if self.console.encoding:
-            data = self.encode_data(data, 'RCON')
+            data = self.encode_data(command, 'RCON')
 
         self.console.verbose('RCON sending (%s:%s) %r', self.host[0], self.host[1], data)
         start_time = time.time()
@@ -187,13 +188,13 @@ class Rcon(object):
                     self.console.warning('RCON: error sending: %r', msg)
                 else:
                     try:
-                        data = self.readSocket(self.socket, socketTimeout=socketTimeout)
-                        self.console.verbose2('RCON: received %r' % data)
-                        return data
+                        response = self.readSocket(self.socket, socketTimeout=socketTimeout)
+                        self.console.verbose2('RCON: received %r' % response)
+                        return response
                     except Exception as msg:
                         self.console.warning('RCON: error reading: %r', msg)
 
-                if re.match(r'^quit|map(_rotate)?.*', data):
+                if re.match(r'^quit|map(_rotate)?.*', command):
                     # do not retry quits and map changes since they prevent the server from responding
                     self.console.verbose2('RCON: no retry for %r', data)
                     return ''
