@@ -1,13 +1,18 @@
-include *.py
 include b3_run.py
+include b3_debug.py
+include CHANGELOG README.md
 include b3/sql/*.sql
-include CHANGELOG README.md b3/PKG-INFO *.txt
+include b3/sql/mysql/*.sql
+include b3/sql/postgresql/*.sql
+include b3/sql/sqlite/*.sql
 include b3/conf/*.xml
 include b3/conf/*.ini
 include b3/conf/templates/*.tpl
-exclude .idea/*
+include b3/conf/templates/autodoc/*.html
+include b3/docs/*.txt
+include b3/docs/*.pdf
+include b3/plugins/adv/CHANGELOG
+recursive-include b3/plugins/banlist *.xml
+recursive-include examples *
+recursive-include scripts *
 exclude tests/*
-exclude setup.cfg
-exclude setup.py
-exclude build-requirements.txt
-exclude MANIFEST.in
