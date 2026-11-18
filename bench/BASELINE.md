@@ -42,3 +42,39 @@ message history, i.e. test-harness bookkeeping, not the production hot path.
 - event processing: at least 25% faster than this baseline
 - idle RSS with 10 plugins loaded: at most 100 MB
 - startup: at most 3 s
+
+## M11 optimization round — 2026-11-19
+
+The bench was extended with a **real parser replay**: 10,000 canned q3-family log
+lines (game init, kills, chat, radio, votes) fed through the actual `iourt42`
+parser via `parseLine`, i.e. the production log-path. 3 runs per side, same
+process class, logging silenced.
+
+| metric | before | after | delta |
+|---|---|---|---|
+| parser replay (`iourt42`) | 12,904 lines/sec (0.77 s) | **19,602 lines/sec (0.51 s)** | **+33%** |
+| parser replay errors | 0 | 0 | — |
+| RSS after replay | 33.2 MB | 33.2 MB | — |
+| tracemalloc peak (replay) | 0.78 MB | 0.78 MB | — |
+| core event loop (admin plugin) | 20,654 ev/s | 20,068 ev/s | noise |
+| `import b3.fake` | 133 ms | ~149 ms (noise) | — |
+| `pkg_resources` in import journey | — | **0** | removed at M4 |
+
+**The win:** the parser's hot loop tried each compiled line-format with
+`re.match(pattern, line)` (~10 module-level dispatches per line, 51k per 5k
+lines); switched to `pattern.match(line)` (and `pattern.sub(...)` for the line
+clear) in `q3a/abstractParser.py` and `iourt41.py`. Profile-driven, tests stay
+green (parsers 690 passed, full suite 2481 passed).
+
+**Backlog items measured and dispositioned:**
+
+| Item | Verdict |
+|---|---|
+| `pkg_resources` removal (M4) | verified: 0 imports in the journey |
+| regex discipline | hot-path regexes are class-level compiled (verified) |
+| cron `Event.wait` | already implemented in `Cron.run` (verified) |
+| `__slots__` on Client/Penalty/Group/Team | **rejected with evidence**: plugins/parsers `setattr` arbitrary attributes on clients at runtime (`cmdmanager`, `etpro`, ...), slots would raise `AttributeError` |
+| parameterized SQL | **not a performance item**: sqlite storage measured at **463k queries/sec** (~4 orders of magnitude above demand); keep as a post-port *safety* improvement |
+| `requests.Session` reuse | deferred: no HTTP in the hot path, plugins make occasional calls only (no measurable bench signal) |
+
+**Targets status:** throughput **+33% ≥ +25%** ✓ · idle RSS **29–33 MB ≤ 100 MB** ✓ · startup **~0.15 s ≤ 3 s** ✓.

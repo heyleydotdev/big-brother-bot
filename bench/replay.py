@@ -55,6 +55,51 @@ EVENTS = ['regular chat line: nothing to see here',
           '!b3',
           'regular say: benchmarking the port']
 
+# representative q3-family log lines: game init, kills, chat, radio and votes
+PARSER_LINES = [
+    'InitGame: \\sv_hostname\\bench\\mapname\\ut4_casa',
+    'Kill: 0 1 38: Patate killed psyp by UT_MOD_GLOCK',
+    'say: 2 BenchPlayer: hello there',
+    'say: 6 ^5Marcel^2[^6CZARMY^2]: !help',
+    'Radio: 0 - 7 - 2 - "New Alley" - "I\'m going for the flag"',
+    'Callvote: 1 - "map dressingroom"',
+    'Vote: 0 - 2',
+    'VotePassed: 1 - 0 - "reload"',
+]
+
+
+def bench_parser(n_lines):
+    """
+    Replay canned q3-family log lines through the real iourt42 parser, the
+    same way the game log pump feeds it in production.
+    """
+    from b3.config import XmlConfigParser
+    from b3.fake import FakeConsole
+    from b3.parsers.q3a.abstractParser import AbstractParser
+
+    # same mounting trick the tests use: run the q3 parser on the fake console
+    AbstractParser.__bases__ = (FakeConsole,)
+    from b3.parsers.iourt42 import Iourt42Parser
+
+    conf = XmlConfigParser()
+    conf.loadFromString('<configuration><settings name="server">'
+                        '<set name="game_log"/></settings></configuration>')
+    parser = Iourt42Parser(conf)
+
+    errors = 0
+    tracemalloc.start()
+    t0 = time.perf_counter()
+    for i in range(n_lines):
+        try:
+            parser.parseLine(PARSER_LINES[i % len(PARSER_LINES)])
+        except Exception:
+            errors += 1
+    loop_time = time.perf_counter() - t0
+    peak = tracemalloc.get_traced_memory()[1]
+    tracemalloc.stop()
+    return loop_time, peak, errors
+
+
 
 def main():
     n_events = int(sys.argv[1]) if len(sys.argv) > 1 else 10000
@@ -117,6 +162,10 @@ def main():
 
         rss_after = psutil.Process().memory_info().rss
 
+        # -- parser replay: the real game-log hot path
+        parser_time, parser_peak, parser_errors = bench_parser(n_events)
+        rss_after_parser = psutil.Process().memory_info().rss
+
         logging.disable(logging.NOTSET)
 
     print('import b3.fake  : %8.0f ms (module import + default console boot)' % (import_time * 1000))
@@ -125,6 +174,10 @@ def main():
     print('event loop      : %8.2f s  => %8.0f events/sec' % (loop_time, n_events / loop_time))
     print('rss after loop  : %8.1f MB' % (rss_after / 1048576.0))
     print('tracemalloc peak: %8.2f MB during the event loop' % (peak_tracemalloc / 1048576.0))
+    print('parser replay   : %8.2f s  => %8.0f lines/sec (iourt42, parser errors: %s)'
+          % (parser_time, n_events / parser_time, parser_errors))
+    print('rss after replay: %8.1f MB' % (rss_after_parser / 1048576.0))
+    print('tracemalloc peak: %8.2f MB during the parser replay' % (parser_peak / 1048576.0))
     print('top allocations during the loop:')
     for stat in snapshot.statistics('lineno')[:5]:
         print('    %6.2f MB  %s' % (stat.size / 1048576.0, stat.traceback.format()[0].strip()))
