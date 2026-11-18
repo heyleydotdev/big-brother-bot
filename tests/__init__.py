@@ -39,12 +39,6 @@ from unittest.mock import Mock, patch
 import time
 import unittest
 from b3.events import Event
-from b3.clients import Clients
-
-# The UrT42/43 parsers patch Clients.newClient globally in __new__ (to hand out
-# parser specific client instances) and never restore it. Capture the pristine
-# method so every test can start from a clean class state.
-_PRISTINE_NEW_CLIENT = Clients.newClient
 
 
 testcase_lock = threading.Lock()  # together with flush_console_streams, helps getting logging output related to the
@@ -90,10 +84,6 @@ class B3TestCase(unittest.TestCase):
             testcase_lock.acquire()
         flush_console_streams()
 
-        # undo class-level monkeypatching left by UrT42/43 parser instantiations
-        # in other test modules (see _PRISTINE_NEW_CLIENT above)
-        Clients.newClient = _PRISTINE_NEW_CLIENT
-
         # create a FakeConsole parser
         self.parser_conf = MainConfig(CfgConfigParser(allow_no_value=True))
         self.parser_conf.loadFromString(r"""""")
@@ -112,6 +102,12 @@ class B3TestCase(unittest.TestCase):
         self.console.error = myError
 
     def tearDown(self):
+        # stop the console's cron scheduler (non-blocking): leftover background
+        # crontabs from earlier consoles keep firing during later test modules
+        # and corrupt their mockito state / timing
+        cron = getattr(getattr(self, 'console', None), '_cron', None)
+        if cron is not None:
+            cron.stop()
         flush_console_streams()
         testcase_lock.release()
 

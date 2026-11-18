@@ -390,3 +390,9 @@ print("creating fakeAdminPlugin with @b3/conf/plugin_admin.ini")
 fakeAdminPlugin = AdminPlugin(fakeConsole, '@b3/conf/plugin_admin.ini')
 fakeAdminPlugin.onLoadConfig()
 fakeAdminPlugin.onStartup()
+
+# The module level console is a convenience for interactive use: stop its cron
+# scheduler so an imported test session is not polluted by background crontabs
+# (tests create and shut down their own consoles).
+if fakeConsole._cron:
+    fakeConsole._cron.stop()

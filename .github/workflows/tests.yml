@@ -70,4 +70,9 @@ jobs:
           pip install -e ".[postgresql,test]"
 
       - name: Run tests
-        run: pytest --cov=b3 tests
+        run: |
+          if [ "${{ matrix.python-version }}" = "3.11" ]; then
+            pytest --cov=b3
+          else
+            pytest
+          fi

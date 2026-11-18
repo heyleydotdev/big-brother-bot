@@ -77,8 +77,9 @@ class Test_events(SpreeTestCase):
             self.console.queueEvent(self.console.getEvent('EVT_CLIENT_KILL', client=self.bill, target=self.mike))
         self.console.queueEvent(self.console.getEvent('EVT_CLIENT_KILL', client=self.mike, target=self.bill))
         # THEN
+        # NOTE: do not expect "You're back in business Mike" here: that is the
+        # loosingspree-12 end message and Mike only died 10 times in this test
         self.console.say.assert_has_calls([call('Bill is on fire! (10 kills in a row)'),
-                                           call("You're back in business Mike"),
                                            call('Mike iced Bill')])
 
     def test_losing_spree_start_with_12_kills(self):

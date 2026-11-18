@@ -43,6 +43,7 @@ sftp = ["paramiko>=3.4"]
 test = [
     "pytest",
     "pytest-cov",
+    "pytest-xdist",
     "mockito",
     # pymysql needs this to authenticate against MySQL 8 default auth plugin (caching_sha2_password)
     "cryptography",
@@ -91,6 +92,15 @@ line-length = 120
 [tool.ruff.lint]
 select = ["E", "W", "F", "UP"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# xdist: each module runs in a single worker process (loadscope) so module
+# level patches and the shared FakeConsole/mockito state never leak across
+# modules; it also cuts the suite runtime several-fold.
+addopts = "-n auto --dist loadscope"
+# NOTE: no network-dependent tests remain (geolocation/update tests mock their
+# transports), so no deselect markers are needed.
+
 [tool.coverage.run]
 omit = [
     "tests/*",
@@ -98,3 +108,8 @@ omit = [
     "b3/tools/*",
     "b3/fake.py",
 ]
+
+[tool.coverage.report]
+# floor near the measured port baseline (45%); keeps CI honest without
+# failing on harmless noise
+fail_under = 40

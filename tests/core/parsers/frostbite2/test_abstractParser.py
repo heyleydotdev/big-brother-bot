@@ -36,6 +36,10 @@ from functools import reduce
 
 sleep_patcher = None
 def setUpModule():
+    # NOTE: the global is required: without it this assigns a local and
+    # tearDownModule never stops the patch, leaving time.sleep mocked for the
+    # whole pytest session (breaks timer based tests in other modules).
+    global sleep_patcher
     sleep_patcher = patch("time.sleep")
     sleep_patcher.start()
 
