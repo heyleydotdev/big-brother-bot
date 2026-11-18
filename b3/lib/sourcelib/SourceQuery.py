@@ -63,7 +63,7 @@ A2S_RULES_REPLY = ord('E')
 CHALLENGE = -1
 S2C_CHALLENGE = ord('A')
 
-class SourceQueryPacket(io.StringIO):
+class SourceQueryPacket(io.BytesIO):
     # putting and getting values
     def putByte(self, val):
         self.write(struct.pack('<B', val))
@@ -93,13 +93,14 @@ class SourceQueryPacket(io.StringIO):
         return struct.unpack('<f', self.read(4))[0]
 
     def putString(self, val):
-        self.write(val + '\x00')
+        self.write(val.encode('ascii', 'replace') + b'\x00')
 
     def getString(self):
         val = self.getvalue()
         start = self.tell()
-        end = val.index('\0', start)
-        val = val[start:end]
+        end = val.index(b'\0', start)
+        # decode at the boundary: source engine strings are utf-8
+        val = val[start:end].decode('utf-8', 'replace')
         self.seek(end+1)
         return val
 
@@ -167,7 +168,7 @@ class SourceQuery(object):
                 else:
                     raise SourceQueryError('Invalid split packet')
 
-            packet = SourceQueryPacket("".join(result))
+            packet = SourceQueryPacket(b"".join(result))
 
             if packet.getLong() == WHOLE:
                 return packet

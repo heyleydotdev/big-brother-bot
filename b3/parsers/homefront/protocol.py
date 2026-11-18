@@ -27,7 +27,7 @@ Module implementing the Homefront protocol. Provide the Client class which
 creates a connection to a Homefront gameserver
 """
 
-import asyncore
+from b3.lib import netasync as asyncore
 import socket
 import time
 

@@ -358,7 +358,9 @@ class Parser(object):
             self.screen.write('Using gamelog    : %s\n' % b3.getShortPath(os.path.abspath(f)))
 
             if os.path.isfile(f):
-                self.input = open(f, 'r')
+                # text mode with the parser declared encoding: the log pump is
+                # the decode boundary, everything below receives str
+                self.input = open(f, 'r', encoding=self.encoding, errors='replace')
                 if self.config.has_option('server', 'seek'):
                     seek = self.config.getboolean('server', 'seek')
                     if seek:

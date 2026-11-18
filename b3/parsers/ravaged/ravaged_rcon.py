@@ -22,7 +22,7 @@
 #                                                                     #
 # ################################################################### #
 
-import asyncore
+from b3.lib import netasync as asyncore
 import logging
 import re
 import time

@@ -42,9 +42,9 @@ class Rcon(object):
     queue = None
     console = None
     socket_timeout = 0.80
-    rconsendstring = '\377\377\377\377rcon "%s" %s\n'
-    rconreplystring = '\377\377\377\377print\n'
-    qserversendstring = '\377\377\377\377%s\n'
+    rconsendstring = b'\377\377\377\377rcon "%s" %s\n'
+    rconreplystring = b'\377\377\377\377print\n'
+    qserversendstring = b'\377\377\377\377%s\n'
 
     # default expiretime for the status cache in seconds and cache type
     status_cache_expire_time = 2
@@ -94,12 +94,13 @@ class Rcon(object):
         """
         try:
             if isinstance(data, str):
-                data = str(data, errors='ignore')
-            data = data.encode(self.console.encoding, 'replace')
+                data = data.encode(self.console.encoding, 'replace')
+            # bytes payloads pass through untouched: the wire is bytes and
+            # this method is the encoding boundary
         except Exception as msg:
             self.console.warning('%s: error encoding data: %r', source, msg)
-            data = 'Encoding error'
-            
+            data = b'Encoding error'
+
         return data
         
     def send(self, data, maxRetries=None, socketTimeout=None):
@@ -182,7 +183,7 @@ class Rcon(object):
                 self.console.warning('RCON: %s', str(errors))
             elif len(writeables) > 0:
                 try:
-                    writeables[0].send(self.rconsendstring % (self.password, data))
+                    writeables[0].send(self.rconsendstring % (self.password.encode(self.console.encoding), data))
                 except Exception as msg:
                     self.console.warning('RCON: error sending: %r', msg)
                 else:
@@ -278,21 +279,22 @@ class Rcon(object):
         """
         sock.settimeout(2)
         start_time = time.time()
-        data = ''
+        data = b''
         while time.time() - start_time < 1:
             try:
-                d = str(sock.recv(4096))
+                d = sock.recv(4096)
             except socket.error as detail:
                 self.console.debug('RCON: error reading: %s' % detail)
                 break
             else:
                 if d:
                     # remove rcon header
-                    data += d.replace(self.rconreplystring, '')
-                elif len(data) > 0 and ord(data[-1:]) == 10:
+                    data += d.replace(self.rconreplystring, b'')
+                elif len(data) > 0 and data[-1:] == b'\n':
                     break
 
-        return data.strip()
+        # decode once at the read boundary so every consumer above gets str
+        return data.decode(self.console.encoding, 'replace').strip()
 
     def readSocket(self, sock, size=4096, socketTimeout=None):
         """
@@ -304,7 +306,7 @@ class Rcon(object):
         if socketTimeout is None:
             socketTimeout = self.socket_timeout
 
-        data = ''
+        data = b''
         readables, writeables, errors = select.select([sock], [], [sock], socketTimeout)
 
         if not len(readables):
@@ -312,17 +314,18 @@ class Rcon(object):
             return ''
 
         while len(readables):
-            d = str(sock.recv(size))
+            d = sock.recv(size)
 
             if d:
                 # remove rcon header
-                data += d.replace(self.rconreplystring, '')
+                data += d.replace(self.rconreplystring, b'')
 
             readables, writeables, errors = select.select([sock], [], [sock], socketTimeout)
             if len(readables):
                 self.console.verbose('RCON: more data to read in socket')
 
-        return data
+        # decode once at the read boundary so every consumer above gets str
+        return data.decode(self.console.encoding, 'replace')
 
     def close(self):
         pass

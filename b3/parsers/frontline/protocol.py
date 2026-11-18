@@ -22,7 +22,7 @@
 #                                                                     #
 # ################################################################### #
 
-import asyncore
+from b3.lib import netasync as asyncore
 import re
 import socket
 import time

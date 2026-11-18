@@ -30,7 +30,7 @@
 
 import re
 import socket
-import asyncore
+from b3.lib import netasync as asyncore
 
 PACKETSIZE=1400
 
@@ -222,8 +222,9 @@ class SourceLogListener(asyncore.dispatcher):
     def handle_read(self):
         data = self.recv(PACKETSIZE)
 
-        if data.startswith('\xff\xff\xff\xff') and data.endswith('\n\x00'):
-            self.parser.parse(data)
+        if data.startswith(b'\xff\xff\xff\xff') and data.endswith(b'\n\x00'):
+            # decode once at the boundary: source engine logs are utf-8
+            self.parser.parse(data.decode('utf-8', 'replace'))
 
         else:
             raise SourceLogListenerError("Received invalid packet.")

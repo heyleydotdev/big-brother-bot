@@ -24,7 +24,7 @@
 
 import b3
 import sys
-import asyncore
+from b3.lib import netasync as asyncore
 import socket
 
 from b3.parser import Parser

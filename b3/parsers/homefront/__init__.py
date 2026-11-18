@@ -26,7 +26,7 @@
 import b3
 import b3.cron
 import b3.events
-import asyncore
+from b3.lib import netasync as asyncore
 import ftplib
 import os
 from . import protocol

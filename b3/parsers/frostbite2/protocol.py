@@ -26,7 +26,7 @@ __version__ = '1.2'
 
 import logging
 import time
-import asyncore
+from b3.lib import netasync as asyncore
 import socket
 import threading
 import hashlib
@@ -59,14 +59,15 @@ def DecodeInt32(data):
     
 def EncodeWords(words):
     size = 0
-    encodedWords = ''
+    encodedWords = b''
     for word in words:
-        strWord = str(word)
-        encodedWords += EncodeInt32(len(strWord))
-        encodedWords += strWord
-        encodedWords += '\x00'
-        size += len(strWord) + 5
-    
+        # words are str, the wire format only knows cp1252 bytes
+        encodedWord = word if isinstance(word, bytes) else str(word).encode('cp1252', 'replace')
+        encodedWords += EncodeInt32(len(encodedWord))
+        encodedWords += encodedWord
+        encodedWords += b'\x00'
+        size += len(encodedWord) + 5
+
     return size, encodedWords
 
 
@@ -75,9 +76,9 @@ def DecodeWords(size, data):
     words = []
     offset = 0
     while offset < size:
-        wordLen = DecodeInt32(data[offset : offset + 4])        
+        wordLen = DecodeInt32(data[offset : offset + 4])
         word = data[offset + 4 : offset + 4 + wordLen]
-        words.append(word)
+        words.append(word.decode('cp1252', 'replace'))
         offset += wordLen + 5
 
     return words
@@ -155,7 +156,7 @@ def printPacket(packet):
 def generatePasswordHash(salt, password):
     m = hashlib.new('md5')
     m.update(salt)
-    m.update(password)
+    m.update(password if isinstance(password, bytes) else password.encode('cp1252', 'replace'))
     return m.digest()
 
 def containsCompletePacket(data):
@@ -224,7 +225,7 @@ class FrostbiteDispatcher(asyncore.dispatcher_with_send):
         :param port: The Frostbite2 server port
         """
         asyncore.dispatcher_with_send.__init__(self)
-        self._buffer_in = ''
+        self._buffer_in = b''
         self.getLogger().info("connecting")
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         asyncore.dispatcher_with_send.connect(self, (host, port))
@@ -410,9 +411,10 @@ class FrostbiteServer(threading.Thread):
         self.getLogger().info("starting authentication")
         hash_token = self.command('login.hashed')
         # Given the salt and the password, combine them and compute hash value
-        salt = hash_token[0].decode("hex")
+        # (py2's str.decode("hex") / str.encode("hex") are gone: bytes.fromhex / bytes.hex replace them)
+        salt = bytes.fromhex(hash_token[0])
         passwordHash = generatePasswordHash(salt, self.password)
-        passwordHashHexString = passwordHash.encode("hex").upper()
+        passwordHashHexString = passwordHash.hex().upper()
         # Send password hash to server
         self.command("login.hashed", passwordHashHexString)
         self.getLogger().info("authentication done")
