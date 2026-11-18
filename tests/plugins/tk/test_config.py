@@ -343,7 +343,7 @@ class Test_get_config_for_levels(Test_Tk_plugin):
             ], self.error_mock.mock_calls)
         else:
             self.assertListEqual([
-                call('value for kill_multiplier is invalid. could not convert string to float: f00'),
+                call("value for kill_multiplier is invalid. could not convert string to float: 'f00'"),
             ], self.error_mock.mock_calls)
 
     def test_bad_damage_multiplier(self):
@@ -370,7 +370,7 @@ class Test_get_config_for_levels(Test_Tk_plugin):
             ], self.error_mock.mock_calls)
         else:
             self.assertListEqual([
-                call('value for damage_multiplier is invalid. could not convert string to float: f00'),
+                call("value for damage_multiplier is invalid. could not convert string to float: 'f00'"),
             ], self.error_mock.mock_calls)
 
     def test_bad_ban_length(self):

@@ -58,6 +58,8 @@ class CensorurtTestCase(B3TestCase):
     def tearDown(self):
         B3TestCase.tearDown(self)
         self.timer_patcher.stop()
+        # do not leave DEBUG logging enabled for the other test modules
+        logging.getLogger('output').setLevel(logging.WARNING)
 
     def init_plugin(self, config_content):
         self.conf.setXml(config_content)

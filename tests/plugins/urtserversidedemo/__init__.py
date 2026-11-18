@@ -70,6 +70,9 @@ class Iourt41TestCase(Iourt41_TestCase_mixin):
 
         # make sure the admin plugin obtained by other plugins is our admin plugin
         when(self.console).getPlugin('admin').thenReturn(self.adminPlugin)
+        # mockito 2 raises on unstubbed invocations; these plugins are absent by default
+        when(self.console).getPlugin('haxbusterurt').thenReturn(None)
+        when(self.console).getPlugin('follow').thenReturn(None)
 
     def tearDown(self):
         self.console.working = False

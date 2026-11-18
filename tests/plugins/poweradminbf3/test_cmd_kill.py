@@ -63,7 +63,7 @@ kill: 0
 
     def test_superadmin_kills_joe(self):
         # GIVEN
-        when(self.console).write()
+        when(self.console, strict=False).write()
         self.joe.connects('Joe')
         self.superadmin.connects('superadmin')
         self.joe.clearMessageHistory()
@@ -85,7 +85,7 @@ kill: 0
 
     def test_superadmin_kills_simon(self):
         # GIVEN
-        when(self.console).write()
+        when(self.console, strict=False).write()
         self.simon.connects('Simon')
         self.superadmin.connects('superadmin')
         self.simon.clearMessageHistory()

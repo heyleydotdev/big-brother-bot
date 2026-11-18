@@ -41,7 +41,7 @@ unlockmode: 40
         self.p = Poweradminbf3Plugin(self.console, self.conf)
         self.p.onLoadConfig()
         self.p.onStartup()
-        when(self.console).write()
+        when(self.console, strict=False).write()
 
 
     def test_get_current_unlockmode(self):

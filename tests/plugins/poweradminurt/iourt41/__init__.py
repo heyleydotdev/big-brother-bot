@@ -51,6 +51,9 @@ class Iourt41TestCase(unittest.TestCase):
             self.parser_conf = XmlConfigParser()
             self.parser_conf.loadFromString("""<configuration><settings name="server"><set name="game_log"></set></settings></configuration>""")
             self.console = Iourt41Parser(self.parser_conf)
+            # mockito 2 raises on stubbed-method calls that match no stub; the py2-era
+            # mockito returned None, which these tests rely on. Register non-strict first.
+            when(self.console, strict=False)
             self.console.startup()
 
             # load the admin plugin

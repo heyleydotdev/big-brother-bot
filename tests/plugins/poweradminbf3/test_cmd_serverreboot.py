@@ -44,7 +44,7 @@ serverreboot: 100
 
 
     def test_nominal(self, sleep_mock):
-        when(self.console).write()
+        when(self.console, strict=False).write()
         self.superadmin.connects("god")
         self.superadmin.says("!serverreboot")
         verify(self.console).write(('admin.shutDown',))

@@ -32,6 +32,7 @@ from b3 import TEAM_UNKNOWN
 from b3.config import XmlConfigParser
 from b3.parsers.bf3 import Bf3Parser, __version__ as bf3_version
 from b3.plugins.admin import AdminPlugin
+from mockito import when
 from tests import logging_disabled
 import b3.output # do not remove, needed because the module alters some defaults of the logging module
 
@@ -58,12 +59,21 @@ class Bf3TestCase(unittest.TestCase):
         from b3.fake import FakeClient
         FakeClient.changes_team = changes_team
 
+    @classmethod
+    def tearDownClass(cls):
+        # do not leave the module's logging level for the other test modules
+        logging.getLogger('output').setLevel(logging.WARNING)
+
     def setUp(self):
         # create a BF3 parser
         self.parser_conf = XmlConfigParser()
         self.parser_conf.loadFromString("""<configuration />""")
         with logging_disabled():
             self.console = Bf3Parser(self.parser_conf)
+
+        # mockito 2 raises on stubbed-method calls that match no stub; the py2-era
+        # mockito returned None, which these tests rely on. Register non-strict first.
+        when(self.console, strict=False)
 
         # alter a few settings to speed up the tests
         self.console.sayqueue_get_timeout = 0

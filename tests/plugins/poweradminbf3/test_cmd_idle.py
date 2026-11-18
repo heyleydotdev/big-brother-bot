@@ -117,6 +117,7 @@ idle: 40
 
         # ON
         unstub()
+        when(self.console, strict=False)
         when(self.console).write(('vars.idleTimeout',)).thenReturn(['0'])
         self.superadmin.message_history = []
         self.superadmin.says("!idle on")
@@ -127,6 +128,7 @@ idle: 40
 
         # OFF
         unstub()
+        when(self.console, strict=False)
         when(self.console).write(('vars.idleTimeout',)).thenReturn(['300'])
         self.superadmin.message_history = []
         self.superadmin.says("!idle off")
@@ -137,6 +139,7 @@ idle: 40
 
         # ON
         unstub()
+        when(self.console, strict=False)
         when(self.console).write(('vars.idleTimeout',)).thenReturn(['0'])
         self.superadmin.message_history = []
         self.superadmin.says("!idle on")
@@ -148,6 +151,7 @@ idle: 40
 
         # 15
         unstub()
+        when(self.console, strict=False)
         when(self.console).write(('vars.idleTimeout',)).thenReturn(['300'])
         self.superadmin.message_history = []
         self.superadmin.says("!idle 15")
@@ -158,6 +162,7 @@ idle: 40
 
         # ON
         unstub()
+        when(self.console, strict=False)
         when(self.console).write(('vars.idleTimeout',)).thenReturn([str(15*60)])
         self.superadmin.message_history = []
         self.superadmin.says("!idle on")
@@ -167,6 +172,7 @@ idle: 40
 
         # OFF
         unstub()
+        when(self.console, strict=False)
         when(self.console).write(('vars.idleTimeout',)).thenReturn([str(15*60)])
         self.superadmin.message_history = []
         self.superadmin.says("!idle off")

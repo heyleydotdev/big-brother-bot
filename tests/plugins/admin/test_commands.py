@@ -84,6 +84,7 @@ class Test_misc_cmd(Admin_TestCase):
 
     def test_maps(self):
         mock_client = Mock(spec=Client, name="client")
+        mock_client.maxLevel = 100
         mock_cmd = Mock(spec=Command)
 
         # None
@@ -1224,7 +1225,7 @@ def _start_new_thread(callable, args_list, kwargs_dict):
     callable(*args_list, **kwargs_dict)
 
 @patch.object(time, "sleep")
-@patch.object(thread, "start_new_thread", wraps=_start_new_thread)
+@patch.object(_thread, "start_new_thread", wraps=_start_new_thread)
 class Test_cmd_rules(Admin_functional_test):
     def setUp(self):
         Admin_functional_test.setUp(self)

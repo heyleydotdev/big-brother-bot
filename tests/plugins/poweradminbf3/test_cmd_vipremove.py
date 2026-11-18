@@ -74,7 +74,7 @@ vipremove: 0
 
 
     def test_nominal_on_connected_player(self):
-        when(self.console).write()
+        when(self.console, strict=False).write()
         self.joe.connects('Joe')
         self.superadmin.connects('superadmin')
         self.superadmin.clearMessageHistory()

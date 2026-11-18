@@ -94,7 +94,7 @@ endround: 20
 
 
     def test_0(self):
-        when(self.console).write().thenReturn()
+        when(self.console, strict=False).write().thenReturn()
         self.superadmin.message_history = []
         self.superadmin.says("!endround 0")
         verify(self.console).write(('mapList.endRound', '0'))
@@ -102,7 +102,7 @@ endround: 20
 
 
     def test_1(self):
-        when(self.console).write().thenReturn()
+        when(self.console, strict=False).write().thenReturn()
         self.superadmin.message_history = []
         self.superadmin.says("!endround 1")
         verify(self.console).write(('mapList.endRound', '1'))

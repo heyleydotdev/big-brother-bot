@@ -71,7 +71,7 @@ class AdvTestCase(B3TestCase):
 
         B3TestCase.setUp(self)
 
-        global ADV_CONFIG_CONTENT, ADV_CONFIG_FILE, ADMIN_CONFIG_FILE, timer_patcher
+        global ADV_CONFIG_CONTENT, ADV_CONFIG_FILE, ADMIN_CONFIG_FILE, timer_patcher, feed_patcher
         if os.path.exists(ADV_CONFIG_FILE):
             with open(ADV_CONFIG_FILE, 'r') as f:
                 ADV_CONFIG_CONTENT = f.read()
@@ -80,6 +80,7 @@ class AdvTestCase(B3TestCase):
         self.adminPluginConf.load(ADMIN_CONFIG_FILE)
         self.adminPlugin = AdminPlugin(self.console, self.adminPluginConf)
         when(self.console).getPlugin("admin").thenReturn(self.adminPlugin)
+        when(self.console).getPlugin("xlrstats").thenReturn(None)
 
         self.adminPlugin.onLoadConfig()
         self.adminPlugin.onStartup()
@@ -90,10 +91,17 @@ class AdvTestCase(B3TestCase):
         timer_patcher = patch('threading.Timer')
         timer_patcher.start()
 
+        # never hit the network for the news feed
+        feed_patcher = patch('feedparser.api._open_resource', return_value=RSS_FEED_CONTENT.encode('utf-8'))
+        feed_patcher.start()
+
     def tearDown(self):
         B3TestCase.tearDown(self)
         timer_patcher.stop()
+        feed_patcher.stop()
         unstub()
+        # do not leave DEBUG logging enabled for the other test modules
+        logging.getLogger('output').setLevel(logging.WARNING)
 
     def init_plugin(self, config_content=None):
         conf = None

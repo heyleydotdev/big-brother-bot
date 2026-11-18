@@ -36,6 +36,10 @@ DEFAULT_XLRSTATS_CONFIG_FILE = os.path.join(os.path.dirname(b3_module__file__), 
 
 class XlrstatsTestCase(B3TestCase):
 
+    def tearDown(self):
+        # do not leave DEBUG logging enabled for the other test modules
+        logging.getLogger('output').setLevel(logging.WARNING)
+
     def setUp(self):
         """
         This method is called before each test.

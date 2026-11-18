@@ -64,7 +64,7 @@ class Test_render_cmd_template(CustomcommandsTestCase):
         when(self.p.console).getMaps().thenReturn(["map1", "map2", "map3", "ut4_turnpike", "ut4_casa"])
         # THEN
         self.assertRaises(ValueError, self.p._render_cmd_template, "map <ARG:FIND_MAP>", data="", client=self.player1)
-        self.assertRaisesRegex(ValueError, "do you mean : map2, map3, map1 ?",
+        self.assertRaisesRegex(ValueError, "do you mean : map1, map2, map3 ?",
                                 self.p._render_cmd_template, "map <ARG:FIND_MAP>", data="map", client=self.player1)
 
     def test_ARG_FIND_MAP_nominal(self):

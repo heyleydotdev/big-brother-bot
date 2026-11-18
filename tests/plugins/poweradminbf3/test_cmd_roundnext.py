@@ -56,7 +56,7 @@ roundnext: 20
 
 
     def test_nominal(self):
-        when(self.console).write()
+        when(self.console, strict=False).write()
         self.superadmin.clearMessageHistory()
         self.superadmin.says('!roundnext')
         self.assertEqual([], self.superadmin.message_history)
