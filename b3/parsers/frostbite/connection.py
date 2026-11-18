@@ -28,7 +28,6 @@ __version__ = '2.1'
 debug = True
 
 import socket
-import string
 import b3.parsers.frostbite.protocol as protocol
 
 
@@ -86,7 +85,7 @@ class FrostbiteConnection(object):
         """
         try:
             self.console.debug('opening FrostbiteConnection socket')
-            self._receiveBuffer = ''
+            self._receiveBuffer = b''
             self._serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self._serverSocket.connect((self._host, self._port))
         except Exception as err:
@@ -153,9 +152,9 @@ class FrostbiteConnection(object):
             raise FrostbiteException("Could not retrieve salt")
 
         # given the salt and the password, combine them and compute hash value
-        salt = words[1].decode("hex")
+        salt = bytes.fromhex(words[1])
         passwordHash = protocol.generatePasswordHash(salt, self._password)
-        passwordHashHexString = string.upper(passwordHash.encode("hex"))
+        passwordHashHexString = passwordHash.hex().upper()
 
         # send password hash to server
         loginResponse = self.sendRequest("login.hashed", passwordHashHexString)

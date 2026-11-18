@@ -30,7 +30,6 @@ import sys
 import re
 import traceback
 import time
-import string
 import queue
 import threading
 import b3.clients
@@ -225,7 +224,7 @@ class AbstractParser(b3.parser.Parser):
         func = ''
         match = re.search(r"^(?P<actor>[^.]+)\.on(?P<event>.+)$", eventType)
         if match:
-            func = 'On%s%s' % (string.capitalize(match.group('actor')), string.capitalize(match.group('event')))
+            func = 'On%s%s' % (match.group('actor').capitalize(), match.group('event').capitalize())
             #self.debug("-==== FUNC!!: " + func)
             
         if match and hasattr(self, func):
@@ -1110,7 +1109,7 @@ def patch_b3_clients():
             for line in self.console.getWrap(text):
                 self.messagequeue.put(line)
             # create a thread that executes the worker and pushes out the queue
-            if not hasattr(self, 'messagehandler') or not self.messagehandler.isAlive():
+            if not hasattr(self, 'messagehandler') or not self.messagehandler.is_alive():
                 self.messagehandler = threading.Thread(target=self.messagequeueworker)
                 self.messagehandler.setDaemon(True)
                 self.messagehandler.start()

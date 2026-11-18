@@ -44,7 +44,7 @@ class Test_BanlistContent(unittest.TestCase):
         self.assertEqual('BanlistContent[]', repr(blc))
         blc = BanlistContent(['name', 'Averell', 'seconds', '3600', '0', 'reason 2'])
         self.assertEqual(1, len(blc))
-        self.assertEqual("BanlistContent[{'idType': 'name', 'seconds_left': '3600', 'reason': 'reason 2', 'banType': 'seconds', 'rounds_left': '0', 'id': 'Averell'}]", repr(blc))
+        self.assertEqual("BanlistContent[{'idType': 'name', 'id': 'Averell', 'banType': 'seconds', 'seconds_left': '3600', 'rounds_left': '0', 'reason': 'reason 2'}]", repr(blc))
 
     def test_1(self):
         bloc = BanlistContent([
@@ -52,8 +52,8 @@ class Test_BanlistContent(unittest.TestCase):
             'name', 'Averell', 'seconds', '3600', '0', 'reason 2',
         ])
         self.assertEqual(2, len(bloc))
-        self.assertEqual("BanlistContent[{'idType': 'name', 'seconds_left': '0', 'reason': 'reason 1', 'banType': 'perm', 'rounds_left': '0', 'id': 'William'}, \
-{'idType': 'name', 'seconds_left': '3600', 'reason': 'reason 2', 'banType': 'seconds', 'rounds_left': '0', 'id': 'Averell'}]", repr(bloc))
+        self.assertEqual("BanlistContent[{'idType': 'name', 'id': 'William', 'banType': 'perm', 'seconds_left': '0', 'rounds_left': '0', 'reason': 'reason 1'}, \
+{'idType': 'name', 'id': 'Averell', 'banType': 'seconds', 'seconds_left': '3600', 'rounds_left': '0', 'reason': 'reason 2'}]", repr(bloc))
 
     def test_slice(self):
         bloc = BanlistContent([
@@ -144,7 +144,7 @@ class Test_PlayerInfoBlock(unittest.TestCase):
         self.assertEqual('bla2', bloc[0]['param2'])
         self.assertEqual('foo1', bloc[1]['param1'])
         self.assertEqual('foo2', bloc[1]['param2'])
-        self.assertEqual("PlayerInfoBlock[{'param2': 'bla2', 'param1': 'bla1'}{'param2': 'foo2', 'param1': 'foo1'}]", repr(bloc))
+        self.assertEqual("PlayerInfoBlock[{'param1': 'bla1', 'param2': 'bla2'}{'param1': 'foo1', 'param2': 'foo2'}]", repr(bloc))
 
     def test_slice(self):
         bloc = PlayerInfoBlock(['2','param1','param2','4','player0-p1','player0-p2','player1-p1','player1-p2', 'player2-p1','player2-p2','player3-p1','player3-p2' ])
@@ -154,7 +154,7 @@ class Test_PlayerInfoBlock(unittest.TestCase):
         self.assertEqual('player1-p2', bloc[1:3][0]['param2'])
         self.assertEqual('player2-p1', bloc[1:3][1]['param1'])
         self.assertEqual('player2-p2', bloc[1:3][1]['param2'])
-        self.assertEqual("[{'param2': 'player1-p2', 'param1': 'player1-p1'}, {'param2': 'player2-p2', 'param1': 'player2-p1'}]", repr(bloc[1:3]))
+        self.assertEqual("[{'param1': 'player1-p1', 'param2': 'player1-p2'}, {'param1': 'player2-p1', 'param2': 'player2-p2'}]", repr(bloc[1:3]))
 
     def test_R38_no_player(self):
         bloc = PlayerInfoBlock(['8', 'name', 'guid', 'teamId', 'squadId', 'kills', 'deaths', 'score', 'rank', '0'])

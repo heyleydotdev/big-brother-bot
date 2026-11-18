@@ -60,7 +60,7 @@ class BanlistContent(object):
         Comment: The list starts with a number telling how many bans the list is holding. 
                  After that, 5 words (Id-type, id, ban-type, time and reason) are received for every ban in the list.
         """
-        self.numOfBans = data[0]
+        self.numOfBans = int(data[0])
         self.bansData = data[1:]
     
     def __len__(self):

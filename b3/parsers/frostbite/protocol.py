@@ -59,13 +59,14 @@ def DecodeInt32(data):
     
 def EncodeWords(words):
     size = 0
-    encodedWords = ''
+    encodedWords = b''
     for word in words:
-        strWord = str(word)
-        encodedWords += EncodeInt32(len(strWord))
-        encodedWords += strWord
-        encodedWords += '\x00'
-        size += len(strWord) + 5
+        # words are str, the wire format only knows cp1252 bytes
+        encodedWord = word if isinstance(word, bytes) else str(word).encode('cp1252', 'replace')
+        encodedWords += EncodeInt32(len(encodedWord))
+        encodedWords += encodedWord
+        encodedWords += b'\x00'
+        size += len(encodedWord) + 5
     
     return size, encodedWords
 
@@ -77,7 +78,7 @@ def DecodeWords(size, data):
     while offset < size:
         wordLen = DecodeInt32(data[offset : offset + 4])        
         word = data[offset + 4 : offset + 4 + wordLen]
-        words.append(word)
+        words.append(word.decode('cp1252', 'replace'))
         offset += wordLen + 5
 
     return words
@@ -153,7 +154,7 @@ def printPacket(packet):
 def generatePasswordHash(salt, password):
     m = newmd5()
     m.update(salt)
-    m.update(password)
+    m.update(password if isinstance(password, bytes) else password.encode('cp1252', 'replace'))
     return m.digest()
     
 

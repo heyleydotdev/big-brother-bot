@@ -91,7 +91,7 @@ class BanlistContent(object):
 
         # append data
         self.bansData += data
-        self.numOfBans += len(data) / 6
+        self.numOfBans += len(data) // 6
 
     def __len__(self):
         return int(self.numOfBans)

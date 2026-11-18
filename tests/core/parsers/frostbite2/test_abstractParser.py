@@ -1000,7 +1000,7 @@ class Test_getFullBanList(AbstractParser_TestCase):
         # verify
         mlb = self.parser.getFullBanList()
         self.assertEqual(
-            "BanlistContent[{'idType': 'name', 'seconds_left': '0', 'reason': 'Banned by admin', 'banType': 'perm', 'rounds_left': '0', 'id': 'Foo1 '}]"
+            "BanlistContent[{'idType': 'name', 'id': 'Foo1 ', 'banType': 'perm', 'seconds_left': '0', 'rounds_left': '0', 'reason': 'Banned by admin'}]"
             , repr(mlb))
         self.assertEqual(2, self.parser.write.call_count)
 
@@ -1012,8 +1012,8 @@ class Test_getFullBanList(AbstractParser_TestCase):
             )
         # verify
         mlb = self.parser.getFullBanList()
-        self.assertEqual("BanlistContent[{'idType': 'name', 'seconds_left': '0', 'reason': 'Banned by admin', 'banType': 'perm', 'rounds_left': '0', 'id': 'Foo1 '}, \
-{'idType': 'name', 'seconds_left': '0', 'reason': 'Banned by admin', 'banType': 'perm', 'rounds_left': '0', 'id': 'Foo2 '}]"
+        self.assertEqual("BanlistContent[{'idType': 'name', 'id': 'Foo1 ', 'banType': 'perm', 'seconds_left': '0', 'rounds_left': '0', 'reason': 'Banned by admin'}, \
+{'idType': 'name', 'id': 'Foo2 ', 'banType': 'perm', 'seconds_left': '0', 'rounds_left': '0', 'reason': 'Banned by admin'}]"
             , repr(mlb))
         self.assertEqual(2, self.parser.write.call_count)
 

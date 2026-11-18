@@ -30,10 +30,9 @@ import re
 import sys
 import traceback
 import time
-import string
 import queue
 import threading
-import new
+import types
 import b3.clients
 import b3.cron
 import b3.events
@@ -358,8 +357,8 @@ class AbstractParser(b3.parser.Parser):
         match = re.search(r"^(?P<actor>[^.]+)\.(on)?(?P<event>.+)$", eventType)
         func = None
         if match:
-            func = 'On%s%s' % (string.capitalize(match.group('actor')),
-                               string.capitalize(match.group('event')))
+            func = 'On%s%s' % (match.group('actor').capitalize(),
+                               match.group('event').capitalize())
             self.verbose2("Looking for event handling method called : " + func)
 
         if match and hasattr(self, func):
@@ -1731,9 +1730,9 @@ class AbstractParser(b3.parser.Parser):
                     return
 
         adminplugin = self.getPlugin('admin')
-        adminplugin.parse_map_parameters = new.instancemethod(parse_map_parameters, adminplugin)
+        adminplugin.parse_map_parameters = types.MethodType(parse_map_parameters, adminplugin)
         command = adminplugin._commands['map']
-        command.func = new.instancemethod(new_cmd_map, adminplugin)
+        command.func = types.MethodType(new_cmd_map, adminplugin)
         command.help = new_cmd_map.__doc__.strip()
 
 
@@ -1772,7 +1771,7 @@ def patch_b3_clients():
             for line in self.console.getWrap(text):
                 self.messagequeue.put(line)
             # create a thread that executes the worker and pushes out the queue
-            if not hasattr(self, 'messagehandler') or not self.messagehandler.isAlive():
+            if not hasattr(self, 'messagehandler') or not self.messagehandler.is_alive():
                 self.messagehandler = threading.Thread(target=self.messagequeueworker, name="%s_messagehandler" % self)
                 self.messagehandler.setDaemon(True)
                 self.messagehandler.start()
