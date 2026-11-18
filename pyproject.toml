@@ -51,6 +51,7 @@ test = [
     "psutil",
 ]
 build = [
+    "build",
     "bump2version",
     "wheel",
 ]

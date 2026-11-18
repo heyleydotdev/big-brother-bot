@@ -1,5 +1,47 @@
+1.12 -> 2.0.0
+----
+
+B3 2.0.0 is the Python 3 port. The code base now runs on Python 3.11+ only
+(3.11/3.12/3.13 in CI); the Python 2 branch remains available as the 1.x series.
+
+Highlights
+~~~~~~~~~~
+- Single Python 3 code base (no compatibility shims); core, parsers and all
+  native plugins ported, test suite green (2481 tests).
+- `asyncore` removed (gone in 3.12) and replaced by an internal `selectors`
+  based layer (`b3/lib/netasync.py`); plugin loading moved from `imp` to
+  `importlib`; `distutils` replaced by a standalone version class.
+- Packaging moved to `pyproject.toml` only: pip installable, extras for
+  `postgresql` and `sftp`, no more requirements files.
+
+Dependencies
+~~~~~~~~~~~~
+- PyMySQL 1.x (was 0.6.6), psycopg 3 (was psycopg2 2.6), paramiko 3 (was 1.15),
+  feedparser 6 (was 5.1), requests 2.32+, python-dateutil 2.9+.
+
+Performance (see `bench/BASELINE.md`)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Parser log hot loop: 12,904 -> 19,602 lines/sec (+33%).
+- Idle memory 29-33 MB with the admin plugin loaded; startup ~0.15 s.
+- `pkg_resources` removed from the import path.
+
+Plugins
+~~~~~~~
+- Native plugins are all ported. Third party plugins written for Python 2 need
+  their own port: `imp`, `asyncore`, `string.*` helpers, `unicode`/`basestring`
+  and positional `config.get(..., raw)` are gone; `telnetlib` is removed in
+  Python 3.13 (use sockets or `telnetlib3`).
+- `b3_debug.py` keeps the memory/function profiler modes; the old log
+  diagnostic tooling was removed (use `bench/replay.py`).
+
+Credits
+~~~~~~~
+- See `CREDITS.md` and the README hall of fame: B3 ran on game servers for over
+  a decade because of these people.
+
 1.9.0 -> 1.9.1
 ----
+
 A list of changed files is available after release here:
 http://github.com/BigBrotherBot/big-brother-bot/compare/v1.9.0...v1.9.1
 ----
