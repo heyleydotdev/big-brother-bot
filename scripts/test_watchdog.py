@@ -18,9 +18,9 @@ del sys.argv[1]
 
 def _dump_and_exit():
     print('')
-    print('=== TEST WATCHDOG: run exceeded %s seconds, dumping all thread stacks ===' % LIMIT_SECONDS)
-    for thread_id, stack_frame in sys._current_frames().items():
-        print('--- thread 0x%x ---' % thread_id)
+    print(('=== TEST WATCHDOG: run exceeded %s seconds, dumping all thread stacks ===' % LIMIT_SECONDS))
+    for thread_id, stack_frame in list(sys._current_frames().items()):
+        print(('--- thread 0x%x ---' % thread_id))
         traceback.print_stack(stack_frame)
     print('=== TEST WATCHDOG: exiting ===')
     sys.stdout.flush()

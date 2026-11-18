@@ -56,7 +56,7 @@ class GeolocationPlugin(b3.plugin.Plugin):
         try:
             # append this one separately since db may be missing
             self._geolocators.append(MaxMindGeolocator())
-        except IOError, e:
+        except IOError as e:
             self.debug('MaxMind geolocation not available: %s' % e)
         # cache of already retrieved geolocation data: {ip address string: (timestamp, Location)}
         self._cache_lock = threading.Lock()
@@ -148,9 +148,9 @@ class GeolocationPlugin(b3.plugin.Plugin):
                     location = geotool.getLocation(client)
                     self.debug('retrieved geolocation data for %s <@%s>: %r', client.name, client.id, location)
                     break # stop iterating if we collect valid data
-                except GeolocalizationError, e:
+                except GeolocalizationError as e:
                     self.warning('could not retrieve geolocation data %s <@%s>: %s', client.name, client.id, e)
-                except Exception, e:
+                except Exception as e:
                     self.error('client %s <@%s> geolocation terminated unexpectedtly when using %s service: %s',
                                client.name, client.id, geotool.__class__.__name__, e)
 
@@ -173,6 +173,6 @@ class GeolocationPlugin(b3.plugin.Plugin):
         Remove expired entries from the cache. Must be called while holding the cache lock.
         """
         now = time.time()
-        expired = [ip for ip, (timestamp, _) in self._cache.items() if now - timestamp > self._cache_ttl]
+        expired = [ip for ip, (timestamp, _) in list(self._cache.items()) if now - timestamp > self._cache_ttl]
         for ip in expired:
             del self._cache[ip]

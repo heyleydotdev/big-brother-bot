@@ -29,8 +29,8 @@ import b3.events
 import asyncore
 import ftplib
 import os
-import protocol
-import rcon
+from . import protocol
+from . import rcon
 import re
 import string
 import sys
@@ -154,7 +154,7 @@ class HomefrontParser(Parser):
                 self.game.sv_hostname = serverinfo['hostname']
             if 'maxplayers' in serverinfo:
                 self.game.sv_maxclients = serverinfo['maxplayers']
-        except Exception, err:
+        except Exception as err:
             self.exception(err)
 
     def run(self):
@@ -331,7 +331,7 @@ class HomefrontParser(Parser):
             remoteSize = ftp.size(os.path.basename(self.ftpconfig['path']))
             self.verbose("Connection successfull: remote file size is %s" % remoteSize)
             ftp.retrlines('RETR ' + os.path.basename(self.ftpconfig['path']), handleDownload)
-        except ftplib.all_errors, e:
+        except ftplib.all_errors as e:
             self.debug(str(e))
             try:
                 ftp.close()
@@ -627,7 +627,7 @@ class HomefrontParser(Parser):
             return
         
         if len(uid) != 17:
-            self.warning(u"weird UID : [%s]" % uid)
+            self.warning("weird UID : [%s]" % uid)
         
         # try to get the client by guid
         client = self.clients.getByGUID(uid)
@@ -734,11 +734,11 @@ class HomefrontParser(Parser):
         now = time.time()
         for client in self.clients.getList():
             howlongago = now - client.last_update_time
-            self.debug(u"%s last seen %d seconds ago" % (client, howlongago))
+            self.debug("%s last seen %d seconds ago" % (client, howlongago))
             if howlongago < (self._playerlistInterval * 2):
                 mlist[client.cid] = client
             else:
-                self.info(u"%s last update is too old" % client)
+                self.info("%s last update is too old" % client)
                 client.disconnect()
         return mlist
     
@@ -1007,7 +1007,7 @@ class HomefrontParser(Parser):
         pings = {}
         clients = self.clients.getList()
         if filter_client_ids:
-             clients = filter(lambda client: client.cid in filter_client_ids, clients)
+             clients = [client for client in clients if client.cid in filter_client_ids]
 
         for c in clients:
             try:

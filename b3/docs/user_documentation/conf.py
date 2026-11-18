@@ -40,8 +40,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'BigBrotherBot'
-copyright = u'2013, B3 community'
+project = 'BigBrotherBot'
+copyright = '2013, B3 community'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -184,8 +184,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'BigBrotherBot.tex', u'BigBrotherBot Documentation',
-   u'B3 community', 'manual'),
+  ('index', 'BigBrotherBot.tex', 'BigBrotherBot Documentation',
+   'B3 community', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -214,8 +214,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'bigbrotherbot', u'BigBrotherBot Documentation',
-     [u'B3 community'], 1)
+    ('index', 'bigbrotherbot', 'BigBrotherBot Documentation',
+     ['B3 community'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -228,8 +228,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'BigBrotherBot', u'BigBrotherBot Documentation',
-   u'B3 community', 'BigBrotherBot', 'One line description of project.',
+  ('index', 'BigBrotherBot', 'BigBrotherBot Documentation',
+   'B3 community', 'BigBrotherBot', 'One line description of project.',
    'Miscellaneous'),
 ]
 

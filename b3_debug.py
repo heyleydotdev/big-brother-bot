@@ -62,8 +62,8 @@ def parse_cmdline_args():
         args, extras = parser.parse_known_args() # We parse only the special commandlines parameter here, for the rest, the normal switchs, we give them up to the rest of B3 functions (namely the main() in b3/run.py). The recognized args are stored in args var, for the rest it's stored in extras var
         extras.insert(0, sys.argv[0]) # add the path to this script file (to normalize the arguments)
         sys.argv = extras # trim out the debug vars we will process here, so that b3 can parse the arguments normally
-    except BaseException, e:
-        print('Exception: %s' % str(e))
+    except BaseException as e:
+        print(('Exception: %s' % str(e)))
         return
 
     # processing the arguments

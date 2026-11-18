@@ -70,10 +70,10 @@ else:
                          user=POSTGRESQL_TEST_USER,
                          password=POSTGRESQL_TEST_PASSWORD,
                          database='postgres')
-    except psycopg2.Error, err:
+    except psycopg2.Error as err:
         is_postgresql_ready = False
         no_postgresql_reason = "%r" % err
-    except Exception, err:
+    except Exception as err:
         is_postgresql_ready = False
         no_postgresql_reason = "%r" % err
 
@@ -102,7 +102,7 @@ class Test_PostgreSQL(B3TestCase, StorageAPITest):
             cursor.execute('DROP DATABASE IF EXISTS "%s"' % POSTGRESQL_TEST_DB)
             cursor.execute('CREATE DATABASE "%s" ENCODING \'utf8\'' % POSTGRESQL_TEST_DB)
             connection.close()
-        except psycopg2.Error, e:
+        except psycopg2.Error as e:
             self.fail("Error: %r" % e)
 
         try:
@@ -115,7 +115,7 @@ class Test_PostgreSQL(B3TestCase, StorageAPITest):
                 # dont remove the groups table since we would need it in next tests
                 tables.remove('groups')
                 self.storage.truncateTable(tables)
-        except Exception, e:
+        except Exception as e:
             self.fail("Error: %s" % e)
 
     def tearDown(self):
