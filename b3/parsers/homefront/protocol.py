@@ -97,7 +97,11 @@ class Packet(object):
         ## Message Type
         ## type: 8-bit char[]
         ## byte length : 2
-        s = self.message[0:2]
+        s = self.message[0:2].encode('ascii')
+        ## Channel
+        ## type: 8-bit byte
+        ## byte length : 1
+        s += pack('>B', self.channel)
         ## Data length
         ## type: 32-bit signed int (big-endian)
         ## byte 4
@@ -115,11 +119,11 @@ class Packet(object):
         ## Message Type
         ## type: 8-bit char[]
         ## byte length : 2
-        self.message = packet[0:2]
+        self.message = packet[0:2].decode('ascii')
         ## Message Type
         ## type: 8-bit byte
         ## byte length : 1
-        (self.channel,) = unpack('>B', packet[2])
+        (self.channel,) = unpack('>B', packet[2:3])
         ## Data length
         ## type: 32-bit signed int (big-endian)
         ## byte 4
@@ -127,8 +131,7 @@ class Packet(object):
         ## Data
         ## type: 8-bit char[N]
         ## byte length : N
-        str = packet[7:7+datalength]
-        self.data = str.decode('utf-8')
+        self.data = packet[7:7+datalength].decode('utf-8')
         
     @staticmethod
     def decodeIncomingPacketSize(packet):
@@ -156,7 +159,7 @@ class Client(asyncore.dispatcher_with_send):
         self._port = port
         self._password = password
         self.keepalive = keepalive
-        self._buffer_in = ''
+        self._buffer_in = b''
         self.authed = False
         self.server_version = None
         self.last_pong_time = self.last_ping_time = time.time()
