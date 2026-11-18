@@ -29,7 +29,6 @@ __version__ = '1.3.2'
 import os
 import b3
 import re
-import string
 import b3.parsers.cod5
 import b3.parsers.q3a.rcon
 
@@ -176,7 +175,7 @@ class Cod7Parser(b3.parsers.cod5.Cod5Parser):
             return False
 
         match, action, data, client, target = m
-        func = 'On%s' % string.capwords(action).replace(' ','')
+        func = 'On%s' % ''.join(word.capitalize() for word in action.split())
         # Timer (in seconds) that always reflects the current event's timestamp
         t = re.match(self._lineTime, line)
         if t:

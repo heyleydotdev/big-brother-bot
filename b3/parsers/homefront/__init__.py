@@ -32,7 +32,6 @@ import os
 from . import protocol
 from . import rcon
 import re
-import string
 import sys
 import time
 
@@ -230,7 +229,7 @@ class HomefrontParser(Parser):
                     return
                 match = re.search(r"^(?P<event>[A-Z ]+): (?P<data>.*)$", packet.data, re.MULTILINE | re.DOTALL)
                 if match:
-                    func = 'onServer%s' % (string.capitalize(match.group('event').replace(' ','_')))
+                    func = 'onServer%s' % (match.group('event').replace(' ','_').capitalize())
                     data = match.group('data')
                     #self.debug('DATA: %s' % data)
                     #self.debug("-==== FUNC!!: " + func)

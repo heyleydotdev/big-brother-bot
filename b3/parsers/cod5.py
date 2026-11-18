@@ -27,7 +27,6 @@ __version__ = '1.4.2'
 
 import b3.functions
 import b3.parsers.cod2
-import string
 
 from b3.events import Event
 
@@ -99,7 +98,7 @@ class Cod5Parser(b3.parsers.cod2.Cod2Parser):
             return False
 
         match, action, data, client, target = m
-        func = 'On%s' % string.capwords(action).replace(' ','')
+        func = 'On%s' % ''.join(word.capitalize() for word in action.split())
         
         if hasattr(self, func):
             func = getattr(self, func)
