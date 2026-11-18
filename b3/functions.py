@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -343,7 +342,7 @@ def soundex(s1):
 
 
 def meanstdv(x):
-    """
+    r"""
     Calculate mean and standard deviation of data x[]:
         mean = {\sum_i x_i \over n}
         std = sqrt(\sum_i (x_i - mean)^2 \over n-1)
@@ -387,7 +386,7 @@ def fuzzyGuidMatch(a, b):
         distance = levenshteinDistance(a, b)
         if distance <= 1:
             return True
-    
+
     return False
 
 def sanitizeMe(s):
@@ -512,9 +511,9 @@ def corrent_spell(c_word, wordbook):
 def prefixText(prefixes, text):
     """
     Add prefixes to a given text.
-    :param prefixes: list[basestring] the list of prefixes to preprend to the text
-    :param text: basestring the text to be prefixed
-    :return basestring
+    :param prefixes: list[str] the list of prefixes to prepend to the text
+    :param text: str the text to be prefixed
+    :return str
 
     >>> prefixText(None, None)
     ''

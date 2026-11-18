@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -122,7 +121,7 @@ class Scrambler:
 
 
 class vip_commands_mixin(object):
-    
+
     def cmd_viplist(self, data, client, cmd=None):
         """
         [filter] - display all VIPs or VIP matched by the given filter
@@ -408,7 +407,7 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
                     self._scrambler.scrambleTeams()
             else:
                 self.info(r"ignoring auto scramble as current gamemode '%s' is in the blacklist (see config option"
-                    + " 'scrambler\gamemodes_blacklist')" % self._autoscramble_gamemode_blacklist)
+                          r" 'scrambler\gamemodes_blacklist')" % self.console.game.gameType)
         self.debug('Scrambling finished, Autoassign now active')
         self._scramblingdone = True
         self.start_autobalance_cron()
@@ -1148,7 +1147,7 @@ class Poweradminbf3Plugin(Plugin, vip_commands_mixin):
         try:
             try:
                 blacklist_raw = self.config.get('scrambler', 'gamemodes_blacklist')
-                gamemodes_list = re.split('\W+', blacklist_raw)
+                gamemodes_list = re.split(r'\W+', blacklist_raw)
                 invalid_gamemodes = []
                 for gamemode in gamemodes_list:
                     if not re_valid_gamemode.match(gamemode):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -85,7 +84,7 @@ class Cod7HttpPlugin(b3.plugin.Plugin):
 
             if self._publicIp[0:1] == '~' or self._publicIp[0:1] == '/':
                 # load ip from a file
-                f = file(self.console.getAbsolutePath(self._publicIp))
+                f = open(self.console.getAbsolutePath(self._publicIp))
                 self._publicIp = f.read().strip()
                 f.close()
 
@@ -106,15 +105,15 @@ class Cod7HttpPlugin(b3.plugin.Plugin):
         else:
             # get timeout value set by gameservers.com
             try:
-                
+
                 req = urllib.request.Request(self._timeout_url)
                 req.headers['User-Agent'] = user_agent
                 f = urllib.request.urlopen(req)
                 self.timeout = int(f.readlines()[0])
                 f.close()
                 self.debug('using timeout value of %s seconds' % self.timeout)
-                
-            except (urllib.error.HTTPError, urllib.error.URLError, socket.timeout) as error: 
+
+            except (urllib.error.HTTPError, urllib.error.URLError, socket.timeout) as error:
                 self.timeout = self._default_timeout
                 self.error('ERROR: %s' % error)
                 self.error('ERROR: Couldn\'t get timeout value. Using default %s seconds' % self.timeout)
@@ -164,7 +163,7 @@ class Cod7HttpPlugin(b3.plugin.Plugin):
         # remove any blank lines
         while remotelog[-4:-2] == '\r\n':
             remotelog = remotelog[:-2]
-        
+
         # use Just a baka's lazy cursor
         self.lastlines = remotelog[-1000:]
 
@@ -284,7 +283,7 @@ class Cod7HttpPlugin(b3.plugin.Plugin):
                             output = open(self.locallog,'ab')
                             output.write(newlog)
                             output.close()
-                            self.lastlines = remotelog[-1000:]                        
+                            self.lastlines = remotelog[-1000:]
                             self.debug('downloaded %s KB and added %s char(s) to log' % (remotelogsize, len(newlog)))
 
                     else:

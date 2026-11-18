@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -206,7 +205,7 @@ class AdvPlugin(b3.plugin.Plugin):
         Save the current advertisements list.
         """
         if self._fileName:
-            f = file(self._fileName, 'w')
+            f = open(self._fileName, 'w')
             for msg in self._msg.items:
                 if msg:
                     f.write(msg + "\n")

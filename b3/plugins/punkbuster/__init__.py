@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -130,11 +129,11 @@ class PunkbusterPlugin(b3.plugin.Plugin):
         if self._remoteBansFile:
             f = io.StringIO()
         else:
-            f = file(self._bansFile, 'w')
+            f = open(self._bansFile, 'w')
 
         while not cursor.EOF:
             r = cursor.getRow()
-            if r['reason'] != '':            
+            if r['reason'] != '':
                 f.write('[%s] %s "%s" "%s" %s" ""\r\n\r\n' % (time.strftime('%m.%d.%Y %H:%M:%S',
                                                               time.localtime(int(r['time_add']))),
                                                               r['pbid'], r['name'], r['ip'], r['reason']))

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -23,6 +22,7 @@
 # ################################################################### #
 
 from unittest.mock import Mock
+import sys
 from tests.plugins.censor import CensorTestCase
 
 class Test_functional(CensorTestCase):

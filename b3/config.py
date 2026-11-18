@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -372,7 +371,7 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         """
         Save the configuration file.
         """
-        f = file(self.fileName, 'w')
+        f = open(self.fileName, 'w')
         self.write(f)
         f.close()
         return True
@@ -456,7 +455,7 @@ class MainConfig(B3ConfigParserMixin):
         except configparser.NoOptionError:
             disabled_plugins = []
         else:
-            disabled_plugins = re.split('\W+', disabled_plugins_raw.lower())
+            disabled_plugins = re.split(r'\W+', disabled_plugins_raw.lower())
 
         def get_custom_plugin_path(plugin_name):
             try:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -151,7 +150,7 @@ class Poweradminurt41Plugin(b3.plugin.Plugin):
         """
         # get the admin plugin so we can register commands
         self._adminPlugin = self.console.getPlugin('admin')
-        
+
         try:
             self._hitlocations['HL_HEAD'] = self.console.HL_HEAD
         except AttributeError as e:
@@ -806,7 +805,8 @@ class Poweradminurt41Plugin(b3.plugin.Plugin):
         self.debug('recent: %s' % str(recentcontrib))
 
         def contribcmp(a, b):
-            return cmp(recentcontrib[b.id], recentcontrib[a.id])
+            x, y = recentcontrib[b.id], recentcontrib[a.id]
+            return (x > y) - (x < y)
 
         blue = sorted(blue, key=cmp_to_key(contribcmp))
         red = sorted(red, key=cmp_to_key(contribcmp))
@@ -1503,7 +1503,7 @@ class Poweradminurt41Plugin(b3.plugin.Plugin):
             client.message("^7You don't have enough privileges to mute this player")
             return
 
-        if args[1] is not None and re.match('^([0-9]+)\s*$', args[1]):
+        if args[1] is not None and re.match(r'^([0-9]+)\s*$', args[1]):
             duration = int(args[1])
         else:
             duration = ''

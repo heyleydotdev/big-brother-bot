@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # ################################################################### #
 #                                                                     #
@@ -52,7 +51,7 @@ class DocBuilder:
     _outputType = 'html'
     _outputUrl = None
     _maxlevel = None
-    
+
     def __init__(self, console):
         """
         Object constructor.
@@ -66,7 +65,7 @@ class DocBuilder:
         self._adminPlugin = self._console.getPlugin('admin')
         if self._adminPlugin is None:
             raise Exception('AUTODOC: cannot generate documentation without the admin plugin')
-                
+
         if self._console.config.has_section('autodoc'):
             if self._console.config.has_option('autodoc', 'destination'):
                 dest = self._console.config.get('autodoc', 'destination')
@@ -78,10 +77,10 @@ class DocBuilder:
                     else:
                         # assume file
                         self._outputUrl = 'file://' + self._console.config.getpath('autodoc', 'destination')
-        
+
             if self._console.config.has_option('autodoc', 'type'):
                 self._outputType = self._console.config.get('autodoc', 'type')
-    
+
             if self._console.config.has_option('autodoc', 'maxlevel'):
                 self._maxlevel = self._console.config.getint('autodoc', 'maxlevel')
 
@@ -162,7 +161,7 @@ class DocBuilder:
         xDoc.setAttribute("time", time.asctime())
         xDoc.setAttribute("game", self._console.game.gameName)
         xDoc.setAttribute("address", self._console._publicIp + ':' + str(self._console._port))
-        
+
         xCommands = xml.createElement("b3commands")
         for cmd in self._getCommandsDict():
             xCommand = xml.createElement("b3command")
@@ -196,7 +195,7 @@ class DocBuilder:
                 </tbody>
             </table>
         """
-        
+
         def friendlyLevel(level):
             try:
                 intlevel = int(level)
@@ -220,7 +219,7 @@ class DocBuilder:
                     return level
             except:
                 return level
-        
+
         htmlCommands = ""
         for cmd in self._getCommandsDict():
             html = """<tr class="b3command">
@@ -236,7 +235,7 @@ class DocBuilder:
             cmd['maxlevel'] = friendlyLevel(cmd['maxlevel'])
             htmlCommands += html % cmd
         return text % {'commandsTablerow': htmlCommands}
-    
+
     def _getCommandsDict(self):
         if self._maxlevel is not None:
             self._console.debug('AUTODOC: get commands with level <= %s' % self._maxlevel)
@@ -247,12 +246,12 @@ class DocBuilder:
                 continue
             if self._maxlevel is not None and cmd.level[0] > self._maxlevel:
                 continue
-            
+
             #self._console.debug('AUTODOC: making command doc for %s'%cmd.command)
             tmp = {'name': cmd.prefix + cmd.command, 'alias': ""}
             if cmd.alias is not None and cmd.alias != '' :
                 tmp['alias'] = cmd.prefix + cmd.alias
-            tmp['plugin'] = re.sub('Plugin$', '', cmd.plugin.__class__.__name__) 
+            tmp['plugin'] = re.sub('Plugin$', '', cmd.plugin.__class__.__name__)
             _cmd_help = escape(cmd.help)
             if _cmd_help.startswith('-'):
                 tmp['description'] = _cmd_help[1:]
@@ -278,11 +277,11 @@ class DocBuilder:
         listCommands = list(commands.values())
         listCommands.sort(commands_compare)
         return listCommands
-    
+
     def _write(self, text):
         if text.strip() == '':
             self._console.warning('AUTODOC: nothing to write')
-            
+
         dsn = splitDSN(self._outputUrl)
         if dsn['protocol'] == 'ftp':
             self._console.debug('AUTODOC: uploading to FTP server %s' % dsn['host'])
@@ -295,7 +294,7 @@ class DocBuilder:
         elif dsn['protocol'] == 'file':
             path = getWritableFilePath(dsn['path'], True)
             self._console.debug('AUTODOC: writing to %s', path)
-            f = file(path, 'w')
+            f = open(path, 'w')
             f.write(text)
             f.close()
         else:
