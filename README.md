@@ -90,6 +90,20 @@ incidental basis. Without you B3 wouldn't be this intelligent!
 [Fenix]: https://github.com/danielepantaleone
 [Ozon]: https://github.com/ozon
 
+## Credits & Thanks
+
+B3 ran on game servers for over a decade because of these people: see
+[CREDITS.md](CREDITS.md) for the full list of developers, the vendored
+libraries and their licenses.
+
+## Derivative work
+
+This is a community continuation of Big Brother Bot, originally created by
+Michael "ThorN" Thornton and the B3 team (upstream:
+https://github.com/BigBrotherBot/big-brother-bot). It is not affiliated with or
+endorsed by the original project; the name is used descriptively.
+
 ## License
 
-GNU General Public License v2. Every source file carries the license header.
+GNU General Public License, version 2 or later (`GPL-2.0-or-later`) — the full
+text is in [LICENSE](LICENSE). Every source file carries the GPL header block.

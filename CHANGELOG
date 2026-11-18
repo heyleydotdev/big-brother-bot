@@ -38,6 +38,10 @@ Credits
 ~~~~~~~
 - See `CREDITS.md` and the README hall of fame: B3 ran on game servers for over
   a decade because of these people.
+- License made explicit: the file headers always granted GPL v2 or later and a
+  `LICENSE` file (GPL v2 text) is now shipped; the package metadata declares
+  `GPL-2.0-or-later`. The bundled netblock component is GPL v3, which the
+  "or later" grant permits.
 
 1.9.0 -> 1.9.1
 ----
