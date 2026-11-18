@@ -53,6 +53,13 @@ package (`b3/sql/`) and are also used by the test fixtures.
 
 ## Windows
 
-Windows uses the same pip/wheel packaging path as every other platform. If a
-self-contained executable is ever needed, use `cx_Freeze` 7 or `pyinstaller` in
-a separate build job — do not add it to the runtime dependency set.
+Windows uses the same pip/wheel packaging path as every other platform. The
+release workflow (`.github/workflows/release.yml`) additionally builds a
+self-contained `b3_run.exe` with PyInstaller (one directory, zipped): the
+plugins, conf, sql and docs trees are shipped as source next to the executable
+because the parser loads them from the filesystem at runtime. PyInstaller is a
+build-time tool only; it is not a runtime dependency.
+
+Known limit: the executable bundles the interpreter and the `postgresql`/`sftp`
+extras, so it is ~40 MB and cannot load extra packages installed later —
+external plugins that import a library outside that set need the pip install.

@@ -1,0 +1,110 @@
+# Build the release artifacts when a version tag is pushed.
+#
+# Assets attached to the GitHub release:
+#   - b3-<version>-py3-none-any.whl and b3-<version>.tar.gz (any platform)
+#   - b3-<version>-windows-x64.zip (self contained b3_run.exe, no python needed)
+#
+# The version in pyproject.toml must match the tag: the windows smoke test
+# fails the release when it does not.
+
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  python-dist:
+    name: wheel and sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Build
+        run: |
+          pip install build
+          python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-dist
+          path: dist/*
+
+  windows:
+    name: windows executable
+    runs-on: windows-latest
+    env:
+      VERSION: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          pip install -e ".[postgresql,sftp]" pyinstaller
+
+      - name: Build executable
+        # parsers are imported at runtime by name, so they are collected
+        # explicitly; the plugins are shipped as source next to the exe (the
+        # loader reads them from the filesystem)
+        run: |
+          pyinstaller --noconfirm --clean --onedir --name b3_run `
+            --collect-submodules b3 `
+            --collect-submodules dateutil `
+            --hidden-import feedparser `
+            --hidden-import requests `
+            --hidden-import paramiko `
+            --hidden-import psycopg `
+            b3_run.py
+
+      - name: Bundle runtime data
+        run: |
+          Copy-Item -Recurse b3/conf, b3/sql, b3/plugins, b3/extplugins, b3/docs dist/b3_run/
+          Copy-Item CHANGELOG, README.md, LICENSE, CREDITS.md -Destination dist/b3_run/
+
+      - name: Smoke test
+        run: |
+          $version = $env:VERSION -replace '^v', ''
+          $out = & ./dist/b3_run/b3_run.exe -v
+          Write-Host $out
+          if ($out -notmatch "v$([regex]::Escape($version))") {
+            throw "b3_run.exe reports '$out' but the tag is $env:VERSION (bump the version?)"
+          }
+          foreach ($dir in 'conf', 'sql', 'plugins') {
+            if (-not (Test-Path "dist/b3_run/$dir")) { throw "missing $dir in the bundle" }
+          }
+
+      - name: Package
+        run: |
+          $name = "b3-$($env:VERSION -replace '^v', '')-windows-x64.zip"
+          Compress-Archive -Path dist/b3_run -DestinationPath "dist/$name"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-dist
+          path: dist/*.zip
+
+  release:
+    name: github release
+    needs: [python-dist, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -lh dist
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "B3 $GITHUB_REF_NAME" \
+            --generate-notes
