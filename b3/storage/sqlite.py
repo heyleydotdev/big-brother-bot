@@ -24,7 +24,24 @@
 import b3
 import os
 
+from b3.querybuilder import QueryBuilder
 from b3.storage.common import DatabaseStorage
+
+
+def patch_query_builder(console):
+    """
+    SQLite does not use backslash escapes: quote with single quotes and double
+    the quotes inside the value (MySQL and PostgreSQL accept this form too).
+    """
+    def new_escape(self, word):
+        if isinstance(word, int) or isinstance(word, complex) or isinstance(word, float):
+            return str(word)
+        elif word is None:
+            return "'None'"
+        return "'%s'" % word.replace("'", "''")
+
+    console.bot('patching QueryBuilder.escape: %s -> %s' % (id(QueryBuilder.escape), id(new_escape)))
+    QueryBuilder.escape = new_escape
 
 
 class SqliteStorage(DatabaseStorage):
@@ -59,6 +76,7 @@ class SqliteStorage(DatabaseStorage):
             is_new_database = not os.path.isfile(path)
             self.db = sqlite3.connect(path, check_same_thread=False)
             self.db.isolation_level = None  # set autocommit mode
+            patch_query_builder(self.console)
         except Exception as e:
             self.db = None
             self.console.error('Database connection failed: %s', e)

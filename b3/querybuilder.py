@@ -24,6 +24,21 @@
 __author__  = 'ThorN'
 __version__ = '1.3.0'
 
+
+def mysql_escape(word):
+    """
+    Escape a value for the double-quoted string syntax used by MySQL queries.
+    Backslashes are escape characters there, so they must be doubled before the
+    quotes (otherwise a trailing backslash eats the closing quote).
+    """
+    if isinstance(word, int) or isinstance(word, complex) or isinstance(word, float):
+        return str(word)
+    elif word is None:
+        return '"None"'
+    else:
+        return '"%s"' % word.replace('\\', '\\\\').replace('"', '\\"')
+
+
 class QueryBuilder(object):
 
     def __init__(self, db=None):
@@ -35,15 +50,11 @@ class QueryBuilder(object):
 
     def escape(self, word):
         """
-        Escape quotes from a given string.
+        Escape quotes from a given string (MySQL string syntax; the sqlite and
+        postgresql storages patch this method with their own quoting).
         :param word: The string on which to perform the escape
         """
-        if isinstance(word, int) or isinstance(word, int) or isinstance(word, complex) or isinstance(word, float):
-            return str(word)
-        elif word is None:
-            return '"None"'
-        else:
-            return '"%s"' % word.replace('"', '\\"')
+        return mysql_escape(word)
 
     def quoteArgs(self, args):
         """
