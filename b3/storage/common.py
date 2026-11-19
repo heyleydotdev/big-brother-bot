@@ -105,13 +105,17 @@ class DatabaseStorage(Storage):
     def getCounts(self):
         """
         Return a dictionary containing the number of clients, Bans, Kicks, Warnings and Tempbans.
+        Only penalties that are still in force are counted.
         """
         counts = {'clients': 0, 'Bans': 0, 'Kicks': 0, 'Warnings': 0, 'TempBans': 0}
         cursor = self.query("""SELECT COUNT(id) total FROM clients""")
         if cursor.rowcount:
             counts['clients'] = int(cursor.getValue('total'))
+        cursor.close()
 
-        cursor = self.query("""SELECT COUNT(id) total, type FROM penalties GROUP BY type""")
+        cursor = self.query("""SELECT COUNT(id) total, type FROM penalties
+                               WHERE inactive = 0 AND (time_expire = -1 OR time_expire > %s)
+                               GROUP BY type""" % int(time()))
         while not cursor.EOF:
             r = cursor.getRow()
             counts[r['type'] + 's'] = int(r['total'])
