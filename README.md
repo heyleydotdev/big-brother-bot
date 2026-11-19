@@ -2,10 +2,11 @@
 
 **********
 
-**B3 2.0 runs on Python 3.11+.** This branch is the Python 3 continuation of the
-project: the Python 2 code base was ported to a single Python 3 code base, the
-dependency stack was brought to maintained releases, and the test suite runs on
-Python 3.11, 3.12 and 3.13.
+> [!IMPORTANT]
+> **B3 2.0 runs on Python 3.11+.** This is the Python 3 continuation of the
+> project: the Python 2 code base was ported to a single Python 3 code base,
+> the dependency stack was brought to maintained releases, and the test suite
+> runs on Python 3.11, 3.12 and 3.13.
 
 Big Brother Bot (B3) is a complete and total server administration package for online games. It is the prefered ingame
 RCON Tool currently available. B3 is designed primarily to keep your server free from the derelicts of online gaming,
@@ -54,12 +55,6 @@ b3_run --help             # all options
 ```
 
 `b3_debug.py` provides the profiling entry points (`--memory*`, `--profile*`).
-
-## Links
-
-* [Documentation](https://github.com/BigBrotherBot/big-brother-bot/wiki)
-* [Bug tracker](https://github.com/BigBrotherBot/big-brother-bot/issues)
-* [Master server](http://master.bigbrotherbot.net/)
 
 ## Development
 
