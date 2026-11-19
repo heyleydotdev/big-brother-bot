@@ -1,3 +1,16 @@
+2.1.2 -> 2.2.0
+----
+
+Removals, nothing else changes:
+
+- the startup update check and its `[update]` config section: it queried a
+  server that no longer exists, over plain HTTP. `B3version` stays, plugins use
+  it for `requiresVersion`.
+- the memory profiler and the `b3_debug --memory*` flags: they imported
+  `guppy`, a python 2 only package, so every flag failed with `NameError`.
+- the unused `silent` parameter of `Storage.queryFromFile`.
+- the dead `--console` argument from `scripts/b3.sh`.
+
 2.1.1 -> 2.1.2
 ----
 
