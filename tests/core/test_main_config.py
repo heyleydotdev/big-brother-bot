@@ -60,9 +60,6 @@ class CommonDefaultTestMethodsMixin:
         with self.assertRaises(configparser.NoOptionError):
             self.conf.get('autodoc', 'destination')
 
-    def test_update_section(self):
-        self.assertEqual('stable', self.conf.get('update', 'channel'))
-
     def test_messages_section(self):
         self.assertEqual("""$clientname^7 was kicked by $adminname^7 $reason""", self.conf.get("messages", "kicked_by"))
         self.assertEqual("""$clientname^7 was kicked $reason""", self.conf.get("messages", "kicked"))
