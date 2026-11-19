@@ -94,6 +94,17 @@ class Test_handleEvents(unittest.TestCase):
         self.assertEqual('hello', received[0].data)
         self.assertFalse(thread.is_alive())
 
+    def test_queue_event_does_not_artificially_delay(self):
+        # queueEvent used to sleep 1ms per event: a busy server lost commands
+        self.parser.queue = queue.Queue(1000)
+        event = self.parser.getEvent('EVT_CLIENT_SAY', 'hello')
+
+        started = time.perf_counter()
+        for _ in range(100):
+            self.parser.queueEvent(event)
+
+        self.assertLess(time.perf_counter() - started, 0.05)
+
 
 class Test_getMessage(unittest.TestCase):
 

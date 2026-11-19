@@ -58,6 +58,7 @@ from b3.exceptions import MissingRequirement
 from b3.functions import getModule
 from b3.functions import vars2printf
 from b3.functions import main_is_frozen
+from b3.functions import redact
 from b3.functions import splitDSN
 from b3.functions import right_cut
 from b3.functions import topological_sort
@@ -438,9 +439,9 @@ class Parser(object):
         try:
             queuesize = self.config.getint('b3', 'event_queue_size')
         except NoOptionError:
-            queuesize = 50
+            queuesize = 500
         except ValueError as err:
-            queuesize = 50
+            queuesize = 500
             self.warning(err)
 
         self.debug("Creating the event queue with size %s", queuesize)
@@ -1232,7 +1233,6 @@ class Parser(object):
         elif event.type in self._handlers:  # queue only if there are handlers to listen for this event
             self.verbose('Queueing event %s : %s', self.getEventName(event.type), event.data)
             try:
-                time.sleep(0.001)  # wait a bit so event doesnt get jumbled
                 self.queue.put((self.time(), self.time() + expire, event), True, 2)
                 return True
             except queue.Full:
@@ -1266,7 +1266,6 @@ class Parser(object):
                     timer_plugin_begin = time.perf_counter()
                     try:
                         hfunc.parseEvent(event)
-                        time.sleep(0.001)
                     except b3.events.VetoEvent:
                         # plugin called for event hault, do not continue processing
                         self.bot('Event %s vetoed by %s', event_name, str(hfunc))
