@@ -1,3 +1,16 @@
+Unreleased
+----
+
+- `!login` / `!setpassword` masking follows the configured command prefixes.
+- `!setpassword` accepts a quoted password so it can contain spaces.
+- CoD4x `!unban` no longer sends an empty guid to the server.
+- `nickreg` compares nicknames exactly; `%` and `_` in a name are no longer
+  LIKE wildcards that match other players.
+- the scheduler logs a warning instead of raising when a task names an
+  unknown plugin.
+- the auto-restart command is built as an argument list, so install paths
+  with spaces work.
+
 2.1.0 -> 2.1.1
 ----
 
