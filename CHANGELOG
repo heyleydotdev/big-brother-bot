@@ -1,3 +1,10 @@
+Unreleased
+----
+
+- New CoD4x parser (`b3/parsers/cod4x.py`): parses the CoD4x `status` output
+  (64 bit ids), uses the CoD4x `permban` / `tempban` / `unban <guid>` commands
+  and keeps the standard cod parser initialisation.
+
 2.0.0 -> 2.0.1
 ----
 

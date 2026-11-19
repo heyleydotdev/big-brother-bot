@@ -20,7 +20,7 @@ Game servers supported:
 - Arma II / Arma III
 - Battlefield 3 / Battlefield 4 / Battlefield Hardline / Battlefield Bad Company 2
 - Chivalry Medieval Warfare
-- Call of Duty 1 / 2 / 4 (iw3) / 4 GameRanger / 5 / 6 (iw5) / 7 (t6) / 8 (iw5)
+- Call of Duty 1 / 2 / 4 (iw3) / 4x / 4 GameRanger / 5 / 6 (iw5) / 7 (t6) / 8 (iw5)
 - Counter-Strike: Global Offensive
 - Enemy Territory / Enemy Territory Pro
 - Insurgency
