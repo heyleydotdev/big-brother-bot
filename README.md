@@ -54,7 +54,7 @@ b3_run -c b3.ini          # start B3 with the given main config
 b3_run --help             # all options
 ```
 
-`b3_debug.py` provides the profiling entry points (`--memory*`, `--profile*`).
+`b3_debug.py` provides the profiling entry points (`--profile*`).
 
 ## Development
 

@@ -31,7 +31,6 @@ import argparse
 
 from b3_run import *
 from b3.tools.debug.functionprofiler import *
-from b3.tools.debug.memoryprofiler import *
 
 
 def parse_cmdline_args():
@@ -43,11 +42,6 @@ def parse_cmdline_args():
     parser = argparse.ArgumentParser(conflict_handler='resolve', add_help=False, usage='%(prog)s [debugoptions]', description='B3 DEBUG MODE: Switch to some special debug functionnalities.', epilog='Note: for the profile to be saved, you need to wait the end of the runtime that the profile ends by itself (do not close b3 !)')
     #parser.add_argument('--help', '-h', dest='help', action='store_true', default=False, help='show this help message and exit')
     parser.add_argument('--debughelp', '-debughelp', '--debug', '-debug', dest='debughelp', action='store_true', default=False, help='show this help message and exit')
-    parser.add_argument('--memory', '-m', dest='memory', action='store_true', default=False, help='activate the memory monitor')
-    parser.add_argument('--memorysave', '-msave', dest='memorysave', action='store', default=None, type=str, metavar='/dir/memory.profile', help='store the memory profile to the specified file')
-    parser.add_argument('--memoryload', '-mload', dest='memoryload', action='store', default=None, type=str, metavar='/dir/memory.profile', help='load a memory profile from the specified file')
-    parser.add_argument('--memorydraw', '-mdraw', dest='memorydraw', action='store_true', default=False, help='draw an interactive GUI chart for the loaded memory profile')
-    parser.add_argument('--memoryinteractive', '-mi', dest='memoryinteractive', action='store_true', default=False, help='draw an interactive console terminal _while_ the application is running')
     parser.add_argument('--profile', '-p', dest='profile', action='store_true', default=False, help='activate the functions profiler')
     parser.add_argument('--profilesave', '-psave', dest='profilesave', action='store', default=None, type=str, metavar='/dir/some.profile', help='store the generated profile to the specified file')
     parser.add_argument('--profileload', '-pload', dest='profileload', action='store', default=None, type=str, metavar='/dir/some.profile', help='load a profile from the specified file')
@@ -70,18 +64,6 @@ def parse_cmdline_args():
     if args.debughelp: # debug help message
         parser.print_help()
         return False
-
-    # profiling functionnalities
-    if args.memory:
-            print('MEMORY PROFILER MODE\n--------------------\n')
-            if args.memorysave:
-                    runmemoryprofile(args.memorysave)
-            if args.memoryload:
-                    if args.memorydraw:
-                            memorygui(args.memoryload)
-            if args.memoryinteractive:
-                    memoryinteractive()
-            cancontinue = False
 
     # profiling functionnalities
     if args.profile:
