@@ -401,7 +401,7 @@ class AbstractParser(b3.parser.Parser):
 
     def start_sayqueue_worker(self):
         self.sayqueuelistener = threading.Thread(target=self.sayqueuelistener_worker, name="sayqueuelistener")
-        self.sayqueuelistener.setDaemon(True)
+        self.sayqueuelistener.daemon = True
         self.sayqueuelistener.start()
 
     def wait_for_threads(self):
@@ -1772,7 +1772,7 @@ def patch_b3_clients():
             # create a thread that executes the worker and pushes out the queue
             if not hasattr(self, 'messagehandler') or not self.messagehandler.is_alive():
                 self.messagehandler = threading.Thread(target=self.messagequeueworker, name="%s_messagehandler" % self)
-                self.messagehandler.setDaemon(True)
+                self.messagehandler.daemon = True
                 self.messagehandler.start()
             else:
                 self.console.verbose('messagehandler for %s isAlive' %self.name)

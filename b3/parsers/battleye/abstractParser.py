@@ -436,7 +436,7 @@ class AbstractParser(b3.parser.Parser):
 
     def start_sayqueue_worker(self):
         self.sayqueuelistener = threading.Thread(target=self.sayqueuelistener_worker)
-        self.sayqueuelistener.setDaemon(True)
+        self.sayqueuelistener.daemon = True
         self.sayqueuelistener.start()
 
     def getCommand(self, cmd, **kwargs):

@@ -130,7 +130,7 @@ class Bfbc2Parser(AbstractParser):
         AbstractParser.startup(self)
 
         self.saybigqueuelistener = threading.Thread(target=self.saybigqueuelistenerworker)
-        self.saybigqueuelistener.setDaemon(True)
+        self.saybigqueuelistener.daemon = True
         self.saybigqueuelistener.start()
 
         # add BFBC2 specific commands
@@ -557,7 +557,7 @@ def frostbiteClientMessageBigMethod(self, msg):
         # create a thread that executes the worker and pushes out the queue
         if not hasattr(self, 'messagebighandler') or not self.messagebighandler.is_alive():
             self.messagebighandler = threading.Thread(target=self.messagebigqueueworker)
-            self.messagebighandler.setDaemon(True)
+            self.messagebighandler.daemon = True
             self.messagebighandler.start()
         else:
             self.console.verbose('messagebighandler for %s isAlive' %self.name)

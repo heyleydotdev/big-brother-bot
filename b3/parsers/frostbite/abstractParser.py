@@ -132,7 +132,7 @@ class AbstractParser(b3.parser.Parser):
             #self.PunkBuster = Bfbc2PunkBuster(self)
 
         self.sayqueuelistener = threading.Thread(target=self.sayqueuelistenerworker)
-        self.sayqueuelistener.setDaemon(True)
+        self.sayqueuelistener.daemon = True
         self.sayqueuelistener.start()
 
     def run(self):
@@ -1110,7 +1110,7 @@ def patch_b3_clients():
             # create a thread that executes the worker and pushes out the queue
             if not hasattr(self, 'messagehandler') or not self.messagehandler.is_alive():
                 self.messagehandler = threading.Thread(target=self.messagequeueworker)
-                self.messagehandler.setDaemon(True)
+                self.messagehandler.daemon = True
                 self.messagehandler.start()
             else:
                 self.console.verbose('messagehandler for %s isAlive' %self.name)

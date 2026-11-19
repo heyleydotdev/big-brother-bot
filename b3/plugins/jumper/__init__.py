@@ -569,7 +569,7 @@ class JumperPlugin(b3.plugin.Plugin):
 
         # welcome the clients on the new level
         thread = Timer(30.0, self.welcomeClients, (event.data['new'].lower(),))
-        thread.setDaemon(True)
+        thread.daemon = True
         thread.start()
 
     ####################################################################################################################

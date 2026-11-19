@@ -109,5 +109,5 @@ class Bf3TestCase(unittest.TestCase):
     def tearDown(self):
         self.console.working = False
         self.console.wait_for_threads()
-        sys.stdout.write("\tactive threads count : %s " % threading.activeCount())
+        sys.stdout.write("\tactive threads count : %s " % threading.active_count())
 #        sys.stderr.write("%s\n" % threading.enumerate())

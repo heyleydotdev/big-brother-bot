@@ -145,7 +145,7 @@ class BattleyeServer(Thread):
         self.write_thread = None
 
         self.server_thread = Thread(target=self.polling_thread, name="BE_polling")
-        self.server_thread.setDaemon(True)
+        self.server_thread.daemon = True
         self.server_thread.start()
         time.sleep(.5)
 
@@ -210,11 +210,11 @@ class BattleyeServer(Thread):
         self._isconnected = self.login()
         if self._isconnected:
             self.read_thread = Thread(target=self.reading_thread, name="BE_read")
-            self.read_thread.setDaemon(True)
+            self.read_thread.daemon = True
             self.read_thread.start()
 
             self.write_thread = Thread(target=self.writing_thread, name="BE_write")
-            self.write_thread.setDaemon(True)
+            self.write_thread.daemon = True
             self.write_thread.start()
 
         while self._isconnected and not self.isStopped():
