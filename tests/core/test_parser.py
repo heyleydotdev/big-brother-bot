@@ -26,6 +26,7 @@ import queue
 import threading
 import time
 import unittest
+from unittest.mock import patch
 from b3.clients import Client
 from b3.events import EventsStats, eventManager
 from b3.parser import Parser
@@ -96,16 +97,16 @@ class Test_handleEvents(unittest.TestCase):
         self.assertEqual('hello', received[0].data)
         self.assertFalse(thread.is_alive())
 
-    def test_queue_event_does_not_artificially_delay(self):
+    def test_queue_event_does_not_sleep(self):
         # queueEvent used to sleep 1ms per event: a busy server lost commands
         self.parser.queue = queue.Queue(1000)
         event = self.parser.getEvent('EVT_CLIENT_SAY', 'hello')
 
-        started = time.perf_counter()
-        for _ in range(100):
-            self.parser.queueEvent(event)
+        with patch('b3.parser.time.sleep') as sleep_mock:
+            for _ in range(100):
+                self.parser.queueEvent(event)
 
-        self.assertLess(time.perf_counter() - started, 0.05)
+        self.assertListEqual([], sleep_mock.mock_calls)
 
 
 class Test_getMessage(unittest.TestCase):
