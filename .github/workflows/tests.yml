@@ -70,9 +70,20 @@ jobs:
           pip install -e ".[postgresql,test]"
 
       - name: Run tests
+        shell: bash
         run: |
+          # failed test names are published as check-run annotations: the job log
+          # needs API authentication, the annotations do not
+          set +e
           if [ "${{ matrix.python-version }}" = "3.11" ]; then
-            pytest --cov=b3
+            pytest --cov=b3 2>&1 | tee pytest.log
           else
-            pytest
+            pytest 2>&1 | tee pytest.log
           fi
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            grep -E '^(FAILED|ERROR) ' pytest.log | head -20 | while IFS= read -r line; do
+              echo "::error title=pytest::$line"
+            done
+          fi
+          exit "$status"
