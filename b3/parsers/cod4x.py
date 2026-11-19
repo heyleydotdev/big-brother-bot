@@ -115,6 +115,11 @@ class Cod4XParser(b3.parsers.cod4.Cod4Parser):
         :param admin: The admin who unbanned this client
         :param silent: Whether or not to announce this unban
         """
+        if not client.guid:
+            if admin:
+                admin.message('%s ^7has no guid: cannot unban' % client.exactName)
+            return
+
         result = self.write(self.getCommand('unban', guid=client.guid))
 
         if admin:

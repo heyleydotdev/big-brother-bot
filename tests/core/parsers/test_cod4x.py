@@ -113,3 +113,9 @@ class Test_commands(Cod4XTestCase):
         self.assertEqual('mp_crash', self.console.game.mapName)
         # then the server is switched to 64 bit ids
         self.assertIn(call('sv_usesteam64id  1', maxRetries=3), self.console.write.mock_calls)
+
+    def test_unban_without_guid_does_nothing(self):
+        admin = Mock()
+        self.console.unban(Client(guid=''), admin=admin)
+        self.assertNotIn(call('unban '), self.console.write.mock_calls)
+        self.assertTrue(admin.message.called)
