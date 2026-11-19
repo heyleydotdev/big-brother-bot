@@ -561,11 +561,17 @@ class AdminPlugin(b3.plugin.Plugin):
         if event.target and event.client.id == event.target.id:
             self.OnSay(event, True)
 
+    def _redact(self, text):
+        """Mask credentials in a log line, with the configured command prefixes."""
+        prefixes = ''.join(p for p in (self.cmdPrefix, self.cmdPrefixLoud,
+                                       self.cmdPrefixBig, self.cmdPrefixPrivate) if p)
+        return functions.redact(text, prefixes)
+
     def OnSay(self, event, private=False):
         """
         Handle EVT_CLIENT_SAY
         """
-        self.debug('OnSay handle %s:"%s"', event.type, functions.redact(event.data))
+        self.debug('OnSay handle %s:"%s"', event.type, self._redact(event.data))
 
         if len(event.data) >= 3 and event.data[:1] == '#':
             if self.console.debug:
@@ -649,7 +655,7 @@ class AdminPlugin(b3.plugin.Plugin):
                 self.console.say(functions.confirm(event.client))
                 return
             else:
-                self.debug('handle command %s' % functions.redact(event.data))
+                self.debug('handle command %s' % self._redact(event.data))
 
             if event.data[1:2] in (self.cmdPrefix, self.cmdPrefixLoud, self.cmdPrefixBig, self.cmdPrefixPrivate):
                 # self.is the alias for say

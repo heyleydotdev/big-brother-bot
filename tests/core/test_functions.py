@@ -270,3 +270,6 @@ class Test_redact(unittest.TestCase):
     def test_non_string(self):
         data = {'reason': 'x'}
         self.assertIs(data, redact(data))
+
+    def test_custom_prefix(self):
+        self.assertEqual('?login ***', redact('?login secret', '?'))

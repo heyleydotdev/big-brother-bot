@@ -1175,7 +1175,7 @@ class Parser(object):
                                 self.logTime += log_time_current - log_time_last
                                 log_time_last = log_time_current
 
-                            self.console(redact(line))
+                            self.console(self._redact(line))
 
                             try:
                                 self.parseLine(line)
@@ -1231,7 +1231,7 @@ class Parser(object):
         if not hasattr(event, 'type'):
             return False
         elif event.type in self._handlers:  # queue only if there are handlers to listen for this event
-            self.verbose('Queueing event %s : %s', self.getEventName(event.type), redact(event.data))
+            self.verbose('Queueing event %s : %s', self.getEventName(event.type), self._redact(event.data))
             try:
                 self.queue.put((self.time(), self.time() + expire, event), True, 2)
                 return True
@@ -1294,6 +1294,18 @@ class Parser(object):
             finally:
                 elapsed = time.perf_counter() - timer_plugin_begin
                 self._eventsStats.add_event_handled(hfunc.__class__.__name__, event_name, elapsed * 1000)
+
+    def _redact(self, text):
+        """
+        Mask credentials in a log line, with the command prefixes the admin
+        plugin was configured with (they are user configurable).
+        """
+        admin = getattr(self, '_plugins', {}).get('admin')
+        if admin:
+            prefixes = ''.join(p for p in (admin.cmdPrefix, admin.cmdPrefixLoud,
+                                           admin.cmdPrefixBig, admin.cmdPrefixPrivate) if p)
+            return redact(text, prefixes)
+        return redact(text)
 
     def write(self, msg, maxRetries=None, socketTimeout=None):
         """
