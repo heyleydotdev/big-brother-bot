@@ -205,7 +205,7 @@ class AdvPlugin(b3.plugin.Plugin):
         Save the current advertisements list.
         """
         if self._fileName:
-            f = open(self._fileName, 'w', encoding='utf-8')
+            f = open(self._fileName, 'w', encoding='utf-8', errors='surrogateescape')
             for msg in self._msg.items:
                 if msg:
                     f.write(msg + "\n")
@@ -222,7 +222,7 @@ class AdvPlugin(b3.plugin.Plugin):
             self.error('advertisement file %s does not exist', filename)
             return
 
-        with open(filename, 'r', encoding='utf-8', errors='replace') as f:
+        with open(filename, 'r', encoding='utf-8', errors='surrogateescape') as f:
             self.load(f.readlines())
 
     def load_from_config(self):

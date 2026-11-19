@@ -253,7 +253,7 @@ class XmlConfigParser(B3ConfigParserMixin):
         if not os.path.isfile(filename):
             raise ConfigFileNotFound(filename)
 
-        f = open(filename, 'r', encoding='utf-8', errors='replace')
+        f = open(filename, 'r', encoding='utf-8', errors='surrogateescape')
         self.readfp(f)
         f.close()
 
@@ -338,7 +338,7 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         """
         Load a configuration file.
         """
-        f = open(filename, 'r', encoding='utf-8', errors='replace')
+        f = open(filename, 'r', encoding='utf-8', errors='surrogateescape')
         self.readfp(f)
         f.close()
         self.fileName = filename
@@ -371,7 +371,7 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         """
         Save the configuration file.
         """
-        f = open(self.fileName, 'w', encoding='utf-8')
+        f = open(self.fileName, 'w', encoding='utf-8', errors='surrogateescape')
         self.write(f)
         f.close()
         return True

@@ -253,3 +253,13 @@ class Test_config_file_encoding(unittest.TestCase):
         conf = XmlConfigParser()
         conf.load(self.path)
         self.assertEqual('Ünknown', conf.get('b3', 'bot_name'))
+
+    def test_legacy_bytes_survive_a_save(self):
+        # a cp1252 config loaded and saved again keeps its original bytes
+        with open(self.path, 'wb') as f:
+            f.write(b'[b3]\nbot_name: Caf\xe9\n')
+        conf = CfgConfigParser()
+        conf.load(self.path)
+        conf.save()
+        with open(self.path, 'rb') as f:
+            self.assertIn(b'Caf\xe9', f.read())
