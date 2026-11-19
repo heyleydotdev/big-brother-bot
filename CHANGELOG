@@ -1,3 +1,21 @@
+2.1.0 -> 2.1.1
+----
+
+Fixes and hardening from the post-release audit.
+
+- Plugins no longer swallow `TypeError` from their handlers: the dispatcher
+  logs every handler exception with a traceback.
+- Config files (and the adv/insurgency text files) are read and written as
+  UTF-8 instead of the machine locale encoding, which mangled non-ASCII on
+  Windows.
+- SQL string escaping is correct per backend: MySQL values containing a
+  backslash no longer break the query, SQLite uses doubled single quotes.
+- `!login` / `!setpassword` arguments are masked in the B3 log.
+- The event path no longer sleeps 1 ms per event and per handler, and the
+  event queue holds 500 events instead of 50.
+- Idle network loops (frostbite2, chiv, frontline) no longer spin a CPU core:
+  write interest is registered only when a channel has buffered output.
+
 2.0.1 -> 2.1.0
 ----
 
