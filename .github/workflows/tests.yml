@@ -71,6 +71,8 @@ jobs:
 
       - name: Run tests
         shell: bash
+        env:
+          PYTHONFAULTHANDLER: '1'
         run: |
           # failed test names are published as check-run annotations: the job log
           # needs API authentication, the annotations do not
@@ -85,5 +87,14 @@ jobs:
             grep -E '^(FAILED|ERROR) ' pytest.log | head -20 | while IFS= read -r line; do
               echo "::error title=pytest::$line"
             done
+            # a worker crash or a fatal error does not print FAILED lines
+            if ! grep -qE '^(FAILED|ERROR) ' pytest.log; then
+              grep -nE 'Fatal Python error|INTERNALERROR|node down|worker .* crashed' pytest.log | head -10 | while IFS= read -r line; do
+                echo "::error title=pytest crash::$line"
+              done
+              tail -15 pytest.log | while IFS= read -r line; do
+                echo "::error title=pytest tail::$line"
+              done
+            fi
           fi
           exit "$status"
