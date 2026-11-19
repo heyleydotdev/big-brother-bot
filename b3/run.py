@@ -40,29 +40,35 @@ from time import sleep
 modulePath = pkg_handler.resource_directory(__name__)
 
 
-def run_autorestart(args=None):
+def _autorestart_command(args=None):
     """
-    Run B3 in auto-restart mode.
+    Build the command used to restart B3. A list, so paths with spaces work.
     """
-    restart_num = 0
-
     if main_is_frozen():
         # if we are running the frozen application we do not
         # need to run any script, just the executable itself
-        script = ''
+        script = None
     else:
         # if we are running from sources, then sys.executable is set to `python`
         script = os.path.join(modulePath[:-3], 'b3_run.py')
         if not os.path.isfile(script):
             # must be running from the wheel, so there is no b3_run
             script = os.path.join(modulePath[:-3], 'b3', 'run.py')
-        if os.path.isfile(script + 'c'):
-            script += 'c'
 
-    if args:
-        script = '%s %s %s --autorestart' % (sys.executable, script, ' '.join(args))
-    else:
-        script = '%s %s --autorestart' % (sys.executable, script)
+    command = [sys.executable]
+    if script:
+        command.append(script)
+    command.extend(args or [])
+    command.append('--autorestart')
+    return command
+
+
+def run_autorestart(args=None):
+    """
+    Run B3 in auto-restart mode.
+    """
+    restart_num = 0
+    command = _autorestart_command(args)
 
     while True:
 
@@ -73,7 +79,7 @@ def run_autorestart(args=None):
             except ImportError:
                 import subprocess
 
-            status = subprocess.call(script, shell=True)
+            status = subprocess.call(command)
 
             sys.stdout.write('Exited with status: %s ... ' % status)
             sys.stdout.flush()
