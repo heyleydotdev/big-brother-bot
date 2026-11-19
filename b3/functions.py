@@ -396,6 +396,20 @@ def sanitizeMe(s):
     return re.sub(r'[\x00-\x1F]|[\x7F-\xff]', '?', s) if s else ''
 
 
+_CREDENTIAL_COMMAND = re.compile(r'(?i)(^|[\s:])([!@&./])(login|setpassword)\b.*$')
+
+
+def redact(text):
+    """
+    Mask the arguments of the login and setpassword commands in a log line so
+    passwords typed in chat do not end up in the B3 log. The command must carry
+    one of the usual prefixes, so prose mentioning "login" is left alone.
+    """
+    if not isinstance(text, str):
+        return text
+    return _CREDENTIAL_COMMAND.sub(r'\1\2\3 ***', text)
+
+
 def getStuffSoundingLike(stuff, expected_stuff):
     """
     Found matching stuff for the given expected_stuff list.

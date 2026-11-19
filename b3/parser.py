@@ -1175,7 +1175,7 @@ class Parser(object):
                                 self.logTime += log_time_current - log_time_last
                                 log_time_last = log_time_current
 
-                            self.console(line)
+                            self.console(redact(line))
 
                             try:
                                 self.parseLine(line)
@@ -1231,7 +1231,7 @@ class Parser(object):
         if not hasattr(event, 'type'):
             return False
         elif event.type in self._handlers:  # queue only if there are handlers to listen for this event
-            self.verbose('Queueing event %s : %s', self.getEventName(event.type), event.data)
+            self.verbose('Queueing event %s : %s', self.getEventName(event.type), redact(event.data))
             try:
                 self.queue.put((self.time(), self.time() + expire, event), True, 2)
                 return True

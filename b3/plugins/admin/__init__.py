@@ -565,7 +565,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         Handle EVT_CLIENT_SAY
         """
-        self.debug('OnSay handle %s:"%s"', event.type, event.data)
+        self.debug('OnSay handle %s:"%s"', event.type, functions.redact(event.data))
 
         if len(event.data) >= 3 and event.data[:1] == '#':
             if self.console.debug:
@@ -649,7 +649,7 @@ class AdminPlugin(b3.plugin.Plugin):
                 self.console.say(functions.confirm(event.client))
                 return
             else:
-                self.debug('handle command %s' % event.data)
+                self.debug('handle command %s' % functions.redact(event.data))
 
             if event.data[1:2] in (self.cmdPrefix, self.cmdPrefixLoud, self.cmdPrefixBig, self.cmdPrefixPrivate):
                 # self.is the alias for say

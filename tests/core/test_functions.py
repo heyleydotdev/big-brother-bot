@@ -22,6 +22,7 @@
 # ################################################################### #
 
 from b3 import functions
+from b3.functions import redact
 import unittest
 
 class TestSplitDSN(unittest.TestCase):
@@ -245,3 +246,27 @@ class Test_topologicalSort(unittest.TestCase):
                     ('myplugin5', {'myplugin1', 'myplugin3', 'myplugin4'})]
         sorted_list = [x for x in functions.topological_sort(dep_list)]
         self.assertListEqual(sorted_list, ['myplugin3', 'myplugin1', 'myplugin2', 'myplugin4', 'myplugin5'])
+
+
+class Test_redact(unittest.TestCase):
+    """login payloads must not reach the B3 log"""
+
+    def test_login(self):
+        self.assertEqual('!login ***', redact('!login secret'))
+
+    def test_login_with_spaces(self):
+        self.assertEqual('say: 2 Joe: !login ***', redact('say: 2 Joe: !login my secret pass'))
+
+    def test_setpassword(self):
+        self.assertEqual('@setpassword ***', redact('@setpassword newpass Joe'))
+
+    def test_tell(self):
+        self.assertEqual('saytell: 2 Joe: /tell 5 !login ***', redact('saytell: 2 Joe: /tell 5 !login secret'))
+
+    def test_unrelated_text(self):
+        text = 'the login system is broken'
+        self.assertEqual(text, redact(text))
+
+    def test_non_string(self):
+        data = {'reason': 'x'}
+        self.assertIs(data, redact(data))
