@@ -134,3 +134,15 @@ class Test_commands(NickregTestCase):
         self.p.check_client_for_nick_steal(self.guest)
         # THEN it must not be treated as someone else's nickname
         self.assertListEqual([], self.guest.message_history)
+
+    def test_nick_with_a_quote(self):
+        # GIVEN
+        self.admin.name = "O'Neil"
+        self.admin.clearMessageHistory()
+        # WHEN
+        self.admin.says('!registernick')
+        # THEN
+        self.assertListEqual(['Your nick is now registered'], self.admin.message_history)
+        cursor = self.console.storage.query("SELECT name FROM nicks")
+        self.assertEqual("o'neil", cursor.getValue('name'))
+        cursor.close()

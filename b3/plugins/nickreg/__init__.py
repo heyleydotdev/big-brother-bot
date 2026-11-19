@@ -33,6 +33,7 @@ import os
 import _thread
 
 from b3.functions import clamp
+from b3.querybuilder import QueryBuilder
 
 class NickregPlugin(b3.plugin.Plugin):
 
@@ -140,11 +141,15 @@ class NickregPlugin(b3.plugin.Plugin):
 
     def _process_name(self, name):
         """
-        Normalize the given name by removing color codes, leading/trailing spaces,
-        escaping single quotes and making it lowercase.
+        Normalize the given name by removing color codes, leading/trailing spaces
+        and making it lowercase.
         :param name: the name to normalize
         """
-        return b3.functions.escape(self.console.stripColors(name).lower(), "'")
+        return self.console.stripColors(name).lower().strip()
+
+    def _escaped_name(self, name):
+        """The normalized name as a SQL literal for the configured storage."""
+        return QueryBuilder(self.console.storage.db).escape(self._process_name(name))
 
     def warn_client_for_nick_steal(self, client):
         """
@@ -161,7 +166,7 @@ class NickregPlugin(b3.plugin.Plugin):
         if client and client.id and client.pbid not in ('WORLD', 'Server'):
 
             self.debug('checking if client @%s is using a registered nickname (%s)', client.id, client.name)
-            cursor = self.console.storage.query("""SELECT * FROM nicks WHERE name = '%s'""" % self._process_name(client.name))
+            cursor = self.console.storage.query("""SELECT * FROM nicks WHERE name = %s""" % self._escaped_name(client.name))
             if cursor.EOF:
                 self.debug('nickname "%s" does not seem to be registered: client @%s is legit', client.name, client.id)
             else:
@@ -214,7 +219,7 @@ class NickregPlugin(b3.plugin.Plugin):
         """
         - register current name as yours
         """
-        cursor = self.console.storage.query("""SELECT * FROM nicks WHERE name = '%s'""" % self._process_name(client.name))
+        cursor = self.console.storage.query("""SELECT * FROM nicks WHERE name = %s""" % self._escaped_name(client.name))
         if not cursor.EOF:
             client.message('^7Nick ^1%s ^7is already registered' % client.name)
             cursor.close()
@@ -229,7 +234,7 @@ class NickregPlugin(b3.plugin.Plugin):
             return
 
         cursor.close()
-        self.console.storage.query("""INSERT INTO nicks (client_id, name) VALUES ('%s', '%s')""" % (client.id, self._process_name(client.name)))
+        self.console.storage.query("""INSERT INTO nicks (client_id, name) VALUES (%s, %s)""" % (client.id, self._escaped_name(client.name)))
         client.message('^7Your nick is now registered')
 
     def cmd_delnick(self,  data,  client,  cmd=None):
