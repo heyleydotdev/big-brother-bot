@@ -36,12 +36,10 @@ import b3.parsers.punkbuster
 import logging
 import re
 import io
-import sys
-import time
-import traceback
 
 from b3.clients import Clients
 from b3.cvar import Cvar
+from b3.functions import redact
 from b3.functions import splitDSN
 from b3.game import Game
 from b3.plugins.admin import AdminPlugin
@@ -82,6 +80,7 @@ class FakeConsole(b3.parser.Parser):
         self.game.mapName = 'ut4_turnpike'
         self.cvars = {}
         self._handlers = {}
+        self._eventsStats = b3.events.EventsStats(self)
 
         if not self.config.has_option('server', 'punkbuster') or self.config.getboolean('server', 'punkbuster'):
             self.PunkBuster = b3.parsers.punkbuster.PunkBuster(self)
@@ -100,40 +99,12 @@ class FakeConsole(b3.parser.Parser):
         if not hasattr(event, 'type'):
             return False
         elif event.type in self._handlers:
-            self.verbose('Queueing event %s %s', self.Events.getName(event.type), event.data)
-            self._handleEvent(event)
+            self.verbose('Queueing event %s %s', self.getEventName(event.type), redact(event.data))
+            if event.type == self.getEventID('EVT_EXIT') or event.type == self.getEventID('EVT_STOP'):
+                self.working = False
+            self._dispatch(event)
             return True
         return False
-
-    def _handleEvent(self, event):
-        """
-        NO QUEUE, NO THREAD for faking speed up
-        """
-        if event.type == self.getEventID('EVT_EXIT') or event.type == self.getEventID('EVT_STOP'):
-            self.working = False
-
-        nomore = False
-        for hfunc in self._handlers[event.type]:
-            if not hfunc.isEnabled():
-                continue
-            elif nomore:
-                break
-
-            self.verbose('parsing event: %s: %s', self.Events.getName(event.type), hfunc.__class__.__name__)
-
-            try:
-                hfunc.parseEvent(event)
-                time.sleep(0.001)
-            except b3.events.VetoEvent:
-                # plugin called for event hault, do not continue processing
-                self.bot('Event %s vetoed by %s', self.Events.getName(event.type), str(hfunc))
-                nomore = True
-            except SystemExit as e:
-                self.exitcode = e.code
-            except Exception as msg:
-                self.error('handler %s could not handle event %s: %s: %s %s',
-                           hfunc.__class__.__name__, self.Events.getName(event.type),
-                           msg.__class__.__name__, msg, traceback.extract_tb(sys.exc_info()[2]))
 
     def shutdown(self):
         """
@@ -143,7 +114,7 @@ class FakeConsole(b3.parser.Parser):
             if self.working and self.exiting.acquire():
                 self.bot('shutting down...')
                 self.working = False
-                self._handleEvent(self.getEvent('EVT_STOP'))
+                self._dispatch(self.getEvent('EVT_STOP'))
                 if self._cron:
                     self._cron.stop()
                 self.bot('shutting down database connections...')

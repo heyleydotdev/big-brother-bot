@@ -1255,35 +1255,45 @@ class Parser(object):
             if self.time() >= expire:  # events can only sit in the queue until expire time
                 self.error('**** Event sat in queue too long: %s %s', event_name, self.time() - expire)
             else:
-                nomore = False
-                for hfunc in self._handlers[event.type]:
-                    if not hfunc.isEnabled():
-                        continue
-                    elif nomore:
-                        break
-
-                    self.verbose('Parsing event: %s: %s', event_name, hfunc.__class__.__name__)
-                    timer_plugin_begin = time.perf_counter()
-                    try:
-                        hfunc.parseEvent(event)
-                    except b3.events.VetoEvent:
-                        # plugin called for event hault, do not continue processing
-                        self.bot('Event %s vetoed by %s', event_name, str(hfunc))
-                        nomore = True
-                    except SystemExit as e:
-                        self.exitcode = e.code
-                    except Exception as msg:
-                        self.error('Handler %s could not handle event %s: %s: %s %s', hfunc.__class__.__name__,
-                                   event_name, msg.__class__.__name__, msg, extract_tb(sys.exc_info()[2]))
-                    finally:
-                        elapsed = time.perf_counter() - timer_plugin_begin
-                        self._eventsStats.add_event_handled(hfunc.__class__.__name__, event_name, elapsed * 1000)
+                self._dispatch(event)
 
         self.bot('Shutting down event handler')
 
         # releasing lock if it was set by self.shutdown() for instance
         if self.exiting.locked():
             self.exiting.release()
+
+    def _dispatch(self, event):
+        """
+        Run an event through the handlers registered for its type.
+        Shared by the event thread and the test console so both always behave
+        the same way: a change here is a change to production AND to the tests.
+        :param event: The event to dispatch
+        """
+        event_name = self.getEventName(event.type)
+        nomore = False
+        for hfunc in self._handlers[event.type]:
+            if not hfunc.isEnabled():
+                continue
+            elif nomore:
+                break
+
+            self.verbose('Parsing event: %s: %s', event_name, hfunc.__class__.__name__)
+            timer_plugin_begin = time.perf_counter()
+            try:
+                hfunc.parseEvent(event)
+            except b3.events.VetoEvent:
+                # plugin called for event hault, do not continue processing
+                self.bot('Event %s vetoed by %s', event_name, str(hfunc))
+                nomore = True
+            except SystemExit as e:
+                self.exitcode = e.code
+            except Exception as msg:
+                self.error('Handler %s could not handle event %s: %s: %s %s', hfunc.__class__.__name__,
+                           event_name, msg.__class__.__name__, msg, extract_tb(sys.exc_info()[2]))
+            finally:
+                elapsed = time.perf_counter() - timer_plugin_begin
+                self._eventsStats.add_event_handled(hfunc.__class__.__name__, event_name, elapsed * 1000)
 
     def write(self, msg, maxRetries=None, socketTimeout=None):
         """

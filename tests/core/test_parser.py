@@ -55,9 +55,9 @@ class _EventHandler:
 
 class Test_handleEvents(unittest.TestCase):
     """
-    The production event dispatcher. b3.fake.FakeConsole replaces it with its own
-    version, so the real loop needs its own test: time.clock() was removed in
-    python 3.8 and nothing caught it because no test ever ran this method.
+    The production event dispatcher, now shared with the fake console (see
+    Test_dispatcher_is_shared). It needs its own test because the queue and the
+    thread are not exercised by the synchronous fake path.
     """
 
     def setUp(self):
@@ -243,3 +243,11 @@ class Test_getWrap(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class Test_dispatcher_is_shared(unittest.TestCase):
+
+    def test_fake_console_uses_the_production_dispatcher(self):
+        # a private copy of the dispatch loop is how time.clock() shipped dead
+        from b3.fake import FakeConsole
+        self.assertIs(Parser._dispatch, FakeConsole._dispatch)
