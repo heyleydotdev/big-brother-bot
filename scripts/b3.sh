@@ -265,9 +265,9 @@ function b3_start() {
     local PID_FILE="${SCRIPT_DIR}/${PID_DIR}/${COMMON_PREFIX}${B3}.pid"
 
     if [ ${AUTO_RESTART} -eq 1 ]; then
-        screen -DmS "${SCREEN}" "${PYTHON}" "${PROCESS}" --restart --console --config "${CONFIG_FILE}" &
+        screen -DmS "${SCREEN}" "${PYTHON}" "${PROCESS}" --restart --config "${CONFIG_FILE}" &
     else
-        screen -DmS "${SCREEN}" "${PYTHON}" "${PROCESS}" --console --config "${CONFIG_FILE}" &
+        screen -DmS "${SCREEN}" "${PYTHON}" "${PROCESS}" --config "${CONFIG_FILE}" &
     fi
 
     echo "${!}" > "${PID_FILE}"
