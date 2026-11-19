@@ -22,7 +22,7 @@ Fixes
 - q3-family RCON crashed at startup when the server did not answer the initial
   status test (a bytes value reached a string regex).
 - Releases now ship a self-contained Windows executable (PyInstaller, zipped)
-  next to the wheel and sdist.
+  and an Inno Setup installer next to the wheel and sdist.
 
 1.12 -> 2.0.0
 ----

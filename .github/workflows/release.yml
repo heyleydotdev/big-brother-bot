@@ -82,6 +82,39 @@ jobs:
             if (-not (Test-Path "dist/b3_run/$dir")) { throw "missing $dir in the bundle" }
           }
 
+      - name: Build installer
+        run: |
+          $version = $env:VERSION -replace '^v', ''
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            $iscc = (Get-ChildItem "${env:ProgramFiles(x86)}\Inno Setup*\ISCC.exe" -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
+          }
+          if (-not $iscc) {
+            choco install innosetup --no-progress -y
+            $iscc = (Get-ChildItem "${env:ProgramFiles(x86)}\Inno Setup*\ISCC.exe" | Select-Object -First 1).FullName
+          }
+          & $iscc "/DB3_VERSION=$version" "installer/innosetup/b3-installer-project.iss"
+          if ($LASTEXITCODE -ne 0) { throw "ISCC failed with exit code $LASTEXITCODE" }
+          Get-ChildItem dist/*-setup.exe
+
+      - name: Installer smoke test
+        run: |
+          $version = $env:VERSION -replace '^v', ''
+          $setup = Get-ChildItem dist/*-setup.exe | Select-Object -First 1
+          $dir = "$env:RUNNER_TEMP\b3installed"
+          Start-Process -FilePath $setup.FullName -Wait -ArgumentList `
+            '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', "/DIR=$dir"
+          $exe = "$dir\b3_run.exe"
+          if (-not (Test-Path $exe)) { throw "the installer did not create b3_run.exe" }
+          $out = & $exe -v
+          Write-Host $out
+          if ($out -notmatch "v$([regex]::Escape($version))") { throw "installed exe reports '$out'" }
+          if (-not (Test-Path "$dir\conf\b3.distribution.ini")) { throw "configuration is missing" }
+          $unins = Get-ChildItem "$dir\unins*.exe" | Select-Object -First 1
+          Start-Process -FilePath $unins.FullName -Wait -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART'
+          if (Test-Path $exe) { throw "the uninstaller left b3_run.exe behind" }
+          if (-not (Test-Path "$dir\conf\b3.distribution.ini")) { throw "the uninstaller removed the user configuration" }
+
       - name: Package
         run: |
           $name = "b3-$($env:VERSION -replace '^v', '')-windows-x64.zip"
@@ -90,7 +123,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: windows-dist
-          path: dist/*.zip
+          path: |
+            dist/*.zip
+            dist/*-setup.exe
 
   release:
     name: github release
@@ -107,6 +142,10 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           ls -lh dist
-          gh release create "$GITHUB_REF_NAME" dist/* \
-            --title "B3 $GITHUB_REF_NAME" \
-            --generate-notes
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* \
+              --title "B3 $GITHUB_REF_NAME" \
+              --generate-notes
+          fi

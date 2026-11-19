@@ -54,12 +54,22 @@ package (`b3/sql/`) and are also used by the test fixtures.
 ## Windows
 
 Windows uses the same pip/wheel packaging path as every other platform. The
-release workflow (`.github/workflows/release.yml`) additionally builds a
-self-contained `b3_run.exe` with PyInstaller (one directory, zipped): the
-plugins, conf, sql and docs trees are shipped as source next to the executable
-because the parser loads them from the filesystem at runtime. PyInstaller is a
-build-time tool only; it is not a runtime dependency.
+release workflow (`.github/workflows/release.yml`) additionally builds two
+Windows artifacts from the same PyInstaller bundle:
+
+- `b3-<version>-windows-x64-setup.exe` — Inno Setup installer, per user (no
+  administrator rights), installs under `%LOCALAPPDATA%\BigBrotherBot` with a
+  Start Menu entry and an uninstaller. User configuration in `conf\` is kept on
+  uninstall.
+- `b3-<version>-windows-x64.zip` — the same bundle, portable: unzip and run
+  `b3_run.exe`.
+
+The plugins, conf, sql and docs trees are shipped as source next to the
+executable because the parser loads them from the filesystem at runtime.
+PyInstaller and Inno Setup are build-time tools only; they are not runtime
+dependencies. The installer is not code signed, so Windows SmartScreen warns
+about an unknown publisher.
 
 Known limit: the executable bundles the interpreter and the `postgresql`/`sftp`
-extras, so it is ~40 MB and cannot load extra packages installed later —
-external plugins that import a library outside that set need the pip install.
+extras, so it cannot load extra packages installed later — external plugins
+that import a library outside that set need the pip install.
