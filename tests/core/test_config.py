@@ -23,6 +23,9 @@
 
 import configparser
 import logging
+import os
+import shutil
+import tempfile
 from unittest import TestCase
 import unittest
 import sys
@@ -212,3 +215,41 @@ foo = %s
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class Test_config_file_encoding(unittest.TestCase):
+    """config files are UTF-8, not the machine locale encoding"""
+
+    def setUp(self):
+        self.dir = tempfile.mkdtemp()
+        self.path = os.path.join(self.dir, 'b3.ini')
+
+    def tearDown(self):
+        shutil.rmtree(self.dir, ignore_errors=True)
+
+    def _write(self, text):
+        with open(self.path, 'w', encoding='utf-8') as f:
+            f.write(text)
+
+    def test_cfg_load_reads_utf8(self):
+        self._write('[b3]\nbot_name: Ünknown\n')
+        conf = CfgConfigParser()
+        conf.load(self.path)
+        self.assertEqual('Ünknown', conf.get('b3', 'bot_name'))
+
+    def test_cfg_save_round_trips_utf8(self):
+        self._write('[b3]\nbot_name: Ünknown\n')
+        conf = CfgConfigParser()
+        conf.load(self.path)
+        conf.save()
+        again = CfgConfigParser()
+        again.load(self.path)
+        self.assertEqual('Ünknown', again.get('b3', 'bot_name'))
+
+    def test_xml_load_reads_utf8(self):
+        self._write('<?xml version="1.0" encoding="utf-8"?>'
+                    '<configuration><settings name="b3"><set name="bot_name">Ünknown</set>'
+                    '</settings></configuration>')
+        conf = XmlConfigParser()
+        conf.load(self.path)
+        self.assertEqual('Ünknown', conf.get('b3', 'bot_name'))

@@ -846,7 +846,7 @@ class InsurgencyParser(Parser):
         map_rotation = []
         self.map_cycles = {}
         self.map_cycle_no = 0
-        f = open(mapcyclefile, 'r')
+        f = open(mapcyclefile, 'r', encoding='utf-8', errors='replace')
         for line in f:
             if len(line):
                 map_rotation.append(line)
