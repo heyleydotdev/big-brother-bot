@@ -476,6 +476,8 @@ class Parser(object):
         self.cron.add(self._eventsStats_cronTab)
         self.bot("All plugins started")
         self.pluginsStarted()
+        self.bot("Starting cron")
+        self.cron.start()
         self.bot("Starting event dispatching thread")
         _thread.start_new_thread(self.handleEvents, ())
         self.bot("Start reading game events")
@@ -1527,11 +1529,12 @@ class Parser(object):
 
     def _get_cron(self):
         """
-        Instantiate the main Cron object.
+        Instantiate the main Cron object. The scheduler is started by start():
+        creating the object must not spawn a thread (tests build parsers without
+        running them, and a stray scheduler fires crontabs against a dead console).
         """
         if not self._cron:
             self._cron = b3.cron.Cron(self)
-            self._cron.start()
         return self._cron
 
     cron = property(_get_cron)
