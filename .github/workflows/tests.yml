@@ -84,11 +84,13 @@ jobs:
           fi
           status=${PIPESTATUS[0]}
           if [ "$status" -ne 0 ]; then
-            grep -E '^(FAILED|ERROR) ' pytest.log | head -20 | while IFS= read -r line; do
+            # "FAILED tests/..." and "ERROR tests/..." are the summary lines;
+            # captured log records also start with ERROR and must not match
+            grep -E '^(FAILED|ERROR) tests/' pytest.log | head -30 | while IFS= read -r line; do
               echo "::error title=pytest::$line"
             done
             # a worker crash or a fatal error does not print FAILED lines
-            if ! grep -qE '^(FAILED|ERROR) ' pytest.log; then
+            if ! grep -qE '^(FAILED|ERROR) tests/' pytest.log; then
               grep -nE 'Fatal Python error|INTERNALERROR|node down|worker .* crashed' pytest.log | head -10 | while IFS= read -r line; do
                 echo "::error title=pytest crash::$line"
               done
