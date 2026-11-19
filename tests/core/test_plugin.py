@@ -196,6 +196,22 @@ f00: bar -%(param1)s- bar
                                    'bar -%(param1)s- bar', ({'param_foo': 'foo'},), ANY)], error_mock.mock_calls)
 
 
+class Test_Plugin_parseEvent(B3TestCase):
+
+    def test_handler_exception_is_not_swallowed(self):
+        # GIVEN
+        k = self.console.getEventID('EVT_CLIENT_SAY')
+        p = MyPlugin(self.console, CfgConfigParser())
+
+        def boom(event):
+            raise TypeError("boom")
+
+        p.eventmap[k] = [boom]
+        # WHEN / THEN: the dispatcher logs handler exceptions with a traceback,
+        # the plugin must not eat them
+        self.assertRaises(TypeError, p.parseEvent, Event(k, 'hello'))
+
+
 class Test_Plugin_registerEvent(B3TestCase):
 
     def setUp(self):

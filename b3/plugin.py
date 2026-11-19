@@ -431,12 +431,8 @@ class Plugin(object):
         Dispatch an Event.
         :param event: The event to be dispatched
         """
-        collection = self.eventmap[event.type]
-        for func in collection:
-            try:
-                func(event)
-            except TypeError as e:
-                self.error('could not parse event %s: %s' % (self.console.getEventName(event.type), e))
+        for func in self.eventmap[event.type]:
+            func(event)
 
         if event.type == self.console.getEventID('EVT_EXIT') or event.type == self.console.getEventID('EVT_STOP'):
             self.working = False
