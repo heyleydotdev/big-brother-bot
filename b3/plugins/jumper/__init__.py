@@ -193,7 +193,8 @@ class JumpRun(object):
         if the client made a new personal record.
         """
         # check if the client made his personal record on this map and this way
-        cursor = self.p.console.storage.query(self.p.sql['jr1'] % (self.client.id, self.p._esc(self.mapname), self.way_id))
+        cursor = self.p.console.storage.query(
+            self.p.sql['jr1'] % (self.client.id, self.p._esc(self.mapname), self.way_id))
         if cursor.EOF:
             self.insert()
             cursor.close()
@@ -222,7 +223,8 @@ class JumpRun(object):
         Return True if the client established a new absolute record on this map and on the given way_id, False otherwise.
         """
         # check if the client made an absolute record on this map on the specified way_id
-        cursor = self.p.console.storage.query(self.p.sql['jr2'] % (self.p._esc(self.mapname), self.way_id, self.way_time))
+        cursor = self.p.console.storage.query(
+            self.p.sql['jr2'] % (self.p._esc(self.mapname), self.way_id, self.way_time))
         if cursor.EOF:
             cursor.close()
             return True
