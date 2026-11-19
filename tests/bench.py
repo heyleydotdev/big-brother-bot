@@ -26,8 +26,7 @@
 """
 B3 core benchmark.
 
-Measures what the py3 port must not regress and what the performance
-milestone (M11) must improve:
+Measures what the py3 port must not regress:
 
   * import time (includes the module level fake console boot)
   * dedicated console boot time (config + storage + admin plugin)
@@ -35,12 +34,15 @@ milestone (M11) must improve:
   * synchronous event processing throughput through the admin plugin,
     which is B3's real hot path (config parsing, command routing)
   * tracemalloc top allocation sites during the loop
+  * a replay of canned q3-family log lines through the real iourt42 parser
 
 Run from the repository root:
 
-    python bench/replay.py [number_of_events]     (default 10000)
+    python tests/bench.py [number_of_events]     (default 10000)
 
-Record results in bench/BASELINE.md.
+CI runs it after the tests on python 3.11 and writes the numbers to the job
+summary. When a change claims a performance win, put the before/after numbers
+in the commit message (this file is not collected by pytest).
 """
 
 import sys

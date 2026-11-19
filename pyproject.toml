@@ -47,7 +47,7 @@ test = [
     "mockito",
     # pymysql needs this to authenticate against MySQL 8 default auth plugin (caching_sha2_password)
     "cryptography",
-    # memory readings for bench/replay.py
+    # memory readings for tests/bench.py
     "psutil",
 ]
 build = [

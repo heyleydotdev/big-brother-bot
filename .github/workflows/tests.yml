@@ -101,3 +101,16 @@ jobs:
             fi
           fi
           exit "$status"
+
+      - name: Benchmark
+        if: matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          python tests/bench.py 10000 > bench.txt
+          {
+            echo '### Benchmark (python 3.11)'
+            echo
+            echo '```'
+            grep -E '^(import b3|console boot|rss |event loop|tracemalloc|parser replay)' bench.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

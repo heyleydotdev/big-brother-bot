@@ -43,7 +43,7 @@ configured git; they have been folded into the names above where possible.
 
 The old profiling helpers `statlib` and `runsnakerun` were vendored for the
 Python 2 era and were removed during the port (replaced by `cProfile`,
-`tracemalloc` and `bench/replay.py`).
+`tracemalloc` and `tests/bench.py`).
 
 ## Community
 
