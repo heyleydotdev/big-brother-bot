@@ -35,6 +35,7 @@ from b3.parsers.frostbite2.protocol import CommandFailedError
 from b3.parsers.frostbite2.util import MapListBlock
 from b3.plugins.admin import AdminPlugin
 from tests import logging_disabled
+from tests import assert_dict_contains_subset
 
 
 sleep_patcher = None
@@ -56,6 +57,7 @@ def tearDownModule():
         del Client.messagequeueworker
     if sleep_patcher:
         sleep_patcher.stop()
+
 
 
 class BF3TestCase(unittest.TestCase):
@@ -81,7 +83,7 @@ class BF3TestCase(unittest.TestCase):
 class Test_getServerInfo(unittest.TestCase):
 
     def test_decodeServerinfo_pre_R9(self):
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             'serverName': 'BigBrotherBot #2',
             'numPlayers': '0',
             'maxPlayers': '16',
@@ -103,7 +105,7 @@ class Test_getServerInfo(unittest.TestCase):
             'roundTime': '455',
         }, Bf3Parser.decodeServerinfo(('BigBrotherBot #2', '0', '16', 'ConquestLarge0', 'MP_012', '0', '2', '0', '0', '', 'true', 'true', 'false', '5148', '455')))
 
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             'serverName': 'BigBrotherBot #2',
             'numPlayers': '0',
             'maxPlayers': '16',
@@ -125,7 +127,7 @@ class Test_getServerInfo(unittest.TestCase):
             'roundTime': '455',
         }, Bf3Parser.decodeServerinfo(('BigBrotherBot #2', '0', '16', 'ConquestLarge0', 'MP_012', '0', '2', '1', '47', '0', '', 'true', 'true', 'false', '5148', '455')))
 
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             'serverName': 'BigBrotherBot #2',
             'numPlayers': '0',
             'maxPlayers': '16',
@@ -147,7 +149,7 @@ class Test_getServerInfo(unittest.TestCase):
             'roundTime': '455',
         }, Bf3Parser.decodeServerinfo(('BigBrotherBot #2', '0', '16', 'ConquestLarge0', 'MP_012', '0', '2', '2', '300', '300', '0', '', 'true', 'true', 'false', '5148', '455')))
 
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             'serverName': 'BigBrotherBot #2',
             'numPlayers': '0',
             'maxPlayers': '16',
@@ -169,7 +171,7 @@ class Test_getServerInfo(unittest.TestCase):
             'roundTime': '455',
         }, Bf3Parser.decodeServerinfo(('BigBrotherBot #2', '0', '16', 'ConquestLarge0', 'MP_012', '1', '2', '3', '300', '215', '25', '0', '', 'true', 'true', 'false', '5148', '455')))
 
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             'serverName': 'BigBrotherBot #2',
             'numPlayers': '0',
             'maxPlayers': '16',

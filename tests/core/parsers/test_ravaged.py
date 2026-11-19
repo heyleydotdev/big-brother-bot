@@ -34,6 +34,7 @@ from b3.parsers.ravaged import RavagedParser, TEAM_SCAVENGERS, TEAM_RESISTANCE
 from b3.plugins.admin import AdminPlugin
 
 from b3 import __file__ as b3_module__file__
+from tests import assert_dict_contains_subset
 
 ADMIN_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(b3_module__file__), "conf/plugin_admin.ini"))
 ADMIN_CONFIG = None
@@ -45,6 +46,7 @@ def client_equal(client_a, client_b):
     if client_a is not None and client_b is None:
         return False
     return all([getattr(client_a, x, None) == getattr(client_b, x, None) for x in ('cid', 'guid', 'name', 'ip', 'ping')])
+
 
 
 class RavagedTestCase(unittest.TestCase):
@@ -442,7 +444,7 @@ class Test_getClientOrCreate(RavagedTestCase):
     def test_new_client__guid_name_team(self):
         # GIVEN
         self.assertEqual(1, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 1}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 1}, self.parser.storage.getCounts())
         # WHEN
         client = self.parser.getClientOrCreate(guid="12312312312312312", name="courgette", team="1")
         # THEN
@@ -453,13 +455,13 @@ class Test_getClientOrCreate(RavagedTestCase):
         self.assertEqual(TEAM_RESISTANCE, client.team)
         self.assertTrue(client.authed)
         self.assertEqual(2, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 2}, self.parser.storage.getCounts())
 
 
     def test_new_client__guid_name(self):
         # GIVEN
         self.assertEqual(1, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 1}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 1}, self.parser.storage.getCounts())
         # WHEN
         client = self.parser.getClientOrCreate(guid="12312312312312312", name="courgette")
         # THEN
@@ -470,14 +472,14 @@ class Test_getClientOrCreate(RavagedTestCase):
         self.assertEqual(TEAM_UNKNOWN, client.team)
         self.assertTrue(client.authed)
         self.assertEqual(2, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 2}, self.parser.storage.getCounts())
 
 
     def test_connected_client__guid(self):
         # GIVEN
         self.parser.clients.newClient(cid="12312312312312312", guid="12312312312312312", name="courgette", team=TEAM_SCAVENGERS)
         self.assertEqual(2, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 2}, self.parser.storage.getCounts())
         # WHEN
         client = self.parser.getClientOrCreate(guid="12312312312312312", name=None)
         # THEN
@@ -488,14 +490,14 @@ class Test_getClientOrCreate(RavagedTestCase):
         self.assertEqual(TEAM_SCAVENGERS, client.team)
         self.assertTrue(client.authed)
         self.assertEqual(2, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 2}, self.parser.storage.getCounts())
 
 
     def test_connected_client__guid_different_name(self):
         # GIVEN
         self.parser.clients.newClient(cid="12312312312312312", guid="12312312312312312", name="courgette", team=TEAM_SCAVENGERS)
         self.assertEqual(2, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 2}, self.parser.storage.getCounts())
         # WHEN
         client = self.parser.getClientOrCreate(guid="12312312312312312", name="F00")
         # THEN
@@ -506,7 +508,7 @@ class Test_getClientOrCreate(RavagedTestCase):
         self.assertEqual(TEAM_SCAVENGERS, client.team)
         self.assertTrue(client.authed)
         self.assertEqual(2, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 2}, self.parser.storage.getCounts())
 
 
     def test_known_client__guid(self):
@@ -514,7 +516,7 @@ class Test_getClientOrCreate(RavagedTestCase):
         known_client = Client(console=self.parser, guid="12312312312312312", name="courgette", connections=15)
         known_client.save()
         self.assertEqual(1, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 2}, self.parser.storage.getCounts())
         # WHEN
         client = self.parser.getClientOrCreate(guid="12312312312312312", name="newName", team="0")
         # THEN
@@ -527,7 +529,7 @@ class Test_getClientOrCreate(RavagedTestCase):
         self.assertEqual(16, client.connections)
         self.assertTrue(client.authed)
         self.assertEqual(2, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 2}, self.parser.storage.getCounts())
 
 
 

@@ -27,9 +27,11 @@ from mockito import mock, when, any as anything
 import unittest
 from b3.config import XmlConfigParser
 from b3.parsers.cod import CodParser
+from tests import assert_dict_contains_subset
 
 log = logging.getLogger("test")
 log.setLevel(logging.INFO)
+
 
 
 class CodTestCase(unittest.TestCase):
@@ -94,19 +96,19 @@ num score ping guid   name            lastmsg address               qport rate
         # WHEN
         rv = self.console.getPlayerList()
         # THEN
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             'slot': '1', 'score': '0', 'ping': '55', 'guid': '63281996', 'name': 'BandAid^7', 'last': '50', 'ip': '11.11.11.11', 'pbid': None
         }, rv.get('1', {}), rv)
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             'slot': '2', 'score': '0', 'ping': '157', 'guid': '81554346', 'name': 'hugobongenhielm^7', 'last': '50', 'ip': '11.11.11.11', 'pbid': None
         }, rv.get('2', {}), rv)
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             'slot': '3', 'score': '0', 'ping': '156', 'guid': '86330555', 'name': 'Irish^7', 'last': '0', 'ip': '11.11.11.11', 'pbid': None
         }, rv.get('3', {}), rv)
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             'slot': '4', 'score': '0', 'ping': '999', 'guid': '68003079', 'name': 'Ashhole^7', 'last': '750', 'ip': '11.11.11.11', 'pbid': None
         }, rv.get('4', {}), rv)
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             'slot': '5', 'score': '5', 'ping': '53', 'guid': '318670', 'name': 'bigredtwit^7', 'last': '0', 'ip': '11.11.11.11', 'pbid': None
         }, rv.get('5', {}), rv)
 

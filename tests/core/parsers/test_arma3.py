@@ -29,8 +29,10 @@ from b3.clients import Client
 from b3.parsers.arma3 import Arma3Parser
 from b3.config import XmlConfigParser
 from tests import logging_disabled
+from tests import assert_dict_contains_subset
 
 ANY = object()
+
 
 
 class Arma3TestCase(unittest.TestCase):
@@ -192,7 +194,7 @@ class test_sync(EventParsingTestCase):
 
     def test_new_client_with_unverified_guid(self):
         # GIVEN
-        self.assertDictContainsSubset({'clients': 1}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 1}, self.parser.storage.getCounts())
         self.assertNotIn('8', self.parser.clients)
         # WHEN
         when(self.parser.output).write('players').thenReturn('''\
@@ -204,7 +206,7 @@ Players on server:
 ''')
         rv = self.parser.sync()
         # THEN no new client is saved to database
-        self.assertDictContainsSubset({'clients': 1}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 1}, self.parser.storage.getCounts())
         # THEN sync return correct info
         self.assertIn('8', rv)
         client = rv["8"]
@@ -225,7 +227,7 @@ Players on server:
         # GIVEN
         self.parser.routeBattleyeEvent('Player #8 Max (111.222.200.50:2304) connected')
         self.parser.routeBattleyeEvent('Player #8 Max - GUID: 73c5e50a7860475f0000000000000000 (unverified)')
-        self.assertDictContainsSubset({'clients': 1}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 1}, self.parser.storage.getCounts())
         self.assertIn('8', self.parser.clients)
         self.clear_events()
         # WHEN
@@ -238,7 +240,7 @@ Players on server:
 ''')
         rv = self.parser.sync()
         # THEN no new client is saved to database
-        self.assertDictContainsSubset({'clients': 1}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 1}, self.parser.storage.getCounts())
         # THEN sync return correct info
         self.assertIn('8', rv)
         client = rv["8"]
@@ -261,7 +263,7 @@ Players on server:
         self.parser.routeBattleyeEvent('Player #8 Max (111.222.200.50:2304) connected')
         self.parser.routeBattleyeEvent('Player #8 Max - GUID: 73c5e50a7860475f0000000000000000 (unverified)')
         self.parser.routeBattleyeEvent('Verified GUID (73c5e50a7860475f0000000000000000) of player #8 Max')
-        self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 2}, self.parser.storage.getCounts())
         self.assertIn('8', self.parser.clients)
         # GIVEN that the player exists in database
         client_from_db = self.parser.storage.getClient(Client(guid="73c5e50a7860475f0000000000000000"))
@@ -280,7 +282,7 @@ Players on server:
 ''')
         rv = self.parser.sync()
         # THEN no new client is saved to database
-        self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 2}, self.parser.storage.getCounts())
         # THEN sync return correct info
         self.assertIn('8', rv)
         client = rv["8"]

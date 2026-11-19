@@ -30,6 +30,7 @@ from b3.clients import Client
 from b3.config import XmlConfigParser
 from b3.fake import FakeClient
 from b3.parsers.csgo import CsgoParser
+from tests import assert_dict_contains_subset
 
 
 WAS_FROSTBITE_LOADED = 'b3.parsers.frostbite' in list(sys.modules.keys()) or 'b3.parsers.frostbite2' in list(sys.modules.keys())
@@ -74,6 +75,7 @@ def client_equal(client_a, client_b):
 
 
 WHATEVER = object()  # sentinel used in CsgoTestCase.assert_has_event
+
 
 
 class CsgoTestCase(unittest.TestCase):
@@ -349,7 +351,7 @@ class Test_gamelog_parsing(CsgoTestCase):
         self.assertEqual('courgette', client_from_storage.name)
         self.assertEqual("STEAM_1:0:1111111", client_from_storage.guid)
         self.assertEqual("11.222.111.222", client_from_storage.ip)
-        self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 2}, self.parser.storage.getCounts())
 
 
     def test_player_connected__unicode(self):
@@ -375,7 +377,7 @@ class Test_gamelog_parsing(CsgoTestCase):
         self.assertEqual("Spoon««", client_from_storage.name)
         self.assertEqual("STEAM_1:0:1111111", client_from_storage.guid)
         self.assertEqual("11.222.111.222", client_from_storage.ip)
-        self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 2}, self.parser.storage.getCounts())
 
 
     def test_bot_connected(self):
@@ -397,7 +399,7 @@ class Test_gamelog_parsing(CsgoTestCase):
         # THEN no client object is saved to database
         clients_from_storage = self.parser.storage.getClientsMatching({'%name%': 'Moe'})
         self.assertListEqual([], clients_from_storage)
-        self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 2}, self.parser.storage.getCounts())
 
 
     def test_kicked_by_console(self):
@@ -1232,7 +1234,7 @@ class Test_getClientOrCreate(CsgoTestCase):
     def test_new_client_with_cid_guid_name_team(self):
         # GIVEN
         self.assertEqual(2, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 2}, self.parser.storage.getCounts())
         # WHEN
         client = self.parser.getClientOrCreate(cid="2", guid="AAAAAAAAAAAA000000000000000", name="theName", team="CT")
         # THEN
@@ -1243,13 +1245,13 @@ class Test_getClientOrCreate(CsgoTestCase):
         self.assertEqual(TEAM_RED, client.team)
         self.assertTrue(client.authed)
         self.assertEqual(3, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 3}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 3}, self.parser.storage.getCounts())
 
 
     def test_new_client_with_cid_guid_name(self):
         # GIVEN
         self.assertEqual(2, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 2}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 2}, self.parser.storage.getCounts())
         # WHEN
         client = self.parser.getClientOrCreate(cid="2", guid="AAAAAAAAAAAA000000000000000", name="theName")
         # THEN
@@ -1260,14 +1262,14 @@ class Test_getClientOrCreate(CsgoTestCase):
         self.assertEqual(TEAM_UNKNOWN, client.team)
         self.assertTrue(client.authed)
         self.assertEqual(3, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 3}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 3}, self.parser.storage.getCounts())
 
 
     def test_connected_client_by_cid(self):
         # GIVEN
         self.parser.clients.newClient(cid="2", guid="AAAAAAAAAAAA000000000000000", name="theName", team=TEAM_BLUE)
         self.assertEqual(3, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 3}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 3}, self.parser.storage.getCounts())
         # WHEN
         client = self.parser.getClientOrCreate(cid="2", guid=None, name=None)
         # THEN
@@ -1278,14 +1280,14 @@ class Test_getClientOrCreate(CsgoTestCase):
         self.assertEqual(TEAM_BLUE, client.team)
         self.assertTrue(client.authed)
         self.assertEqual(3, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 3}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 3}, self.parser.storage.getCounts())
 
 
     def test_connected_client_by_cid_different_name(self):
         # GIVEN
         self.parser.clients.newClient(cid="2", guid="AAAAAAAAAAAA000000000000000", name="theName", team=TEAM_BLUE)
         self.assertEqual(3, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 3}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 3}, self.parser.storage.getCounts())
         # WHEN
         client = self.parser.getClientOrCreate(cid="2", guid=None, name="newName")
         # THEN
@@ -1296,7 +1298,7 @@ class Test_getClientOrCreate(CsgoTestCase):
         self.assertEqual(TEAM_BLUE, client.team)
         self.assertTrue(client.authed)
         self.assertEqual(3, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 3}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 3}, self.parser.storage.getCounts())
 
 
     def test_known_client_by_cid(self):
@@ -1304,7 +1306,7 @@ class Test_getClientOrCreate(CsgoTestCase):
         known_client = Client(console=self.parser, guid="AAAAAAAAAAAA000000000000000", name="theName")
         known_client.save()
         self.assertEqual(2, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 3}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 3}, self.parser.storage.getCounts())
         # WHEN
         client = self.parser.getClientOrCreate(cid="2", guid="AAAAAAAAAAAA000000000000000", name="newName", team="CT")
         # THEN
@@ -1316,7 +1318,7 @@ class Test_getClientOrCreate(CsgoTestCase):
         self.assertEqual(TEAM_RED, client.team)
         self.assertTrue(client.authed)
         self.assertEqual(3, len(self.parser.clients))
-        self.assertDictContainsSubset({'clients': 3}, self.parser.storage.getCounts())
+        assert_dict_contains_subset(self, {'clients': 3}, self.parser.storage.getCounts())
 
 
     def test_changing_team(self):

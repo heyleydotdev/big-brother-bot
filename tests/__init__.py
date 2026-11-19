@@ -73,6 +73,17 @@ def flush_console_streams():
     sys.stdout.flush()
 
 
+def assert_dict_contains_subset(testcase, subset, dictionary, msg=None):
+    """
+    Fail unless every key/value pair of `subset` is present in `dictionary`.
+
+    Replaces the stdlib TestCase.assertDictContainsSubset (removed in 3.12).
+    """
+    testcase.assertEqual(dict(subset.items()),
+                         {k: dictionary[k] for k in subset if k in dictionary},
+                         msg)
+
+
 class B3TestCase(unittest.TestCase):
 
     def setUp(self):

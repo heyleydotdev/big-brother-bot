@@ -28,6 +28,7 @@ import unittest
 from b3.clients import Client
 from b3.config import XmlConfigParser
 from b3.parsers.cod6 import Cod6Parser
+from tests import assert_dict_contains_subset
 
 log = logging.getLogger("test")
 log.setLevel(logging.INFO)
@@ -40,6 +41,7 @@ original_client_auth = Client.auth
 def tearDownModule():
     # restore core B3 stuff
     Client.auth = original_client_auth
+
 
 
 
@@ -104,18 +106,18 @@ num score ping guid                             name            lastmsg address 
         # WHEN
         rv = self.console.getPlayerList()
         # THEN
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             'slot': '0', 'score': '1', 'ping': '69', 'guid': '011000010002d113', 'name': 'Minikruku!^7', 'last': '0', 'ip': '11.11.11.11', 'pbid': None
         }, rv.get('0', {}))
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             'slot': '1', 'score': '1', 'ping': '101', 'guid': '011000010002caf1', 'name': 'GuMaK111^7', 'last': '50', 'ip': '11.11.11.11', 'pbid': None
         }, rv.get('1', {}))
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             'slot': '2', 'score': '1', 'ping': '175', 'guid': '0110000100003fb4', 'name': 'phantom1151^7', 'last': '0', 'ip': '11.11.11.11', 'pbid': None
         }, rv.get('2', {}))
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             'slot': '3', 'score': '1', 'ping': '49', 'guid': '011000010003ed88', 'name': 'isidora10^7', 'last': '0', 'ip': '11.11.11.11', 'pbid': None
         }, rv.get('3', {}))
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             'slot': '4', 'score': '1', 'ping': '31', 'guid': '011000018e87f252', 'name': '[^5RnK^0] ^4B^7', 'last': '50', 'ip': '11.11.11.11', 'pbid': None
         }, rv.get('4', {}))

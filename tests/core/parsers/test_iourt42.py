@@ -34,6 +34,7 @@ from b3.fake import FakeClient as original_FakeClient
 from b3.output import VERBOSE2
 from b3.parsers.iourt42 import Iourt42Parser, Iourt42Client
 from tests import logging_disabled
+from tests import assert_dict_contains_subset
 
 log = logging.getLogger("test")
 log.setLevel(logging.INFO)
@@ -46,6 +47,7 @@ def tearDownModule():
 
 
 # We need our own FakeClient class to use the new auth() method from the Iourt42Client class
+
 class FakeClient(original_FakeClient, Iourt42Client):
     # Python resolution rule for multiple inheritance will try to find the called methods in original_FakeClient class
     # first ; second from the b3.clients.Client class (which is inherited from the original_FakeClient class) ; third
@@ -904,7 +906,7 @@ num score ping name            lastmsg address               qport rate
         # WHEN
         rv = self.console.getPlayerList()
         # THEN
-        self.assertDictContainsSubset({
+        assert_dict_contains_subset(self, {
             '5': {'slot': '5', 'last': '0', 'name': 'theName2^7', 'ip': '11.22.33.45', 'ping': '48', 'pbid': None, 'qport': '38410', 'rate': '8000', 'score': '0', 'port': '27961'},
             '4': {'slot': '4', 'last': '0', 'name': 'theName^7', 'ip': '11.22.33.44', 'ping': '141', 'pbid': None, 'qport': '38410', 'rate': '8000', 'score': '0', 'port': '27961'}
         }, rv)

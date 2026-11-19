@@ -29,6 +29,8 @@ import unittest
 from b3.clients import Client
 from b3.events import EventsStats, eventManager
 from b3.parser import Parser
+from tests import assert_dict_contains_subset
+
 
 
 class DummyParser(Parser):
@@ -151,15 +153,15 @@ class Test_getMessageVariables(unittest.TestCase):
     def test_with_parameters(self):
         client = Client(name="Jack")
         rv = self.parser.getMessageVariables(client)
-        self.assertDictContainsSubset({'name': client.name}, rv, rv)
+        assert_dict_contains_subset(self, {'name': client.name}, rv, rv)
 
     def test_with_named_parameters(self):
         client = Client(name="Jack")
-        self.assertDictContainsSubset({'clientname': client.name, 'reason': 'this is a good reason'}, self.parser.getMessageVariables(client=client, reason="this is a good reason"))
+        assert_dict_contains_subset(self, {'clientname': client.name, 'reason': 'this is a good reason'}, self.parser.getMessageVariables(client=client, reason="this is a good reason"))
 
     def test_with_named_parameters__unicode(self):
         client = Client(name="ÄÖé")
-        self.assertDictContainsSubset({'clientname':client.name, 'reason': 'this is a good reason'}, self.parser.getMessageVariables(client=client, reason="this is a good reason"))
+        assert_dict_contains_subset(self, {'clientname':client.name, 'reason': 'this is a good reason'}, self.parser.getMessageVariables(client=client, reason="this is a good reason"))
 
 
 class Test_getWrap(unittest.TestCase):

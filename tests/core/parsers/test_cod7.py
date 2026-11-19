@@ -27,9 +27,11 @@ from mockito import mock, when, any as anything
 import unittest
 from b3.config import XmlConfigParser
 from b3.parsers.cod7 import Cod7Parser
+from tests import assert_dict_contains_subset
 
 log = logging.getLogger("test")
 log.setLevel(logging.INFO)
+
 
 
 class Cod7TestCase(unittest.TestCase):
@@ -93,7 +95,7 @@ num score ping guid   name            lastmsg address               qport rate
         rv = self.console.getPlayerList()
         # THEN
         self.assertNotIn("0", rv)
-        self.assertDictContainsSubset({'slot': '1', 'score': '200', 'ping': '47', 'guid': '8326146', 'name': 'ShaGGyTuBBs^7', 'last': '0', 'ip': '11.11.11.11', 'port': '524', 'qport': '16783', 'rate': '25000', 'pbid': None}, rv.get("1", {}))
-        self.assertDictContainsSubset({'slot': '2', 'score': '1360', 'ping': '61', 'guid': '56089378', 'name': 'fresh breeze^7', 'last': '0', 'ip': '11.11.11.11', 'port': '-27409', 'qport': '7422', 'rate': '25000', 'pbid': None}, rv.get("2", {}))
-        self.assertDictContainsSubset({'slot': '3', 'score': '470', 'ping': '97', 'guid': '69406003', 'name': 'kossi__86^7', 'last': '0', 'ip': '11.11.11.11', 'port': '524', 'qport': '24017', 'rate': '25000', 'pbid': None}, rv.get("3", {}))
+        assert_dict_contains_subset(self, {'slot': '1', 'score': '200', 'ping': '47', 'guid': '8326146', 'name': 'ShaGGyTuBBs^7', 'last': '0', 'ip': '11.11.11.11', 'port': '524', 'qport': '16783', 'rate': '25000', 'pbid': None}, rv.get("1", {}))
+        assert_dict_contains_subset(self, {'slot': '2', 'score': '1360', 'ping': '61', 'guid': '56089378', 'name': 'fresh breeze^7', 'last': '0', 'ip': '11.11.11.11', 'port': '-27409', 'qport': '7422', 'rate': '25000', 'pbid': None}, rv.get("2", {}))
+        assert_dict_contains_subset(self, {'slot': '3', 'score': '470', 'ping': '97', 'guid': '69406003', 'name': 'kossi__86^7', 'last': '0', 'ip': '11.11.11.11', 'port': '524', 'qport': '24017', 'rate': '25000', 'pbid': None}, rv.get("3", {}))
 
