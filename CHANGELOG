@@ -1,3 +1,11 @@
+2.2.1 -> 2.2.2
+----
+
+- plugin SQL safety: nicknames (`nickreg`), map names and demo file names
+  (`jumper`) and server/cvar values (`status`) are escaped with the storage's
+  `QueryBuilder` instead of ad-hoc quoting. A nickname containing a quote could
+  break or inject the query on SQLite, the default storage.
+
 2.2.0 -> 2.2.1
 ----
 
