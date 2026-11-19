@@ -1,3 +1,13 @@
+2.2.0 -> 2.2.1
+----
+
+- `Storage.getCounts()` only counts penalties still in force: inactive and
+  expired rows were included, so the ban numbers never went down.
+- `setDaemon()` / `activeCount()` replaced by the `daemon` attribute and
+  `active_count()` (deprecated since Python 3.10).
+- new test for the `httpytail` mirror, the bytes/str boundary that broke remote
+  log tailing in 2.0.0.
+
 2.1.2 -> 2.2.0
 ----
 

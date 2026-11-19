@@ -34,7 +34,7 @@ import shutil
 from tempfile import TemporaryFile
 
 __author__ = 'ThorN'
-__version__ = '2.2.0'
+__version__ = '2.2.1'
 
 modulePath = pkg_handler.resource_directory(__name__)
 
