@@ -193,7 +193,7 @@ class JumpRun(object):
         if the client made a new personal record.
         """
         # check if the client made his personal record on this map and this way
-        cursor = self.p.console.storage.query(self.p.sql['jr1'] % (self.client.id, self.mapname, self.way_id))
+        cursor = self.p.console.storage.query(self.p.sql['jr1'] % (self.client.id, self.p._esc(self.mapname), self.way_id))
         if cursor.EOF:
             self.insert()
             cursor.close()
@@ -222,7 +222,7 @@ class JumpRun(object):
         Return True if the client established a new absolute record on this map and on the given way_id, False otherwise.
         """
         # check if the client made an absolute record on this map on the specified way_id
-        cursor = self.p.console.storage.query(self.p.sql['jr2'] % (self.mapname, self.way_id, self.way_time))
+        cursor = self.p.console.storage.query(self.p.sql['jr2'] % (self.p._esc(self.mapname), self.way_id, self.way_time))
         if cursor.EOF:
             cursor.close()
             return True
@@ -240,18 +240,25 @@ class JumpRun(object):
         """
         Insert the jumprun in the storage.
         """
-        demo = self.demo.replace("'", "\'") if self.demo else None
-        self.p.console.storage.query(self.p.sql['jr7'] % (self.client.id, self.mapname, self.way_id, self.way_time,
-                                                          self.time_add, self.time_edit, demo))
+        self.p.console.storage.query(QueryBuilder(self.p.console.storage.db).InsertQuery({
+            'client_id': self.client.id,
+            'mapname': self.mapname,
+            'way_id': self.way_id,
+            'way_time': self.way_time,
+            'time_add': self.time_add,
+            'time_edit': self.time_edit,
+            'demo': self.demo,
+        }, 'jumpruns'))
         self.p.debug('stored new jumprun : %r' % self)
 
     def update(self):
         """
         Update the jumprun in the storage.
         """
-        demo = self.demo.replace("'", "\'") if self.demo else None
-        self.p.console.storage.query(self.p.sql['jr8'] % (self.way_time, self.time_add, demo,
-                                                          self.client.id, self.mapname, self.way_id))
+        self.p.console.storage.query(QueryBuilder(self.p.console.storage.db).UpdateQuery(
+            {'way_time': self.way_time, 'time_edit': self.time_add, 'demo': self.demo},
+            'jumpruns',
+            {'client_id': self.client.id, 'mapname': self.mapname, 'way_id': self.way_id}))
         self.p.debug('updated jumprun : %r' % self)
 
     def delete(self):
@@ -298,29 +305,26 @@ class JumperPlugin(b3.plugin.Plugin):
     ]
 
     sql = {
-        'jr1': """SELECT * FROM jumpruns WHERE client_id = '%s' AND mapname = '%s' AND way_id = '%d'""",
-        'jr2': """SELECT * FROM jumpruns WHERE mapname = '%s' AND way_id = '%d' AND way_time < '%d'""",
+        'jr1': """SELECT * FROM jumpruns WHERE client_id = %s AND mapname = %s AND way_id = %s""",
+        'jr2': """SELECT * FROM jumpruns WHERE mapname = %s AND way_id = %s AND way_time < %s""",
         'jr3': """SELECT jr.id AS jumprun_id, jr.client_id AS client_id, jr.way_id AS way_id, jr.way_time AS way_time,
                   jr.time_add AS time_add, jr.time_edit AS time_edit, jr.demo AS demo, jw.way_name
                   AS way_name FROM jumpruns AS jr LEFT OUTER JOIN jumpways AS jw ON jr.way_id = jw.way_id
-                  AND jr.mapname = jw.mapname WHERE jr.mapname = '%s' AND jr.way_time IN (SELECT MIN(way_time)
-                  FROM jumpruns WHERE mapname = '%s' GROUP BY way_id) ORDER BY jr.way_id ASC""",
+                  AND jr.mapname = jw.mapname WHERE jr.mapname = %s AND jr.way_time IN (SELECT MIN(way_time)
+                  FROM jumpruns WHERE mapname = %s GROUP BY way_id) ORDER BY jr.way_id ASC""",
         'jr4': """SELECT jr.id AS jumprun_id, jr.way_id AS way_id, jr.way_time AS way_time, jr.time_add AS time_add,
                   jr.time_edit AS time_edit, jr.demo AS demo, jw.way_name AS way_name FROM jumpruns AS jr
                   LEFT OUTER JOIN  jumpways AS jw ON  jr.way_id = jw.way_id
-                  AND jr.mapname = jw.mapname WHERE jr.client_id = '%s' AND jr.mapname = '%s'
+                  AND jr.mapname = jw.mapname WHERE jr.client_id = %s AND jr.mapname = %s
                   ORDER BY jr.way_id ASC""",
-        'jr5': """SELECT DISTINCT way_id FROM jumpruns WHERE mapname = '%s' ORDER BY way_id ASC""",
+        'jr5': """SELECT DISTINCT way_id FROM jumpruns WHERE mapname = %s ORDER BY way_id ASC""",
         'jr6': """SELECT jr.id AS jumprun_id, jr.client_id AS client_id, jr.way_id AS way_id, jr.way_time AS way_time,
                   jr.time_add AS time_add, jr.time_edit AS time_edit, jr.demo AS demo, jw.way_name AS way_name
                   FROM jumpruns AS jr LEFT OUTER JOIN jumpways AS jw ON jr.way_id = jw.way_id
-                  AND jr.mapname = jw.mapname WHERE jr.mapname = '%s' AND jr.way_id = '%d'
+                  AND jr.mapname = jw.mapname WHERE jr.mapname = %s AND jr.way_id = %s
                   ORDER BY jr.way_time ASC LIMIT 3""",
-        'jr7': """INSERT INTO jumpruns VALUES (NULL, '%s', '%s', '%d', '%d', '%d', '%d', '%s')""",
-        'jr8': """UPDATE jumpruns SET way_time = '%d', time_edit = '%d', demo = '%s' WHERE client_id = '%s'
-                  AND mapname = '%s' AND way_id = '%d'""",
-        'jr9': """DELETE FROM jumpruns WHERE id = '%d'""",
-        'jw1': """SELECT * FROM jumpways WHERE mapname = '%s' AND way_id = '%d'""",
+        'jr9': """DELETE FROM jumpruns WHERE id = %s""",
+        'jw1': """SELECT * FROM jumpways WHERE mapname = %s AND way_id = %s""",
     }
 
     _demo_record = True
@@ -335,6 +339,10 @@ class JumperPlugin(b3.plugin.Plugin):
     #   STARTUP                                                                                                        #
     #                                                                                                                  #
     ####################################################################################################################
+
+    def _esc(self, value):
+        """Escape a value for the SQL flavour of the configured storage."""
+        return QueryBuilder(self.console.storage.db).escape(value)
 
     def onLoadConfig(self):
         """
@@ -692,7 +700,7 @@ class JumperPlugin(b3.plugin.Plugin):
         """
         Return a list of jumprun records for the given map
         """
-        cursor = self.console.storage.query(self.sql['jr3'] % (mapname, mapname))
+        cursor = self.console.storage.query(self.sql['jr3'] % (self._esc(mapname), self._esc(mapname)))
         if cursor.EOF:
             cursor.close()
             return []
@@ -719,7 +727,7 @@ class JumperPlugin(b3.plugin.Plugin):
         """
         Return a list of jumprun records for the given client on the given mapname
         """
-        cursor = self.console.storage.query(self.sql['jr4'] % (client.id, mapname))
+        cursor = self.console.storage.query(self.sql['jr4'] % (client.id, self._esc(mapname)))
         if cursor.EOF:
             cursor.close()
             return []
@@ -741,7 +749,7 @@ class JumperPlugin(b3.plugin.Plugin):
         """
         Return a list of top jumpruns for the given mapname
         """
-        c1 = self.console.storage.query(self.sql['jr5'] % mapname)
+        c1 = self.console.storage.query(self.sql['jr5'] % self._esc(mapname))
         if c1.EOF:
             c1.close()
             return []
@@ -749,7 +757,7 @@ class JumperPlugin(b3.plugin.Plugin):
         records = []
         while not c1.EOF:
             r1 = c1.getRow()
-            c2 = self.console.storage.query(self.sql['jr6'] % (mapname, int(r1['way_id'])))
+            c2 = self.console.storage.query(self.sql['jr6'] % (self._esc(mapname), int(r1['way_id'])))
             while not c2.EOF:
                 r2 = c2.getRow()
                 client = self.adminPlugin.findClientPrompt('@%s' % r2['client_id'])
@@ -1011,7 +1019,7 @@ class JumperPlugin(b3.plugin.Plugin):
         way_name = m.group('way_name')
 
         mapname = self.console.game.mapName
-        cursor = self.console.storage.query(self.sql['jw1'] % (mapname, way_id))
+        cursor = self.console.storage.query(self.sql['jw1'] % (self._esc(mapname), way_id))
 
         if cursor.EOF:
             # new entry for this way_id on this map. way_name is raw chat text,

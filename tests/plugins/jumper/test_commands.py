@@ -295,6 +295,21 @@ class Test_commands(JumperTestCase):
     #                                                                                                                  #
     ####################################################################################################################
 
+    def test_mapname_with_a_quote(self):
+        # a map name is stored and updated through the escaped SQL layer
+        self.console.game.mapName = "ut42_o'neil"
+        self.mike.clearMessageHistory()
+        self.mike.says('!setway 1 Rookie')
+        cursor = self.console.storage.query("SELECT mapname, way_name FROM jumpways")
+        self.assertEqual("ut42_o'neil", cursor.getValue('mapname'))
+        self.assertEqual('Rookie', cursor.getValue('way_name'))
+        cursor.close()
+
+        self.mike.says('!setway 1 Explorer')
+        cursor = self.console.storage.query("SELECT way_name FROM jumpways")
+        self.assertEqual('Explorer', cursor.getValue('way_name'))
+        cursor.close()
+
     def test_cmd_setway(self):
         # GIVEN
         self.console.game.mapName = 'ut42_bstjumps_u2'
