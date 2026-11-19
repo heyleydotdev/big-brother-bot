@@ -27,6 +27,7 @@ import b3.plugin
 from b3.functions import hash_password  # python 3: md5 needs bytes, see encode() calls below
 from b3.clients import Client
 from configparser import NoOptionError
+import re
 
 __author__ = 'Tim ter Laak'
 __version__ = '1.4'
@@ -152,18 +153,30 @@ class LoginPlugin(b3.plugin.Plugin):
             client.message('Usage: %s%s <new password> [<client>]' % (cmd.prefix, cmd.command))
             return
 
-        data = data.split()
-        if len(data) > 1:
-            sclient = self._adminPlugin.findClientPrompt(data[1], client)
+        sclient = client
+        password = data
+        target = None
+
+        # a quoted first word may contain spaces: !setpassword "my password" [client]
+        match = re.match(r'^(["\'])(.+?)\1\s*(.*)$', data)
+        if match:
+            password = match.group(2)
+            target = match.group(3).strip() or None
+        else:
+            parts = data.split(None, 1)
+            password = parts[0]
+            if len(parts) > 1:
+                target = parts[1]
+
+        if target:
+            sclient = self._adminPlugin.findClientPrompt(target, client)
             if not sclient:
                 return
             if client.maxLevel <= sclient.maxLevel and client.maxLevel < 100:
                 client.message('You can only change passwords of yourself or lower level players')
                 return
-        else:
-            sclient = client
 
-        sclient.password = hash_password(data[0].encode('utf-8'))
+        sclient.password = hash_password(password.encode('utf-8'))
         sclient.save()
         if client == sclient:
             client.message("Your new password has been saved")

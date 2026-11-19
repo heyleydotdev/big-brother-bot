@@ -22,6 +22,7 @@
 # ################################################################### #
 
 from b3.fake import FakeClient
+from b3.functions import hash_password
 from tests.plugins.login import LoginTestCase, F00_MD5
 
 
@@ -63,6 +64,17 @@ class Test_cmd_setpassword(LoginTestCase):
         self.assertEqual(F00_MD5, self.joe.password)
         joe_db = self.p._get_client_from_db(self.joe.id)
         self.assertEqual(F00_MD5, joe_db.password)
+
+    def test_password_with_spaces(self):
+        # GIVEN
+        self.joe.connects("0")
+        self.joe._groupBits = 128  # force superadmin
+        # WHEN
+        self.joe.clearMessageHistory()
+        self.joe.says('!setpassword "my secret pass"')
+        # THEN
+        self.assertEqual(['Your new password has been saved'], self.joe.message_history)
+        self.assertEqual(hash_password(b'my secret pass'), self.joe.password)
 
     def test_change_someone_else(self):
         # GIVEN
