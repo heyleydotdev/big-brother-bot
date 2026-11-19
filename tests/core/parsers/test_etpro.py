@@ -276,14 +276,14 @@ class FunctionalTest(AdminTestCase):
         self.parser.msgPrefix = "[Pre]"
         player = Client(console=self.parser, guid="theGuid")
         with patch.object(self.parser, 'writelines') as write_mock:
-            player.message("f00")
-            write_mock.assert_has_calls([call(['m  [Pre] ^8[pm]^7 f00'])])
+            self.parser.message(player, "f00")
+            write_mock.assert_called_once_with(['m  [Pre] ^8[pm]^7 f00'])
 
     def test_message_with_color_codes(self):
         self.parser.msgPrefix = "[Pre]"
         player = Client(console=self.parser, guid="theGuid")
         with patch.object(self.parser, 'writelines') as write_mock:
-            player.message("^7message ^1with ^2color ^8codes")
-            write_mock.assert_has_calls([call(['m  [Pre] ^8[pm]^7 ^7message ^1with ^2color ^8codes'])])
+            self.parser.message(player, "^7message ^1with ^2color ^8codes")
+            write_mock.assert_called_once_with(['m  [Pre] ^8[pm]^7 ^7message ^1with ^2color ^8codes'])
 
 
