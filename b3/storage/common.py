@@ -24,7 +24,6 @@
 import b3
 import os
 import re
-import sys
 import _thread
 
 from b3.clients import Client
@@ -656,11 +655,10 @@ class DatabaseStorage(Storage):
             if cursor:
                 cursor.close()
 
-    def queryFromFile(self, fp, silent=False):
+    def queryFromFile(self, fp):
         """
         This method executes an external sql file on the current database.
         :param fp: The filepath of the file containing the SQL statements.
-        :param silent: Whether or not to silence MySQL warnings.
         :raise Exception: If the query cannot be evaluated or if the given path cannot be resolved.
         """
         # use existing connection or create a new one
@@ -669,12 +667,6 @@ class DatabaseStorage(Storage):
         connection = self.getConnection()
         if not connection:
             raise Exception('lost connection with the storage layer during query')
-
-        # save standard error output
-        orig_stderr = sys.stderr
-        if silent:
-            # silence mysql warnings and such
-            sys.stderr = open(os.devnull, 'w')
 
         path = b3.getAbsolutePath(fp)
         if not os.path.exists(path):
@@ -686,9 +678,6 @@ class DatabaseStorage(Storage):
         for stmt in statements:
             # will stop if a single query generate an exception
             self.query(stmt)
-
-        # reset standard error output
-        sys.stderr = orig_stderr
 
     ####################################################################################################################
     #                                                                                                                  #
