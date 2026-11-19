@@ -96,9 +96,9 @@ class dispatcher(object):
         return True
 
     def writable(self):
-        # only channels with buffered output need write events: returning True
-        # here makes select() return immediately on an idle socket (busy loop)
-        return False
+        # a channel needs write events while its connection is still being
+        # established, and afterwards only when it has buffered output
+        return not self.connected
 
     # -----------------------------------------------------------------
     # events
@@ -171,7 +171,7 @@ class dispatcher_with_send(dispatcher):
     ac_out_buffer_size = 4096
 
     def writable(self):
-        return bool(self.out_buffer)
+        return not self.connected or bool(self.out_buffer)
 
     def send(self, data):
         self.out_buffer += data

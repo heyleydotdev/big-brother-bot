@@ -30,14 +30,52 @@ from b3.lib import netasync
 
 class Test_writable(unittest.TestCase):
 
-    def test_receiver_is_not_write_interested(self):
-        self.assertFalse(netasync.dispatcher().writable())
+    def test_connected_receiver_is_not_write_interested(self):
+        channel = netasync.dispatcher()
+        self.assertTrue(channel.writable())  # still connecting
+        channel.connected = True
+        self.assertFalse(channel.writable())
 
-    def test_writer_is_write_interested_only_with_buffered_data(self):
+    def test_writer_is_write_interested_while_connecting_or_with_buffered_data(self):
         channel = netasync.dispatcher_with_send()
+        self.assertTrue(channel.writable())  # still connecting
+        channel.connected = True
         self.assertFalse(channel.writable())
         channel.out_buffer = b'x'
         self.assertTrue(channel.writable())
+
+
+class Test_connect(unittest.TestCase):
+    """a completing TCP connect must reach handle_connect (auth happens there)"""
+
+    def setUp(self):
+        netasync._socket_map.clear()
+        self.server = socket.socket()
+        self.server.bind(('127.0.0.1', 0))
+        self.server.listen(1)
+        self.connects = []
+
+    def tearDown(self):
+        for channel in list(netasync._socket_map.values()):
+            channel.close()
+        self.server.close()
+        netasync._socket_map.clear()
+
+    def test_handle_connect_is_called(self):
+        connect_called = self.connects
+
+        class Client(netasync.dispatcher_with_send):
+            def handle_connect(self):
+                connect_called.append(True)
+
+        channel = Client()
+        channel.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+        channel.connect(self.server.getsockname())
+
+        netasync.poll(0.5)
+
+        self.assertTrue(connect_called, "handle_connect never ran on a completing connect")
+        self.assertTrue(channel.connected)
 
 
 class Test_idle_loop(unittest.TestCase):
