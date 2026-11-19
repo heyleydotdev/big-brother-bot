@@ -244,7 +244,7 @@ class Task(object):
                         plugin.enable()
                         self.plugin.info('plugin %s is now ON', pluginName)
                 else:
-                    self.plugin.warn('no plugin named %s loaded', pluginName)
+                    self.plugin.warning('no plugin named %s loaded', pluginName)
             except Exception as e:
                 self.plugin.error("task %s : %s" % (self.name, e))
 
@@ -260,7 +260,7 @@ class Task(object):
                         plugin.disable()
                         self.plugin.info('plugin %s is now OFF', pluginName)
                 else:
-                    self.plugin.warn('no plugin named %s loaded', pluginName)
+                    self.plugin.warning('no plugin named %s loaded', pluginName)
             except Exception as e:
                 self.plugin.error("task %s : %s", self.name, e)
 
