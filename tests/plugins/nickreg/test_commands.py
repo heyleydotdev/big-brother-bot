@@ -124,3 +124,13 @@ class Test_commands(NickregTestCase):
         self.admin.says('!deletenick 1')
         # THEN
         self.assertListEqual(['You can\'t delete SeniorAdmin registered nicknames!'], self.admin.message_history)
+
+    def test_like_wildcard_in_name_is_not_a_match(self):
+        # GIVEN a registered nickname
+        self.admin.says('!registernick')
+        # WHEN a player whose name is a SQL LIKE pattern connects
+        self.guest.name = 'a%'
+        self.guest.clearMessageHistory()
+        self.p.check_client_for_nick_steal(self.guest)
+        # THEN it must not be treated as someone else's nickname
+        self.assertListEqual([], self.guest.message_history)

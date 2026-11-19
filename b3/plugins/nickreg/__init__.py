@@ -161,7 +161,7 @@ class NickregPlugin(b3.plugin.Plugin):
         if client and client.id and client.pbid not in ('WORLD', 'Server'):
 
             self.debug('checking if client @%s is using a registered nickname (%s)', client.id, client.name)
-            cursor = self.console.storage.query("""SELECT * FROM nicks WHERE name LIKE '%s'""" % self._process_name(client.name))
+            cursor = self.console.storage.query("""SELECT * FROM nicks WHERE name = '%s'""" % self._process_name(client.name))
             if cursor.EOF:
                 self.debug('nickname "%s" does not seem to be registered: client @%s is legit', client.name, client.id)
             else:
@@ -214,7 +214,7 @@ class NickregPlugin(b3.plugin.Plugin):
         """
         - register current name as yours
         """
-        cursor = self.console.storage.query("""SELECT * FROM nicks WHERE name LIKE '%s'""" % self._process_name(client.name))
+        cursor = self.console.storage.query("""SELECT * FROM nicks WHERE name = '%s'""" % self._process_name(client.name))
         if not cursor.EOF:
             client.message('^7Nick ^1%s ^7is already registered' % client.name)
             cursor.close()
