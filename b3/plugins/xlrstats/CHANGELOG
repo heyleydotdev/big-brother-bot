@@ -1,6 +1,6 @@
 CHANGELOG (see xlrstats-v2-changelog.txt for v1 and v2 history and credits)
 
-20-11-2026 - 3.0.0        - B3 contributors - first stable release on Python 3:
+20-11-2026 - 3.0.0        - Raveen (heyleydotdev) - first stable release on Python 3:
                                             - per-dialect name escaping (SQLite, MySQL, PostgreSQL)
                                             - PostgreSQL schema upgrade adds id_token; schema errors are no longer silent
                                             - world client protected from auto purge; active-only kill bonus and valid PostgreSQL query

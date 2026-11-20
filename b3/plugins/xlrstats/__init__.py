@@ -21,7 +21,7 @@
 #                                                                     #
 # ################################################################### #
 
-__author__ = 'xlr8or & ttlogic'
+__author__ = 'xlr8or, ttlogic & heyleydotdev'
 __version__ = '3.0.0'
 
 import b3
