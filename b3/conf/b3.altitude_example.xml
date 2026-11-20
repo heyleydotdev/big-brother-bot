@@ -95,7 +95,7 @@
             -->
         <plugin name="admin" config="@b3/conf/plugin_admin.ini" />
         <!--
-        <plugin name="censor" config="@b3/conf/plugin_censor.xml" />
+        <plugin name="censor" config="@b3/conf/plugin_censor.ini" />
         <plugin name="spamcontrol" config="@b3/conf/plugin_spamcontrol.xml" />
         <plugin name="admin" config="@b3/conf/plugin_admin.ini" />
         <plugin name="tk" config="@b3/conf/plugin_tk.xml" />

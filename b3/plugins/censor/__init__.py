@@ -105,8 +105,6 @@ class CensorPlugin(b3.plugin.Plugin):
         """
         Load plugin configuration.
         """
-        assert isinstance(self.config, XmlConfigParser)
-
         try:
             self._maxLevel = self.config.getint('settings', 'max_level')
             self.debug('loaded settings/max_level: %s' % self._maxLevel)
@@ -127,27 +125,25 @@ class CensorPlugin(b3.plugin.Plugin):
             self.error('could not load settings/ignore_length config value: %s' % e)
             self.debug('using default value (%s) for settings/ignore_length' % self._ignoreLength)
 
+        if isinstance(self.config, XmlConfigParser):
+            self._load_xml_config()
+        else:
+            self._load_ini_config()
+
+    def _load_xml_config(self):
         default_badwords_penalty_nodes = self.config.get('badwords/penalty')
         if len(default_badwords_penalty_nodes):
-            penalty = default_badwords_penalty_nodes[0]
-            self._defaultBadWordPenalty = PenaltyData(type=penalty.get('type'),
-                                                      reason=penalty.get('reason'),
-                                                      keyword=penalty.get('reasonkeyword'),
-                                                      duration=functions.time2minutes(penalty.get('duration')))
+            self._defaultBadWordPenalty = self._penalty_from_xml(default_badwords_penalty_nodes[0])
         else:
             self.warning('no default badwords penalty found in configuration file: '
                          'using default (%s)' % self._defaultBadNamePenalty)
 
         default_badnames_penalty_nodes = self.config.get('badnames/penalty')
         if len(default_badnames_penalty_nodes):
-            penalty = default_badnames_penalty_nodes[0]
-            self._defaultBadNamePenalty = PenaltyData(type=penalty.get('type'),
-                                                      reason=penalty.get('reason'),
-                                                      keyword=penalty.get('reasonkeyword'),
-                                                      duration=functions.time2minutes(penalty.get('duration')))
+            self._defaultBadNamePenalty = self._penalty_from_xml(default_badnames_penalty_nodes[0])
         else:
             self.warning('no default badnames penalty found in configuration file: '
-                         'using default (%s)' % self._defaultBadNamePenalty)
+                         'using default (%s)', self._defaultBadNamePenalty)
 
         # load bad words into memory
         self._badWords = []
@@ -156,7 +152,7 @@ class CensorPlugin(b3.plugin.Plugin):
             word_node = e.find('word')
             regexp_node = e.find('regexp')
             self._add_bad_word(rulename=e.get('name'),
-                               penalty=penalty_node,
+                               penalty=self._penalty_from_xml(penalty_node) if penalty_node is not None else None,
                                word=word_node.text if word_node is not None else None,
                                regexp=regexp_node.text if regexp_node is not None else None)
 
@@ -167,9 +163,54 @@ class CensorPlugin(b3.plugin.Plugin):
             word_node = e.find('word')
             regexp_node = e.find('regexp')
             self._add_bad_name(rulename=e.get('name'),
-                               penalty=penalty_node,
+                               penalty=self._penalty_from_xml(penalty_node) if penalty_node is not None else None,
                                word=word_node.text if word_node is not None else None,
                                regexp=regexp_node.text if regexp_node is not None else None)
+
+    def _load_ini_config(self):
+        if not self.config.has_section('badwords') or not self.config.has_option('badwords', 'penalty'):
+            self.warning('no default badwords penalty found in configuration file: '
+                         'using default (%s)', self._defaultBadWordPenalty)
+        else:
+            self._defaultBadWordPenalty = self._penalty_from_section('badwords', self._defaultBadWordPenalty)
+
+        if not self.config.has_section('badnames') or not self.config.has_option('badnames', 'penalty'):
+            self.warning('no default badnames penalty found in configuration file: '
+                         'using default (%s)' % self._defaultBadNamePenalty)
+        else:
+            self._defaultBadNamePenalty = self._penalty_from_section('badnames', self._defaultBadNamePenalty)
+
+        self._badWords = []
+        self._badNames = []
+        for section in self.config.sections():
+            if section.startswith('badword:'):
+                self._add_ini_rule(section, self._add_bad_word)
+            elif section.startswith('badname:'):
+                self._add_ini_rule(section, self._add_bad_name)
+
+    def _penalty_from_xml(self, node):
+        return PenaltyData(type=node.get('type'),
+                           reason=node.get('reason'),
+                           keyword=node.get('reasonkeyword'),
+                           duration=functions.time2minutes(node.get('duration')))
+
+    def _penalty_from_section(self, section, fallback=None):
+        if not self.config.has_section(section) or not self.config.has_option(section, 'penalty'):
+            return fallback
+        duration = functions.time2minutes(self.config.get(section, 'duration'))             if self.config.has_option(section, 'duration') else 0
+        return PenaltyData(
+            type=self.config.get(section, 'penalty'),
+            reason=self.config.get(section, 'reason') if self.config.has_option(section, 'reason') else None,
+            keyword=self.config.get(section, 'reason_keyword')
+            if self.config.has_option(section, 'reason_keyword') else None,
+            duration=duration)
+
+    def _add_ini_rule(self, section, add):
+        rulename = section.split(':', 1)[1]
+        penalty = self._penalty_from_section(section)
+        word = self.config.get(section, 'word') if self.config.has_option(section, 'word') else None
+        regexp = self.config.get(section, 'regexp') if self.config.has_option(section, 'regexp') else None
+        add(rulename=rulename, penalty=penalty, word=word, regexp=regexp)
 
     def _add_bad_word(self, rulename, penalty=None, word=None, regexp=None):
         """
@@ -223,10 +264,7 @@ class CensorPlugin(b3.plugin.Plugin):
             raise
 
         if penalty is not None:
-            pd = PenaltyData(type=penalty.get('type'),
-                             reason=penalty.get('reason'),
-                             keyword=penalty.get('reasonkeyword'),
-                             duration=functions.time2minutes(penalty.get('duration')))
+            pd = penalty
         else:
             pd = default
 

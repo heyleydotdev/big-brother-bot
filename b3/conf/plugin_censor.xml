@@ -1,3 +1,4 @@
+<!-- DEPRECATED: use plugin_censor.ini -->
 <configuration plugin="censor">
 	<settings name="settings">
         <!-- max_level: Users with a greater level will not be checked for bad words/names. -->

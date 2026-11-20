@@ -41,7 +41,7 @@ class Test_Censor_badname_default_config(Detection_TestCase):
             print(("WARNING\t%s" % text))
         #self.p.warning = my_warning
 
-        self.p.config.load(b3.getAbsolutePath('@b3/conf/plugin_censor.xml'))
+        self.p.config.load(b3.getAbsolutePath('@b3/conf/plugin_censor.ini'))
         self.p.onLoadConfig()
         self.assertEqual(17, len(self.p._badNames))
 

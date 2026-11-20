@@ -29,7 +29,7 @@ from unittest.mock import Mock, patch
 from b3.fake import FakeClient
 from tests import B3TestCase
 from b3.plugins.censor import CensorPlugin
-from b3.config import XmlConfigParser
+from b3.config import XmlConfigParser, CfgConfigParser
 
 
 class CensorTestCase(B3TestCase):
@@ -58,8 +58,12 @@ class CensorTestCase(B3TestCase):
         logging.getLogger('output').setLevel(logging.WARNING)
 
     def init_plugin(self, config_content):
-        self.conf = XmlConfigParser()
-        self.conf.setXml(config_content)
+        if config_content.lstrip().startswith('<'):
+            self.conf = XmlConfigParser()
+            self.conf.setXml(config_content)
+        else:
+            self.conf = CfgConfigParser()
+            self.conf.loadFromString(config_content)
         self.p = CensorPlugin(self.console, self.conf)
         self.log.setLevel(logging.DEBUG)
         self.log.info("============================= Censor plugin: loading config ============================")
@@ -74,16 +78,15 @@ class Detection_TestCase(CensorTestCase):
     """
     def setUp(self):
         CensorTestCase.setUp(self)
-        self.init_plugin(r"""
-            <configuration plugin="censor">
-                <badwords>
-                    <penalty type="warning" reasonkeyword="racist"/>
-                </badwords>
-                <badnames>
-                    <penalty type="warning" reasonkeyword="badname"/>
-                </badnames>
-            </configuration>
-        """)
+        self.init_plugin("""
+[badwords]
+penalty: warning
+reason_keyword: racist
+
+[badnames]
+penalty: warning
+reason_keyword: badname
+""")
 
     def assert_name_penalized_count(self, name, count):
         self.p.penalizeClientBadname = Mock()

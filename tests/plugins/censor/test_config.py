@@ -44,7 +44,7 @@ class Test_config(CensorTestCase):
         self.assertIsNone(self.p._defaultBadNamePenalty.reason)
 
     def test_default_conf(self):
-        with open(b3.getAbsolutePath('@b3/conf/plugin_censor.xml')) as default_conf:
+        with open(b3.getAbsolutePath('@b3/conf/plugin_censor.ini')) as default_conf:
             self.init_plugin(default_conf.read())
         self.assertEqual(40, self.p._maxLevel)
         self.assertEqual(3, self.p._ignoreLength)
@@ -52,6 +52,33 @@ class Test_config(CensorTestCase):
         self.assertEqual(17, len(self.p._badNames))
         self.assert_default_badwords_penalty()
         self.assert_default_badnames_penalty()
+
+    def test_ini_rule_with_penalty(self):
+        self.init_plugin("""
+[badwords]
+penalty: warning
+reason_keyword: cuss
+
+[badword:test]
+regexp: testword
+penalty: tempban
+reason: no
+duration: 5m
+
+[badnames]
+penalty: warning
+reason_keyword: badname
+
+[badname:testname]
+word: testname
+""")
+        self.assertEqual(1, len(self.p._badWords))
+        self.assertEqual('tempban', self.p._badWords[0].penalty.type)
+        self.assertEqual(5, self.p._badWords[0].penalty.duration)
+        self.assertEqual('no', self.p._badWords[0].penalty.reason)
+        self.assertEqual(1, len(self.p._badNames))
+        self.assertEqual('warning', self.p._badNames[0].penalty.type)
+        self.assertEqual('badname', self.p._badNames[0].penalty.keyword)
 
     def test_broken_conf__emtpy_conf(self):
         self.init_plugin(r"""

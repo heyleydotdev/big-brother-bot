@@ -77,7 +77,7 @@ class CommonDefaultTestMethodsMixin:
         self.assertListEqual([
             {'name': 'admin', 'conf': '@b3/conf/plugin_admin.ini', 'disabled': False, 'path': None},
             {'name': 'adv', 'conf': '@b3/conf/plugin_adv.ini', 'disabled': False, 'path': None},
-            {'name': 'censor', 'conf': '@b3/conf/plugin_censor.xml', 'disabled': False, 'path': None},
+            {'name': 'censor', 'conf': '@b3/conf/plugin_censor.ini', 'disabled': False, 'path': None},
             {'name': 'cmdmanager', 'conf': '@b3/conf/plugin_cmdmanager.ini', 'disabled': False, 'path': None},
             {'name': 'pingwatch', 'conf': '@b3/conf/plugin_pingwatch.ini', 'disabled': False, 'path': None},
             {'name': 'pluginmanager', 'conf': '@b3/conf/plugin_pluginmanager.ini', 'disabled': False, 'path': None},

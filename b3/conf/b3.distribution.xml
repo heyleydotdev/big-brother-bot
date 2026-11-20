@@ -104,7 +104,7 @@
         -->
         <plugin name="admin" config="@b3/conf/plugin_admin.ini" />
         <plugin name="adv" config="@b3/conf/plugin_adv.ini" />
-        <plugin name="censor" config="@b3/conf/plugin_censor.xml" />
+        <plugin name="censor" config="@b3/conf/plugin_censor.ini" />
         <plugin name="cmdmanager" config="@b3/conf/plugin_cmdmanager.ini" />
         <plugin name="pingwatch" config="@b3/conf/plugin_pingwatch.ini" />
         <plugin name="pluginmanager" config="@b3/conf/plugin_pluginmanager.ini" />
