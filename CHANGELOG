@@ -1,3 +1,34 @@
+3.0.0 -> 3.0.1
+----
+
+Fixes:
+- `!cmdlevel` and `!cmdalias` replies failed on the q3-family parsers (CoD,
+  CoD4x, ET, Frostbite...): substitution arguments were forwarded to
+  `message()` / `say()`, which take a single string there, so the admin only got
+  "There was an error processing your command".
+- `!cmdlevel` could not save the new level: the plugin INI was opened in binary
+  mode while `ConfigParser.write()` produces text, so every update raised
+  `TypeError` and the change was lost on restart.
+
+Security:
+- Admin passwords are no longer unsalted MD5. New hashes are salted
+  PBKDF2-SHA256 stored in the existing 32-character column; a legacy MD5 hash is
+  accepted once and upgraded on the next successful `!login`.
+
+Performance:
+- The game log is read in 64 KiB chunks instead of an unbounded `readlines()`,
+  so replaying a large log, or catching up after a long stall, no longer loads
+  the whole tail into memory.
+
+Geolocation (plugin 1.7):
+- MaxMind retired the GeoIP Legacy `.dat` format in 2022, which the plugin still
+  read. It now reads a MaxMind DB (MMDB) file - DB-IP Lite (City or Country) or
+  GeoLite2 - through the new `maxminddb` dependency. The local file is tried
+  before the HTTP services, city/region/coordinates are mapped for the location
+  plugin, and IPv6 addresses are resolved. The bundled 2018 database and its
+  vendored reader are gone. An unreadable database, and a legacy `GeoIP.dat`
+  left over from an older install, are now reported instead of failing silently.
+
 2.2.3 -> 3.0.0
 ----
 
