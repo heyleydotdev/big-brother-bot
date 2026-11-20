@@ -932,10 +932,14 @@ class Parser(object):
         else:
             raise ImportError("no module named '%s' (looked in %s)" % (name, search_dir))
         module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        # register in sys.modules like the old imp.load_module did, so plugins
-        # referencing each other by module name keep working
+        # register before executing: a plugin package using relative imports
+        # (from .location import ...) needs its own name in sys.modules
         sys.modules[name] = module
+        try:
+            spec.loader.exec_module(module)
+        except Exception:
+            sys.modules.pop(name, None)
+            raise
         return module
 
     def startPlugins(self):

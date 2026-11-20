@@ -23,6 +23,7 @@
 
 
 import b3
+import unittest
 import logging
 import os
 from configparser import NoOptionError
@@ -75,6 +76,15 @@ class MyPlugin(Plugin):
     def onEvent(self, event):
         self.onEvent_call_count += 1
         logging.debug("onEvent called")
+
+
+class Test_load_plugin_module(unittest.TestCase):
+
+    def test_package_with_relative_imports(self):
+        # the module must be in sys.modules while __init__.py runs, or
+        # "from .exceptions import ..." fails with ModuleNotFoundError
+        module = Parser._load_plugin_module('geolocation', os.path.join(b3.getB3Path(True), 'plugins'))
+        self.assertTrue(hasattr(module, 'GeolocationPlugin'))
 
 
 class Test_Plugin_getMessage(B3TestCase):
