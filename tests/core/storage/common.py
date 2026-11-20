@@ -34,6 +34,9 @@ class StorageAPITest(object):
 
     storage = None
 
+    def test_status_while_connected(self):
+        self.assertTrue(self.storage.status())
+
     def test_setClient(self):
         c1 = Client(ip="1.2.3.4", connections=2, guid="abcdefghijkl", pbid="123546abcdef", name="some dude", greeting="hi!", mask_level=20, group_bits=8, login="test login", password="test password")
         c1_id = self.storage.setClient(c1)

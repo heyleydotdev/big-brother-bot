@@ -165,4 +165,4 @@ class SqliteStorage(DatabaseStorage):
         Check whether the connection with the storage layer is active or not.
         :return True if the connection is active, False otherwise.
         """
-        return self.db is None
+        return self.db is not None

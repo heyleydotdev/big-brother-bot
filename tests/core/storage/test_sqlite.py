@@ -43,6 +43,10 @@ class Test_sqlite(B3TestCase, StorageAPITest):
         B3TestCase.tearDown(self)
         self.storage.shutdown()
 
+    def test_status_after_shutdown(self):
+        self.storage.shutdown()
+        self.assertFalse(self.storage.status())
+
     def test_getTables(self):
         self.assertSetEqual(set(
             ['sqlite_sequence',
