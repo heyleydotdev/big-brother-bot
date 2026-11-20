@@ -103,8 +103,14 @@ class Test_PostgreSQL(B3TestCase, StorageAPITest):
 
         # keep the storage errors: 'lost connection' hides the real cause
         storage_errors = []
-        self.console.error = lambda msg, *a, **kw: storage_errors.append(msg % a if a else msg)
-        self.console.critical = lambda msg, *a, **kw: storage_errors.append(msg % a if a else msg)
+        console_error, console_critical = self.console.error, self.console.critical
+
+        def capture(msg, *a, **kw):
+            storage_errors.append(msg % a if a else msg)
+            console_error(msg, *a, **kw)
+
+        self.console.error = capture
+        self.console.critical = capture
 
         try:
             # create a fresh database like Test_MySQL does, since the PostgreSQL server
