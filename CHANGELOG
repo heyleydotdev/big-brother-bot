@@ -1,3 +1,39 @@
+2.2.2 -> 2.2.3
+----
+
+Database:
+- PostgreSQL storage tests run with psycopg 3. `DBCursor` no longer requires
+  `cursor.lastrowid`, which broke every PostgreSQL query. The XLRstats
+  `id_token` migration now covers PostgreSQL, and the kill-bonus query is valid
+  SQL (it previously failed on PostgreSQL and included inactive players).
+- MySQL and PostgreSQL service containers are reachable from CI; new guards fail
+  CI if a database class is skipped.
+- SQLite `status()` reports its connection state correctly; the group list is
+  no longer cached for the process lifetime; `admins_cache` is only used when
+  the database is unreachable.
+
+XLRstats:
+- per-dialect name escaping; dead schema helpers removed; the duplicate-column
+  update is no longer logged as ERROR; the webfront thread is a daemon with a
+  timeout; `webfrontversion` is read as an int; portable top-list SQL; all 11
+  settings are shipped; world-client purge guard; active-only kill bonus;
+  `!xlrinit yes` confirmation; tests for the background jobs and the MySQL /
+  PostgreSQL SQL paths.
+
+Other plugins:
+- admin: `!unreg`, `!putgroup` and `!ungroup` refuse a target above the caller.
+- plugin loader registers a module before executing it (geolocation,
+  poweradminurt, geowelcome).
+- status: SQLite server-variable upsert and bytes-safe XML; jumper: edit time;
+  adv: feed item clamp; stats: group keyword levels; iamgod: level=None;
+  stdout/stderr flush; docs: cmp_to_key.
+- every plugin instance gets its own message cache.
+
+Configuration:
+- XML configuration is deprecated; adv, censor, censorurt, banlist,
+  poweradmincod7 and scheduler ship as INI. The XML loader still works and logs
+  a warning. `cod4x` is listed in the distribution parser examples.
+
 2.2.1 -> 2.2.2
 ----
 
