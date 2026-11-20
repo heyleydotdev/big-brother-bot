@@ -31,6 +31,7 @@ __author__ = 'Courgette, ozon'
 __version__ = '1.2.9'
 
 import datetime
+import functools
 import os
 import re
 import io
@@ -275,7 +276,7 @@ class DocBuilder:
                 return 0
 
         listCommands = list(commands.values())
-        listCommands.sort(commands_compare)
+        listCommands.sort(key=functools.cmp_to_key(commands_compare))
         return listCommands
 
     def _write(self, text):
