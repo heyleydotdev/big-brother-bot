@@ -214,6 +214,20 @@ class Test_cmd_iamgod(CommandTestCase):
         self.mock_client.message.assert_called_once_with('^7You are now a ^2%s' % mock_superadmin_group.name)
 
 
+    def test_command_is_disabled_with_none_after_iamgod(self):
+        # a string level here used to break every !help ("str" <= "int")
+        cmd = Command(self.p, 'iamgod', 0, lambda data, client, cmd=None: None)
+        self.p._commands = {'iamgod': cmd}
+        self.p.console.clients.lookupSuperAdmins = Mock(return_value=[])
+        self.p.console.storage.getGroup = Mock(return_value=Mock(spec=Group))
+        self.mock_client.groups = []
+
+        self.iamgod()
+
+        self.assertIsNone(cmd.level)
+        self.assertFalse(cmd.canUse(self.mock_client))
+
+
 class Test_cmd_warn(CommandTestCase):
 
     def setUp(self):

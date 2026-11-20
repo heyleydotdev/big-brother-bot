@@ -1637,7 +1637,7 @@ class AdminPlugin(b3.plugin.Plugin):
                 self.error('iamgod command not found')
                 return False
             else:
-                command.level = 'none'
+                command.level = None
                 if group in client.groups:
                     client.message('^7You are already a ^2%s' % group.exactName)
                 else:
