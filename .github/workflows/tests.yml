@@ -94,6 +94,12 @@ jobs:
             grep -A8 -E '^(FAILED|ERROR) tests/' pytest.log | grep -v '^--$' | head -40 | while IFS= read -r line; do
               echo "::error title=pytest::$line"
             done
+            # storage errors are only in the captured stdout of the failing test
+            if grep -qE 'Database connection failed|Missing PostgreSQL|Query failed' pytest.log; then
+              grep -E 'Database connection failed|Missing PostgreSQL|Query failed' pytest.log | head -10 | while IFS= read -r line; do
+                echo "::error title=pytest-db::$line"
+              done
+            fi
             # a worker crash or a fatal error does not print FAILED lines
             if ! grep -qE '^(FAILED|ERROR) tests/' pytest.log; then
               grep -nE 'Fatal Python error|INTERNALERROR|node down|worker .* crashed' pytest.log | head -10 | while IFS= read -r line; do
