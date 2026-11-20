@@ -1,3 +1,4 @@
+<!-- DEPRECATED: XML configuration files are deprecated. Use the INI format. -->
 <configuration>
 <!-- 
  If you want to generate a new config file and make sure the format is 

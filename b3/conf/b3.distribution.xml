@@ -1,3 +1,4 @@
+<!-- DEPRECATED: XML configuration files are deprecated. Use the INI format. -->
 <configuration>
 <!-- 
  If you want to generate a new config file and make sure the format is 
@@ -95,14 +96,14 @@
             You can load a plugin but having it disabled by default. This
             allows to later enabled it ingame with the !enable command. To do so use
             the following syntax :
-                <plugin name="adv" config="@b3/conf/plugin_adv.xml" disabled="yes"/>
+                <plugin name="adv" config="@b3/conf/plugin_adv.ini" disabled="yes"/>
             
             You can override the plugin path (official plugins and extplugins folders) 
             by specifying the exact location of the plugin file with the 'path' attribute : 
-                <plugin name="adv" config="@b3/conf/plugin_adv.xml" path="c:/somewhere/else/"/>
+                <plugin name="adv" config="@b3/conf/plugin_adv.ini" path="c:/somewhere/else/"/>
         -->
         <plugin name="admin" config="@b3/conf/plugin_admin.ini" />
-        <plugin name="adv" config="@b3/conf/plugin_adv.xml" />
+        <plugin name="adv" config="@b3/conf/plugin_adv.ini" />
         <plugin name="censor" config="@b3/conf/plugin_censor.xml" />
         <plugin name="cmdmanager" config="@b3/conf/plugin_cmdmanager.ini" />
         <plugin name="pingwatch" config="@b3/conf/plugin_pingwatch.ini" />
@@ -135,7 +136,7 @@
         <!-- <plugin name="nickreg" config="@b3/conf/plugin_nickreg.ini" /> -->
         <!-- <plugin name="poweradminbf3" config="@b3/conf/plugin_poweradminbf3.ini" /> -->
         <!-- <plugin name="poweradminbfbc2" config="@b3/conf/plugin_poweradminbfbc2.ini" /> -->
-        <!-- <plugin name="poweradmincod7" config="@b3/conf/plugin_poweradmincod7.xml" /> -->
+        <!-- <plugin name="poweradmincod7" config="@b3/conf/plugin_poweradmincod7.ini" /> -->
         <!-- <plugin name="poweradminhf" config="@b3/conf/plugin_poweradminhf.ini" /> -->
         <!-- <plugin name="poweradminmoh" config="@b3/conf/plugin_poweradminmoh.ini" /> -->
         <!-- <plugin name="poweradminurt" config="@b3/conf/plugin_poweradminurt.ini" /> -->

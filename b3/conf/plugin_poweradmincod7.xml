@@ -1,3 +1,4 @@
+<!-- DEPRECATED: use plugin_poweradmincod7.ini -->
 <configuration plugin="poweradmincod7">
     <settings name="commands">
         <!--

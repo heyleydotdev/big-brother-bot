@@ -32,7 +32,8 @@ import b3.plugin
 import b3.cron
 
 from b3 import B3_RSS
-from configparser import NoOptionError
+from b3.config import XmlConfigParser
+from configparser import NoOptionError, NoSectionError
 
 
 class MessageLoop(object):
@@ -177,6 +178,9 @@ class AdvPlugin(b3.plugin.Plugin):
             self._feedpre = self.config.get('newsfeed', 'pretext')
         except NoOptionError:
             pass
+        # the INI parser strips trailing spaces: keep the feed readable
+        if self._feedpre and not self._feedpre.endswith(' '):
+            self._feedpre += ' '
 
         # test if we have a proper feed
         if self._feed is not None:
@@ -232,9 +236,14 @@ class AdvPlugin(b3.plugin.Plugin):
         """
         Load advertisement from the plugin configuration file.
         """
-        items = []
-        for e in self.config.get('ads/ad'):
-            items.append(e.text)
+        if isinstance(self.config, XmlConfigParser):
+            items = [e.text for e in self.config.get('ads/ad')]
+        else:
+            try:
+                keys = self.config.options('ads')
+            except NoSectionError:
+                keys = []
+            items = [self.config.get('ads', key) for key in keys]
 
         self.load(items)
 

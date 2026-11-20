@@ -29,6 +29,7 @@ import tempfile
 from unittest import TestCase
 import unittest
 import sys
+import b3.config
 from b3.config import XmlConfigParser, CfgConfigParser, ConfigFileNotValid
 from tests import B3TestCase
 
@@ -217,6 +218,15 @@ if __name__ == '__main__':
     unittest.main()
 
 
+class Test_shipped_configs(unittest.TestCase):
+
+    def test_poweradmincod7_ini(self):
+        conf = b3.config.load('@b3/conf/plugin_poweradmincod7.ini')
+        self.assertIsInstance(conf, CfgConfigParser)
+        self.assertEqual('40', conf.get('commands', 'pasetmap-setmap'))
+        self.assertEqual('100', conf.get('commands', 'paload-load'))
+
+
 class Test_config_file_encoding(unittest.TestCase):
     """config files are UTF-8, not the machine locale encoding"""
 
@@ -253,6 +263,17 @@ class Test_config_file_encoding(unittest.TestCase):
         conf = XmlConfigParser()
         conf.load(self.path)
         self.assertEqual('Ünknown', conf.get('b3', 'bot_name'))
+
+    def test_xml_load_warns_deprecation(self):
+        path = os.path.join(self.dir, 'b3.xml')
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write('<?xml version="1.0" encoding="utf-8"?>'
+                    '<configuration><settings name="b3"><set name="bot_name">b3</set>'
+                    '</settings></configuration>')
+        with self.assertLogs('output', level='WARNING') as logs:
+            conf = b3.config.load(path)
+        self.assertIsInstance(conf, XmlConfigParser)
+        self.assertTrue(any('deprecated' in line for line in logs.output))
 
     def test_legacy_bytes_survive_a_save(self):
         # a cp1252 config loaded and saved again keeps its original bytes

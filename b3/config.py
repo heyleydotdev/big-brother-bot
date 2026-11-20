@@ -24,6 +24,7 @@
 __author__  = 'ThorN, Courgette, Fenix'
 __version__ = '1.7.9'
 
+import logging
 import os
 import re
 import time
@@ -411,6 +412,9 @@ def load(filename):
     Will instantiate the correct configuration object parser.
     """
     if os.path.splitext(filename)[1].lower() == '.xml':
+        logging.getLogger('output').warning(
+            'XML configuration files are deprecated and will be removed in a future release: '
+            'convert %s to the INI format', filename)
         config = XmlConfigParser()
     else:
         # allow the use of empty keys to support the new b3.ini configuration file
