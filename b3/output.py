@@ -122,6 +122,13 @@ class STDOutLogger:
         """
         self.logger.info('STDOUT %r' % msg)
 
+    def flush(self):
+        # python flushes sys.stdout on shutdown / input(): this is not a stream
+        pass
+
+    def isatty(self):
+        return False
+
 
 class STDErrLogger:
     """
@@ -140,6 +147,13 @@ class STDErrLogger:
         :param msg: The message to write
         """
         self.logger.error('STDERR %r' % msg)
+
+    def flush(self):
+        # python flushes sys.stderr on shutdown / unraisable exceptions
+        pass
+
+    def isatty(self):
+        return False
 
 
 logging.setLoggerClass(OutputHandler)
