@@ -24,8 +24,7 @@
 import os
 import unittest
 
-from mockito import mock
-
+from b3.fake import FakeClient
 from b3.functions import splitDSN
 from b3.storage.postgresql import PostgresqlStorage
 from tests import B3TestCase
@@ -57,7 +56,7 @@ else:
                         connect_timeout=int(os.environ.get('PGCONNECT_TIMEOUT', '2'))).close()
     except Exception as err:
         is_postgresql_ready = False
-        no_postgresql_reason = "%r" % err
+        no_postgresql_reason = f"{err!r}"
 
 
 def _connect(dbname):
@@ -75,8 +74,7 @@ class Test_xlrstats_postgresql(XlrstatsTestCase):
         self._create_database()
         XlrstatsTestCase.setUp(self)
         self._sqlite_storage = self.console.storage
-        dsn = "postgresql://%s:%s@%s/%s" % (POSTGRESQL_TEST_USER, POSTGRESQL_TEST_PASSWORD,
-                                            POSTGRESQL_TEST_HOST, XLRSTATS_TEST_DB)
+        dsn = f"postgresql://{POSTGRESQL_TEST_USER}:{POSTGRESQL_TEST_PASSWORD}@{POSTGRESQL_TEST_HOST}/{XLRSTATS_TEST_DB}"
         self.storage = PostgresqlStorage(dsn, splitDSN(dsn), self.console)
         self.storage.connect()
         self.console.storage = self.storage
@@ -99,8 +97,8 @@ class Test_xlrstats_postgresql(XlrstatsTestCase):
             cursor.execute(
                 "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
                 "WHERE datname = %s AND pid <> pg_backend_pid()", (XLRSTATS_TEST_DB,))
-            cursor.execute('DROP DATABASE IF EXISTS "%s"' % XLRSTATS_TEST_DB)
-            cursor.execute("CREATE DATABASE \"%s\" ENCODING 'utf8'" % XLRSTATS_TEST_DB)
+            cursor.execute(f'DROP DATABASE IF EXISTS "{XLRSTATS_TEST_DB}"')
+            cursor.execute(f"CREATE DATABASE \"{XLRSTATS_TEST_DB}\" ENCODING 'utf8'")
         connection.close()
 
     def _drop_database(self):
@@ -110,19 +108,20 @@ class Test_xlrstats_postgresql(XlrstatsTestCase):
             cursor.execute(
                 "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
                 "WHERE datname = %s AND pid <> pg_backend_pid()", (XLRSTATS_TEST_DB,))
-            cursor.execute('DROP DATABASE IF EXISTS "%s"' % XLRSTATS_TEST_DB)
+            cursor.execute(f'DROP DATABASE IF EXISTS "{XLRSTATS_TEST_DB}"')
         connection.close()
 
     def test_schema_update_adds_id_token_to_a_2x_database(self):
         # a 2.x database has the table but not the column
-        self.storage.query("ALTER TABLE %s DROP COLUMN id_token" % self.p.playerstats_table)
+        self.storage.query(f"ALTER TABLE {self.p.playerstats_table} DROP COLUMN id_token")
         self.p.build_database_schema()
-        self.storage.query("SELECT id_token FROM %s LIMIT 1" % self.p.playerstats_table).close()
+        self.storage.query(f"SELECT id_token FROM {self.p.playerstats_table} LIMIT 1").close()
 
     def test_stats_are_saved_with_a_quote_in_the_name(self):
-        client = mock()
-        client.id = 43
-        client.maxLevel = 1
+        # xlr_playerstats has a foreign key on clients.id in the PostgreSQL schema
+        client = FakeClient(console=self.console, name="P1", guid="P1_GUID")
+        client.id = self.storage.setClient(client)
+        client.groupBits = 1
         stats = self.p.get_PlayerStats(client)
         stats.fixed_name = "O'Neil"
         self.p.save_Stat(stats)
