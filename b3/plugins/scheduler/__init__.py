@@ -28,12 +28,64 @@ __author__  = 'Courgette'
 import b3
 import b3.cron
 import b3.plugin
+import shlex
 import b3.timezones
 import threading
+from b3.config import XmlConfigParser
+
+
+class IniTaskNode:
+    """Element-like node for an INI task action."""
+
+    def __init__(self, text=None, attrib=None, args=None):
+        self.text = text
+        self.attrib = attrib or {}
+        self._args = args or []
+
+    def findall(self, tag):
+        return self._args if tag == 'arg' else []
+
+
+class IniTaskConfig:
+    """Adapt an INI [task:name] section to the Element API used by the Task classes."""
+
+    _action_prefixes = ('rcon', 'frostbite', 'bfbc2', 'enable_plugin', 'disable_plugin')
+
+    def __init__(self, config, section, name):
+        self.config = config
+        self.section = section
+        self.attrib = {'name': name}
+        for key in ('seconds', 'minutes', 'hour', 'day', 'month', 'dow', 'delay'):
+            if config.has_option(section, key):
+                self.attrib[key] = config.get(section, key)
+
+        self._actions = {}
+        for option in config.options(section):
+            for prefix in self._action_prefixes:
+                if not option.startswith(prefix):
+                    continue
+                suffix = option[len(prefix):]
+                if suffix and not suffix.isdigit():
+                    continue
+                value = config.get(section, option)
+                if prefix == 'rcon':
+                    node = IniTaskNode(text=value)
+                elif prefix in ('enable_plugin', 'disable_plugin'):
+                    node = IniTaskNode(attrib={'plugin': value.strip()})
+                else:
+                    parts = shlex.split(value)
+                    node = IniTaskNode(attrib={'command': parts[0]},
+                                       args=[IniTaskNode(text=a) for a in parts[1:]])
+                self._actions.setdefault(prefix, []).append((int(suffix) if suffix else 0, node))
+                break
+        for prefix in self._actions:
+            self._actions[prefix] = [node for _, node in sorted(self._actions[prefix], key=lambda x: x[0])]
+
+    def findall(self, tag):
+        return self._actions.get(tag, [])
 
 
 class SchedulerPlugin(b3.plugin.Plugin):
-
     _tasks = None
     _tzOffset = 0
     _restart_tasks = set()
@@ -43,6 +95,21 @@ class SchedulerPlugin(b3.plugin.Plugin):
     #    STARTUP                                                                                                       #
     #                                                                                                                  #
     ####################################################################################################################
+
+    def _iter_tasks(self, task_type):
+        if isinstance(self.config, XmlConfigParser):
+            return self.config.get(task_type)
+        tasks = []
+        prefix = 'task:'
+        for section in self.config.sections():
+            if not section.startswith(prefix) or not self.config.has_option(section, 'type'):
+                continue
+            if self.config.get(section, 'type').strip().lower() != task_type:
+                continue
+            name = self.config.get(section, 'name') if self.config.has_option(section, 'name') \
+                else section[len(prefix):]
+            tasks.append(IniTaskConfig(self.config, section, name))
+        return tasks
 
     def onLoadConfig(self):
         """
@@ -60,7 +127,7 @@ class SchedulerPlugin(b3.plugin.Plugin):
         # load cron tasks from config
         self._tasks = []
 
-        for taskconfig in self.config.get('restart'):
+        for taskconfig in self._iter_tasks('restart'):
             try:
                 task = RestartTask(self, taskconfig)
                 self._tasks.append(task)
@@ -68,7 +135,7 @@ class SchedulerPlugin(b3.plugin.Plugin):
             except Exception as e:
                 self.error("could not load task from configuration file: %s", e)
 
-        for taskconfig in self.config.get('cron'):
+        for taskconfig in self._iter_tasks('cron'):
             try:
                 task = CronTask(self, taskconfig)
                 self._tasks.append(task)
@@ -76,7 +143,7 @@ class SchedulerPlugin(b3.plugin.Plugin):
             except Exception as e:
                 self.error("could not load task from configuration file: %s", e)
 
-        for taskconfig in self.config.get('hourly'):
+        for taskconfig in self._iter_tasks('hourly'):
             try:
                 task = HourlyTask(self, taskconfig)
                 self._tasks.append(task)
@@ -84,7 +151,7 @@ class SchedulerPlugin(b3.plugin.Plugin):
             except Exception as e:
                 self.error("could not load task from configuration file: %s", e)
 
-        for taskconfig in self.config.get('daily'):
+        for taskconfig in self._iter_tasks('daily'):
             try:
                 task = DaylyTask(self, taskconfig)
                 self._tasks.append(task)
@@ -114,7 +181,8 @@ class SchedulerPlugin(b3.plugin.Plugin):
         """
         Works with "*", "*/4", "5" or 9
         """
-        if hourcron.strip() == '*':
+        hourcron = str(hourcron).strip()
+        if hourcron == '*':
             return hourcron
         if '/' in hourcron:
             h,divider = hourcron.split('/')
