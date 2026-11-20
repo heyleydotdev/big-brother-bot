@@ -42,7 +42,9 @@ class Cursor(object):
         self._cursor = cursor
         self._conn = conn
         self.rowcount = self._cursor.rowcount
-        self.lastrowid = self._cursor.lastrowid
+        # psycopg 3 cursors have no lastrowid: the postgresql storage sets it
+        # after an INSERT with SELECT LASTVAL()
+        self.lastrowid = getattr(self._cursor, 'lastrowid', 0)
 
         try:
             self.EOF = self.moveNext()
