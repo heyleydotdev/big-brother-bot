@@ -77,6 +77,15 @@ if is_mysql_ready:
 #
 #===============================================================================
 
+class Test_ci_has_mysql(unittest.TestCase):
+
+    """A skipped backend must fail CI, not silently test only SQLite."""
+
+    @unittest.skipUnless(os.environ.get('CI'), 'only enforced in CI')
+    def test_mysql_is_ready(self):
+        self.assertTrue(is_mysql_ready, no_mysql_reason)
+
+
 @unittest.skipIf(not is_mysql_ready, no_mysql_reason)
 class Test_MySQL(B3TestCase, StorageAPITest):
 

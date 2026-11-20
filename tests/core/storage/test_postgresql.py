@@ -57,18 +57,22 @@ is_postgresql_ready = True
 no_postgresql_reason = ''
 
 try:
-    import psycopg2
+    import psycopg
 except ImportError:
-    psycopg2 = None
+    psycopg = None
     is_postgresql_ready = False
-    no_postgresql_reason = "no psycopg2 module available"
+    no_postgresql_reason = "no psycopg module available"
 else:
     try:
-        psycopg2.connect(host=POSTGRESQL_TEST_HOST,
-                         user=POSTGRESQL_TEST_USER,
-                         password=POSTGRESQL_TEST_PASSWORD,
-                         database='postgres')
-    except psycopg2.Error as err:
+        # probe with the same driver as b3.storage.postgresql (psycopg 3):
+        # probing with psycopg2 skipped this whole class even in CI
+        psycopg.connect(host=POSTGRESQL_TEST_HOST,
+                        user=POSTGRESQL_TEST_USER,
+                        password=POSTGRESQL_TEST_PASSWORD,
+                        dbname='postgres',
+                        # CI sets PGCONNECT_TIMEOUT=10; keep local runs quick
+                        connect_timeout=int(os.environ.get('PGCONNECT_TIMEOUT', '2'))).close()
+    except psycopg.Error as err:
         is_postgresql_ready = False
         no_postgresql_reason = "%r" % err
     except Exception as err:
@@ -81,6 +85,15 @@ else:
 #
 #===============================================================================
 
+class Test_ci_has_postgresql(unittest.TestCase):
+
+    """A skipped backend must fail CI, not silently test only SQLite."""
+
+    @unittest.skipUnless(os.environ.get('CI'), 'only enforced in CI')
+    def test_postgresql_is_ready(self):
+        self.assertTrue(is_postgresql_ready, no_postgresql_reason)
+
+
 @unittest.skipIf(not is_postgresql_ready, no_postgresql_reason)
 class Test_PostgreSQL(B3TestCase, StorageAPITest):
 
@@ -91,16 +104,16 @@ class Test_PostgreSQL(B3TestCase, StorageAPITest):
         try:
             # create a fresh database like Test_MySQL does, since the PostgreSQL server
             # may not have the test database ready (e.g., fresh CI service container)
-            connection = psycopg2.connect(host=POSTGRESQL_TEST_HOST,
-                                          user=POSTGRESQL_TEST_USER,
-                                          password=POSTGRESQL_TEST_PASSWORD,
-                                          database='postgres')
+            connection = psycopg.connect(host=POSTGRESQL_TEST_HOST,
+                                         user=POSTGRESQL_TEST_USER,
+                                         password=POSTGRESQL_TEST_PASSWORD,
+                                         dbname='postgres')
             connection.autocommit = True
             cursor = connection.cursor()
             cursor.execute('DROP DATABASE IF EXISTS "%s"' % POSTGRESQL_TEST_DB)
             cursor.execute('CREATE DATABASE "%s" ENCODING \'utf8\'' % POSTGRESQL_TEST_DB)
             connection.close()
-        except psycopg2.Error as e:
+        except psycopg.Error as e:
             self.fail("Error: %r" % e)
 
         try:
