@@ -24,7 +24,9 @@
 __author__    = 'ThorN, xlr8or, courgette'
 __version__   = '1.23'
 
+import base64
 import collections
+import hmac
 import os
 import re
 import sys
@@ -33,7 +35,7 @@ import string
 import urllib.request, urllib.error, urllib.parse
 import zipfile
 
-from hashlib import md5
+from hashlib import md5, pbkdf2_hmac
 from b3.exceptions import ProgrammingError
 
 
@@ -468,14 +470,42 @@ def getStuffSoundingLike(stuff, expected_stuff):
     return list(dict.fromkeys(match))
 
 
+_PASSWORD_ITERATIONS = 100000
+
+
 def hash_password(password):
     """
-    Calculate the MD5 digest of a given string.
+    Return a salted PBKDF2 hash that fits the 32-character password column.
+
+    The first character '!' marks the new format; the remaining 31 characters
+    are base64url(salt + 16-byte digest), so 32 characters in total.
     """
-    # py3 hashlib needs bytes: encode text here so callers can pass str
     if isinstance(password, str):
         password = password.encode('utf-8')
-    return md5(password).hexdigest()
+    salt = os.urandom(7)
+    digest = pbkdf2_hmac('sha256', password, salt, _PASSWORD_ITERATIONS)[:16]
+    return '!' + base64.urlsafe_b64encode(salt + digest).decode('ascii').rstrip('=')
+
+
+def check_password(stored, password):
+    """
+    Check a password against the stored hash (new format or legacy MD5).
+    """
+    if not stored:
+        return False
+    if isinstance(password, str):
+        password = password.encode('utf-8')
+    if stored.startswith('!'):
+        try:
+            raw = base64.urlsafe_b64decode(stored[1:] + '=')
+        except Exception:
+            return False
+        if len(raw) != 23:
+            return False
+        salt, digest = raw[:7], raw[7:]
+        return hmac.compare_digest(digest, pbkdf2_hmac('sha256', password, salt, _PASSWORD_ITERATIONS)[:16])
+    # legacy unsalted MD5: accepted once, then upgraded by the login plugin
+    return len(stored) == 32 and hmac.compare_digest(stored.lower(), md5(password).hexdigest())
 
 
 def hash_file(filepath):

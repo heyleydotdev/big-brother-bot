@@ -24,7 +24,7 @@
 import b3.events
 import b3.plugin
 
-from b3.functions import hash_password  # python 3: md5 needs bytes, see encode() calls below
+from b3.functions import hash_password, check_password
 from b3.clients import Client
 from configparser import NoOptionError
 import re
@@ -133,9 +133,14 @@ class LoginPlugin(b3.plugin.Plugin):
             return
 
         if data:
-            digest = hash_password(data.encode('utf-8'))
             client_from_db = self._get_client_from_db(client.id)
-            if digest == client_from_db.password:
+            if client_from_db and check_password(client_from_db.password, data):
+                if not client_from_db.password.startswith('!'):
+                    # upgrade the legacy unsalted MD5 on the next successful login
+                    client_from_db.password = hash_password(data)
+                    client_from_db.console = self.console
+                    client_from_db.save()
+                    self.debug('upgraded the password hash of %s', client_from_db.name)
                 client.setvar(self, 'loggedin', 1)
                 client.groupBits = client.var(self, 'login_groupbits').value
                 client.message('You are successfully logged in')
@@ -176,7 +181,7 @@ class LoginPlugin(b3.plugin.Plugin):
                 client.message('You can only change passwords of yourself or lower level players')
                 return
 
-        sclient.password = hash_password(password.encode('utf-8'))
+        sclient.password = hash_password(password)
         sclient.save()
         if client == sclient:
             client.message("Your new password has been saved")

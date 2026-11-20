@@ -22,7 +22,7 @@
 # ################################################################### #
 
 from b3.fake import FakeClient
-from b3.functions import hash_password
+from b3.functions import check_password
 from tests.plugins.login import LoginTestCase, F00_MD5
 
 
@@ -61,9 +61,10 @@ class Test_cmd_setpassword(LoginTestCase):
         self.joe.says("!setpassword f00")
         # THEN
         self.assertEqual(['Your new password has been saved'], self.joe.message_history)
-        self.assertEqual(F00_MD5, self.joe.password)
+        self.assertTrue(self.joe.password.startswith('!'))
+        self.assertTrue(check_password(self.joe.password, 'f00'))
         joe_db = self.p._get_client_from_db(self.joe.id)
-        self.assertEqual(F00_MD5, joe_db.password)
+        self.assertEqual(self.joe.password, joe_db.password)
 
     def test_password_with_spaces(self):
         # GIVEN
@@ -74,7 +75,7 @@ class Test_cmd_setpassword(LoginTestCase):
         self.joe.says('!setpassword "my secret pass"')
         # THEN
         self.assertEqual(['Your new password has been saved'], self.joe.message_history)
-        self.assertEqual(hash_password(b'my secret pass'), self.joe.password)
+        self.assertTrue(check_password(self.joe.password, 'my secret pass'))
 
     def test_change_someone_else(self):
         # GIVEN
@@ -90,9 +91,10 @@ class Test_cmd_setpassword(LoginTestCase):
         self.joe.says("!setpassword f00 jack")
         # THEN
         self.assertEqual(['New password for Jack saved'], self.joe.message_history)
-        self.assertEqual(F00_MD5, jack.password)
+        self.assertTrue(jack.password.startswith('!'))
+        self.assertTrue(check_password(jack.password, 'f00'))
         jack_db = self.p._get_client_from_db(jack.id)
-        self.assertEqual(F00_MD5, jack_db.password)
+        self.assertEqual(jack.password, jack_db.password)
 
     def test_change_someone_else_not_found(self):
         # GIVEN
@@ -172,6 +174,15 @@ class Test_cmd_login(LoginTestCase):
         self.assertEqual(['You are successfully logged in'], self.jack.message_history)
         self.assertEqual(128, self.jack.groupBits)
         self.assertTrue(self.jack.isvar(self.p, 'loggedin'))
+
+    def test_legacy_md5_is_upgraded_on_login(self):
+        self.jack.connects("0")
+        self.jack.clearMessageHistory()
+        self.jack.says("!login f00")
+        db_client = self.p._get_client_from_db(self.jack.id)
+        self.assertTrue(db_client.password.startswith('!'))
+        self.assertTrue(check_password(db_client.password, 'f00'))
+        self.assertNotEqual(F00_MD5, db_client.password)
 
     def test_high_level_spoofed_password_with_compromised_client_object(self):
         """

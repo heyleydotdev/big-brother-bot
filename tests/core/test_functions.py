@@ -273,3 +273,21 @@ class Test_redact(unittest.TestCase):
 
     def test_custom_prefix(self):
         self.assertEqual('?login ***', redact('?login secret', '?'))
+
+
+class Test_password_hashing(unittest.TestCase):
+
+    def test_hash_is_salted_and_fits_the_password_column(self):
+        from b3.functions import hash_password, check_password
+        h1 = hash_password('f00')
+        h2 = hash_password('f00')
+        self.assertEqual(32, len(h1))
+        self.assertTrue(h1.startswith('!'))
+        self.assertNotEqual(h1, h2)
+        self.assertTrue(check_password(h1, 'f00'))
+        self.assertFalse(check_password(h1, 'f01'))
+
+    def test_legacy_md5_hash_is_accepted(self):
+        from b3.functions import check_password
+        self.assertTrue(check_password('9f06f2538cdbb40bce9973f60506de09', 'f00'))
+        self.assertFalse(check_password('9f06f2538cdbb40bce9973f60506de09', 'f01'))
