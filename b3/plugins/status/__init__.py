@@ -483,6 +483,10 @@ class StatusPlugin(b3.plugin.Plugin):
         """
         Store server information in the XML file.
         """
+        if isinstance(xml, bytes):
+            # toprettyxml(encoding=...) returns bytes while this writes text
+            xml = xml.decode('utf-8')
+
         if self._ftpstatus:
             self.debug('uploading XML status to FTP server')
             ftp_file = io.StringIO()

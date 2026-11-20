@@ -21,6 +21,8 @@
 #                                                                     #
 # ################################################################### #
 
+import os
+import tempfile
 from textwrap import dedent
 
 from b3.config import CfgConfigParser
@@ -57,6 +59,17 @@ class Test_storeServerinfo(B3TestCase):
         cursor = self.console.storage.query("SELECT COUNT(*) total FROM current_svars")
         self.assertEqual(1, cursor.getValue('total'))
         cursor.close()
+
+    def test_writeXML_accepts_bytes(self):
+        # toprettyxml(encoding=...) returns bytes while the output is a text file
+        self.p._ftpstatus = False
+        path = os.path.join(tempfile.mkdtemp(), 'status.xml')
+        self.p._outputFile = path
+
+        self.p.writeXML(b'<?xml version="1.0"?><configuration/>')
+
+        with open(path, encoding='utf-8') as f:
+            self.assertIn('configuration', f.read())
 
     def test_value_with_a_quote(self):
         self.p.storeServerinfo("Name", "Bob's Server")
