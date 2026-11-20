@@ -277,6 +277,13 @@ class Test_background_jobs(XlrstatsTestCase):
         self.assertEqual(1.4, self.p.kill_bonus)
         self.assertAlmostEqual(1.4 / 3, self.p.assist_bonus)
 
+    def test_calculateKillBonus_ignores_inactive_players(self):
+        p1 = self._client("P1", "P1_GUID")
+        self._save_stats(p1, skill=1500)
+        self._age(p1, 30)
+        self.p.calculateKillBonus()
+        self.assertEqual(1.5, self.p.kill_bonus)
+
     def test_calculateKillBonus_for_a_low_pool(self):
         p1 = self._client("P1", "P1_GUID")
         self._save_stats(p1, skill=900)

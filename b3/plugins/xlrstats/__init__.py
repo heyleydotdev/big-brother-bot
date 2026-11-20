@@ -1444,9 +1444,13 @@ class XlrstatsPlugin(b3.plugin.Plugin):
 
         # querymax skill from players active in the last 20 days
         seconds = 20 * 86400
-        q = """SELECT %s.time_edit, MAX(%s.skill) AS max_skill FROM %s, %s WHERE %s - %s.time_edit <= %s""" % (
-            self.clients_table, self.playerstats_table, self.clients_table, self.playerstats_table, int(time.time()),
-            self.clients_table, seconds)
+        q = """SELECT MAX(%s.skill) AS max_skill FROM %s, %s
+               WHERE %s.id = %s.client_id
+               AND %s - %s.time_edit <= %s""" % (
+            self.playerstats_table,
+            self.clients_table, self.playerstats_table,
+            self.clients_table, self.playerstats_table,
+            int(time.time()), self.clients_table, seconds)
         cursor = self.query(q)
         r = cursor.getRow()
         _max = r['max_skill']
