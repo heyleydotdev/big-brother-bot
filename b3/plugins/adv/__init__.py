@@ -166,6 +166,9 @@ class AdvPlugin(b3.plugin.Plugin):
         except (NoOptionError, ValueError):
             pass
 
+        if self._feedmaxitems < 1:
+            self.warning('settings/newsfeed items must be at least 1, using 1')
+            self._feedmaxitems = 1
         # reduce feedmaxitems 1 point, since we're starting at item 0, this makes counting easier...
         self._feedmaxitems -= 1
         self.verbose('self._feedmaxitems: %s' % self._feedmaxitems)

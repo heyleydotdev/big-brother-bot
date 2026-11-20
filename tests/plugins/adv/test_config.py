@@ -52,6 +52,17 @@ class Test_config(AdvTestCase):
                                  '@topstats'
                              ], self.p._msg.items)
 
+    def test_feed_items_zero_is_clamped(self):
+        # items: 0 made the index reset on every call, so the feed always
+        # showed the same (first) item
+        self.init_plugin("""<configuration plugin="adv">
+    <settings name="newsfeed">
+        <set name="items">0</set>
+    </settings>
+</configuration>
+""")
+        self.assertEqual(0, self.p._feedmaxitems)
+
     def test_empty(self):
         self.init_plugin("""<configuration plugin="adv" />""")
         self.assertEqual(self.p._rate, '2')
