@@ -138,6 +138,8 @@ class Plugin(object):
 
         self.registerEvent('EVT_STOP', self.onStop)
         self.registerEvent('EVT_EXIT', self.onExit)
+        # the class attribute is shared: give every instance its own message cache
+        self._messages = {}
 
     def start(self):
         """
