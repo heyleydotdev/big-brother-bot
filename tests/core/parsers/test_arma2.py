@@ -26,7 +26,7 @@ from unittest.mock import Mock, patch, call
 from mockito import when
 from b3.fake import FakeClient
 from b3.parsers.arma2 import Arma2Parser
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 
 
 

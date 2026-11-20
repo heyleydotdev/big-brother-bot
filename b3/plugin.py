@@ -122,7 +122,7 @@ class Plugin(object):
         self.console = console
         self.eventmanager = b3.events.eventManager
         self.eventmap = dict()
-        if isinstance(config, b3.config.XmlConfigParser) or isinstance(config, b3.config.CfgConfigParser):
+        if isinstance(config, b3.config.CfgConfigParser):
             # this will be used by default from the Parser class since B3 1.10dev
             self.config = config
         else:

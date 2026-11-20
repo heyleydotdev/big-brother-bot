@@ -30,32 +30,11 @@ from unittest import TestCase
 import unittest
 import sys
 import b3.config
-from b3.config import XmlConfigParser, CfgConfigParser, ConfigFileNotValid
+from b3.config import CfgConfigParser
+from b3.config import ConfigFileNotValid
 from tests import B3TestCase
 
 @unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
-class Test_XmlConfigParser_windows(B3TestCase):
-
-    def setUp(self):
-        B3TestCase.setUp(self)
-        self.conf = XmlConfigParser()
-        self.conf.setXml("""
-            <configuration plugin="test">
-                <settings name="settings">
-                    <set name="output_file">@conf/status.xml</set>
-                </settings>
-            </configuration>
-        """)
-
-    def test_getpath(self):
-        self.console.config.fileName = r"c:\some\where\conf\b3.xml"
-        self.assertEqual(r"c:\some\where\conf\status.xml", self.conf.getpath('settings', 'output_file'))
-
-    def test_issue_xlr8or_18(self):
-        self.console.config.fileName = r"b3.xml"
-        self.assertEqual(r"status.xml", self.conf.getpath('settings', 'output_file'))
-
-
 class CommonTestMethodsMixin:
 
     def _assert_func(self, func, expected, conf_value):
@@ -158,27 +137,6 @@ class CommonTestMethodsMixin:
         self.assert_getDuration(0.5, '30s')
 
 
-class Test_XmlConfigParser(CommonTestMethodsMixin, B3TestCase):
-
-    assert_func_template = """
-        <configuration>
-            <settings name="section_foo">
-                <set name="foo">%s</set>
-            </settings>
-        </configuration>"""
-
-    def setUp(self):
-        B3TestCase.setUp(self)
-        self.conf = XmlConfigParser()
-        self.conf.loadFromString("""<configuration/>""")
-        log = logging.getLogger('output')
-        log.setLevel(logging.DEBUG)
-
-    def test_get_missing(self):
-        self.assert_get_raises(configparser.NoOptionError, 'section_foo', 'bar', """<configuration><settings name="section_foo"><set name="foo"/></settings></configuration>""")
-        self.assert_get_raises(configparser.NoOptionError, 'section_bar', 'foo', """<configuration><settings name="section_foo"><set name="foo"/></settings></configuration>""")
-
-
 class Test_ConfigFileNotValid(TestCase):
 
     def test_exception_message(self):
@@ -186,18 +144,6 @@ class Test_ConfigFileNotValid(TestCase):
             raise ConfigFileNotValid("f00")
         except ConfigFileNotValid as e:
             self.assertEqual(repr("f00"), str(e))
-
-    def test_loading_invalid_conf(self):
-        config = XmlConfigParser()
-        try:
-            config.loadFromString(r"""<configuration """)
-        except ConfigFileNotValid as e:
-            self.assertEqual("'unclosed token: line 1, column 0'", str(e))
-        except Exception as e:
-            self.fail("unexpected exception %r" % e)
-        else:
-            self.fail("expecting exception")
-
 
 class Test_CfgConfigParser(CommonTestMethodsMixin, B3TestCase):
 
@@ -255,25 +201,6 @@ class Test_config_file_encoding(unittest.TestCase):
         again = CfgConfigParser()
         again.load(self.path)
         self.assertEqual('Ünknown', again.get('b3', 'bot_name'))
-
-    def test_xml_load_reads_utf8(self):
-        self._write('<?xml version="1.0" encoding="utf-8"?>'
-                    '<configuration><settings name="b3"><set name="bot_name">Ünknown</set>'
-                    '</settings></configuration>')
-        conf = XmlConfigParser()
-        conf.load(self.path)
-        self.assertEqual('Ünknown', conf.get('b3', 'bot_name'))
-
-    def test_xml_load_warns_deprecation(self):
-        path = os.path.join(self.dir, 'b3.xml')
-        with open(path, 'w', encoding='utf-8') as f:
-            f.write('<?xml version="1.0" encoding="utf-8"?>'
-                    '<configuration><settings name="b3"><set name="bot_name">b3</set>'
-                    '</settings></configuration>')
-        with self.assertLogs('output', level='WARNING') as logs:
-            conf = b3.config.load(path)
-        self.assertIsInstance(conf, XmlConfigParser)
-        self.assertTrue(any('deprecated' in line for line in logs.output))
 
     def test_legacy_bytes_survive_a_save(self):
         # a cp1252 config loaded and saved again keeps its original bytes

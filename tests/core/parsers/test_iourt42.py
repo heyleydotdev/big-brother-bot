@@ -28,7 +28,7 @@ import unittest
 from unittest.mock import Mock, call, patch
 from mockito import mock, when, any as anything
 from b3.clients import Clients, Client
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.events import Event
 from b3.fake import FakeClient as original_FakeClient
 from b3.output import VERBOSE2

@@ -34,7 +34,7 @@ import shutil
 from tempfile import TemporaryFile
 
 __author__ = 'ThorN'
-__version__ = '2.2.3'
+__version__ = '3.0.0'
 
 modulePath = pkg_handler.resource_directory(__name__)
 
@@ -123,15 +123,15 @@ def getConfPath(decode=False, conf=None):
     """
     Return the path to the B3 main configuration directory.
     :param decode: if True will decode the path string using the default file system encoding before returning it.
-    :param conf: the current configuration being used :type XmlConfigParser|CfgConfigParser|MainConfig|str:
+    :param conf: the current configuration being used :type CfgConfigParser|MainConfig|str:
     """
     if conf:
         if isinstance(conf, str):
             path = os.path.dirname(conf)
-        elif isinstance(conf, XmlConfigParser) or isinstance(conf, CfgConfigParser) or isinstance(conf, MainConfig):
+        elif isinstance(conf, (CfgConfigParser, MainConfig)):
             path = os.path.dirname(conf.fileName)
         else:
-            raise TypeError('invalid configuration type specified: expected str|XmlConfigParser|CfgConfigParser|MainConfig, got %s instead' % type(conf))
+            raise TypeError('invalid configuration type specified: expected str|CfgConfigParser|MainConfig, got %s instead' % type(conf))
     elif console is not None and getattr(getattr(console, 'config', None), 'fileName', None):
         # a running console knows where its own main config lives: use it to
         # resolve @conf paths (restores the issue xlr8or #18 behavior which
@@ -150,7 +150,7 @@ def getAbsolutePath(path, decode=False, conf=None):
     Return an absolute path name and expand the user prefix (~).
     :param path: the relative path we want to expand
     :param decode: if True will decode the path string using the default file system encoding before returning it
-    :param conf: the current configuration being used :type XmlConfigParser|CfgConfigParser|MainConfig|str:
+    :param conf: the current configuration being used :type CfgConfigParser|MainConfig|str:
     """
     if path[0:4] == '@b3\\' or path[0:4] == '@b3/':
         path = os.path.join(getB3Path(decode=False), path[4:])
@@ -319,7 +319,7 @@ def start(mainconfig, options):
         sys.exit(223)
 
 
-from b3.config import XmlConfigParser, CfgConfigParser, MainConfig
+from b3.config import CfgConfigParser, MainConfig
 from b3.functions import clearscreen
 from b3.functions import decode as decode_
 from b3.functions import main_is_frozen

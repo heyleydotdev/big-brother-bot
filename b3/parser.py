@@ -1393,9 +1393,7 @@ class Parser(object):
         """
         if b3.getPlatform() in ('linux', 'darwin'):
             # check for PID file if B3 has been started using the provided BASH initialization scripts.
-            b3_name = os.path.basename(self.config.fileName)
-            for x in ('.xml', '.ini'):
-                b3_name = right_cut(b3_name, x)
+            b3_name = right_cut(os.path.basename(self.config.fileName), '.ini')
 
             pidpath = os.path.join(b3.getAbsolutePath('@b3/', decode=True), '..', 'scripts', 'pid', '%s.pid' % b3_name)
             if os.path.isfile(pidpath):

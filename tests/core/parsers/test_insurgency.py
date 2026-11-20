@@ -33,7 +33,7 @@ from b3 import TEAM_RED
 from b3 import TEAM_UNKNOWN
 from b3 import TEAM_SPEC
 from b3.clients import Client
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.config import CfgConfigParser
 from b3.fake import FakeClient
 from b3.parsers.insurgency import InsurgencyParser

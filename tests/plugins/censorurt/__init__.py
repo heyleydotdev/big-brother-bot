@@ -29,7 +29,8 @@ from unittest.mock import Mock, patch
 from b3.fake import FakeClient
 from tests import B3TestCase
 from b3.plugins.censorurt import CensorurtPlugin
-from b3.config import XmlConfigParser, CfgConfigParser
+from b3.config import CfgConfigParser
+from tests.legacy_config import XmlConfigParser
 
 
 class CensorurtTestCase(B3TestCase):

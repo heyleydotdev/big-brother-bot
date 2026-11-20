@@ -38,7 +38,6 @@ import _thread
 import time
 import urllib.request, urllib.error, urllib.parse
 
-from b3.config import XmlConfigParser
 from b3.functions import getCmd
 from configparser import NoOptionError
 
@@ -113,8 +112,6 @@ class BanlistPlugin(b3.plugin.Plugin):
                     self.console.cron - whitelist._cronTab
 
     def _iter_configs(self, name):
-        if isinstance(self.config, XmlConfigParser):
-            return self.config.get(name)
         prefix = name + ':'
         return [IniBanlistConfig(self.config, section)
                 for section in self.config.sections() if section.startswith(prefix)]

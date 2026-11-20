@@ -40,7 +40,10 @@ paident_full_level: 40
         """)
         self.p = PoweradminurtPlugin(self.console, self.conf)
         self.init_default_cvar()
-        self.parser_conf._settings.update({'b3': {"time_zone": "GMT", "time_format": "%I:%M%p %Z %m/%d/%y"}})
+        if not self.parser_conf.has_section('b3'):
+            self.parser_conf.add_section('b3')
+        self.parser_conf.set('b3', 'time_zone', 'GMT')
+        self.parser_conf.set('b3', 'time_format', '%I:%M%p %Z %m/%d/%y')
         self.p.onLoadConfig()
         self.p.onStartup()
 

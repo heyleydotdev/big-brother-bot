@@ -35,10 +35,8 @@ import re
 from configparser import ConfigParser
 from configparser import NoOptionError
 from configparser import NoSectionError
-from b3.config import XmlConfigParser
 from b3.functions import getCmd
 from b3.querybuilder import QueryBuilder
-from xml.dom import minidom
 
 GRANT_SET_JOIN = ','
 GRANT_SET_ATTR = 'cmdgrantset'
@@ -192,55 +190,9 @@ class CmdmanagerPlugin(b3.plugin.Plugin):
         with open(command.plugin.config.fileName, 'wb') as configfile:
             config.write(configfile)
 
-    def write_xml_config_file(self, command, data):
-        """
-        Write the new command configuration in the plugin configuration file
-        """
-        document = minidom.parse(command.plugin.config.fileName)
-        settings = document.getElementsByTagName('settings')
-
-        changed = False
-        for setting in settings:
-            if setting.getAttribute('name') == 'commands':
-                sets = setting.getElementsByTagName('set')
-                for node in sets:
-                    search = node.getAttribute('name').split('-')[0]
-                    if search == command.command:
-                        for v in node.childNodes:
-                            if v.nodeType == v.TEXT_NODE:
-                                v.data = data['command_level']
-                                node.setAttribute('name', data['command_name'])
-                                self.debug('updated command <%s> in plugin <%s> config file',
-                                           command.command, data['plugin_name'])
-                                changed = True
-                                break
-
-                        if changed:
-                            break
-
-                if not changed:
-                    # there is no configuration value for the given command
-                    # so create a new node in the command section
-                    child = document.createElement('set')
-                    child.setAttribute('name', data['command_name'])
-                    child.appendChild(document.createTextNode(data['command_level']))
-                    setting.appendChild(child)
-                    self.debug('created new entry for command <%s> in <%s> plugin config file',
-                               data['command_name'], data['plugin_name'])
-                    changed = True
-                    break
-
-        if not changed:
-            raise NoSectionError('could not find <commands> section in plugin <%s> config file' % data['plugin_name'])
-
-        # update the configuration file
-        with open(command.plugin.config.fileName, 'w') as f:
-            f.write(self._prettyxml(document))
-
     def write_config_file(self, command, client):
         """
-        Helper function which demands the config file writing
-        to other methods according to the config file format
+        Helper function which writes the command level to the plugin INI config
         """
         plugin = command.plugin
         plugin_name = self.get_plugin_name(plugin)
@@ -273,9 +225,7 @@ class CmdmanagerPlugin(b3.plugin.Plugin):
         }
 
         try:
-            # write in the plugin specific configuration file
-            func = getattr(self, 'write_%s_config_file' % ('xml' if isinstance(plugin.config, XmlConfigParser) else 'ini'))
-            func(command, data)
+            self.write_ini_config_file(command, data)
         except (AttributeError, TypeError, IOError, NoSectionError) as e:
             self.warning('could not change plugin <%s> config file: %s', data['plugin_name'], e)
             client.message('^7could not change plugin ^1%s ^7configuration file', data['plugin_name'])
@@ -293,13 +243,6 @@ class CmdmanagerPlugin(b3.plugin.Plugin):
         :param name: The command name to sanitize
         """
         return name.lower().strip()
-
-    @staticmethod
-    def _prettyxml(xml):
-        """
-        Return a correctly formatted XML document.
-        """
-        return '\n'.join([x for x in xml.toprettyxml(encoding='UTF-8', indent='    ').split('\n') if x.strip()])
 
     @staticmethod
     def get_plugin_name(plugin):

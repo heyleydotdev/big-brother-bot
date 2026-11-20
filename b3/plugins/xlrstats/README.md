@@ -9,7 +9,7 @@ on MySQL, PostgreSQL and SQLite.
 
 ## Requirements
 
-- BigBrotherBot 2.3.0 or later (Python 3.11+).
+- BigBrotherBot 3.0.0 or later (Python 3.11+).
 - A writable database: MySQL, PostgreSQL or SQLite.
 - Optional: an XLRstats webfront (v2 or v3) for the top list settings and the
   webfront player pages.

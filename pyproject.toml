@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "b3"
-version = "2.2.3"
+version = "3.0.0"
 description = "BigBrotherBot (B3) is a cross-platform, cross-game game administration bot"
 readme = "README.md"
 license = "GPL-2.0-or-later"
@@ -70,7 +70,6 @@ include = ["b3*"]
 
 [tool.setuptools.package-data]
 b3 = [
-    "conf/*.xml",
     "conf/*.ini",
     "conf/templates/*.tpl",
     "conf/templates/autodoc/*.html",

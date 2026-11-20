@@ -3,7 +3,7 @@
 **********
 
 > [!IMPORTANT]
-> **B3 2.0 runs on Python 3.11+.** This is the Python 3 continuation of the
+> **B3 3.0 runs on Python 3.11+.** This is the Python 3 continuation of the
 > project: the Python 2 code base was ported to a single Python 3 code base,
 > the dependency stack was brought to maintained releases, and the test suite
 > runs on Python 3.11, 3.12 and 3.13.
@@ -55,6 +55,17 @@ b3_run --help             # all options
 ```
 
 `b3_debug.py` provides the profiling entry points (`--profile*`).
+
+## Configuration
+
+B3 uses **INI** config files only. Start from `b3/conf/b3.distribution.ini`,
+copy it to `b3.ini` and edit that copy. The `[plugins]` section lists the
+plugins and their config files.
+
+XML configuration support was removed in B3 3.0.0: `b3.xml`, plugin XML
+configs and `XmlConfigParser` are gone. Convert existing XML files to INI
+before upgrading. `status.xml` is still generated output, not a config.
+
 
 ## Development
 

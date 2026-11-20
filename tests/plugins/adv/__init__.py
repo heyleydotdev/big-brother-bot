@@ -30,7 +30,8 @@ from tests import B3TestCase
 from unittest.mock import patch,  Mock
 from mockito import when, unstub
 from b3.plugins.adv import AdvPlugin
-from b3.config import XmlConfigParser, CfgConfigParser
+from b3.config import CfgConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3 import __file__ as b3_module__file__
 
 ADMIN_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(b3_module__file__), "conf/plugin_admin.ini"))

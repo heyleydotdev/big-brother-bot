@@ -26,7 +26,7 @@ from b3.cvar import Cvar
 from mockito import when
 from tests import logging_disabled
 from b3 import TEAM_UNKNOWN
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.plugins.admin import AdminPlugin
 from b3.update import B3version
 from b3 import __version__ as b3_version

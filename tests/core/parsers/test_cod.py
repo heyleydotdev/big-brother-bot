@@ -25,7 +25,7 @@ import logging
 from unittest.mock import Mock
 from mockito import mock, when, any as anything
 import unittest
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.parsers.cod import CodParser
 from tests import assert_dict_contains_subset
 

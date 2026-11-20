@@ -31,7 +31,6 @@ import b3.plugin
 import shlex
 import b3.timezones
 import threading
-from b3.config import XmlConfigParser
 
 
 class IniTaskNode:
@@ -97,8 +96,6 @@ class SchedulerPlugin(b3.plugin.Plugin):
     ####################################################################################################################
 
     def _iter_tasks(self, task_type):
-        if isinstance(self.config, XmlConfigParser):
-            return self.config.get(task_type)
         tasks = []
         prefix = 'task:'
         for section in self.config.sections():

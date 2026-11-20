@@ -30,7 +30,8 @@ import b3
 from b3.clients import Client, Clients
 from b3.fake import FakeClient
 from b3.parsers.bf3 import Bf3Parser, MAP_NAME_BY_ID, GAME_MODES_BY_MAP_ID, GAME_MODES_NAMES
-from b3.config import XmlConfigParser, CfgConfigParser
+from b3.config import CfgConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.parsers.frostbite2.protocol import CommandFailedError
 from b3.parsers.frostbite2.util import MapListBlock
 from b3.plugins.admin import AdminPlugin

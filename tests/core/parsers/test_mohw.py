@@ -29,7 +29,8 @@ from b3.clients import Client, Clients
 from b3.fake import FakeClient
 from b3.parsers.frostbite2.util import MapListBlockError
 from b3.parsers.mohw import MohwParser, MAP_NAME_BY_ID, GAME_MODES_BY_MAP_ID, GAME_MODES_NAMES, NewMapListBlock
-from b3.config import XmlConfigParser, CfgConfigParser
+from b3.config import CfgConfigParser
+from tests.legacy_config import XmlConfigParser
 from tests import logging_disabled
 
 

@@ -29,7 +29,7 @@ from mockito import mock, verify
 import unittest
 
 from b3.clients import Client
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.parsers.et import EtParser
 
 

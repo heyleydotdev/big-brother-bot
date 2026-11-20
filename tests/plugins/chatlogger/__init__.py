@@ -29,7 +29,7 @@ import sys
 
 from mockito import when, unstub
 from unittest.mock import Mock
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.plugins.admin import AdminPlugin
 from tests import logging_disabled
 

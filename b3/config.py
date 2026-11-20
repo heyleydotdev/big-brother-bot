@@ -24,7 +24,6 @@
 __author__  = 'ThorN, Courgette, Fenix'
 __version__ = '1.7.9'
 
-import logging
 import os
 import re
 import time
@@ -33,11 +32,6 @@ import b3.functions
 import b3.exceptions
 import b3.storage
 import configparser
-
-try:
-    from xml.etree import cElementTree as ElementTree
-except ImportError:
-    from xml.etree import ElementTree
 
 
 ConfigFileNotFound = b3.exceptions.ConfigFileNotFound
@@ -103,187 +97,6 @@ class B3ConfigParserMixin(object):
         if len(kwargs):
             return value % kwargs
         return value
-
-
-class XmlConfigParser(B3ConfigParserMixin):
-    """
-    A config parser class that mimics the ConfigParser
-    settings but reads from an XML format.
-    """
-    _xml = None
-    _settings = None
-
-    fileName = ''
-    fileMtime = 0
-
-    def __init__(self):
-        """
-        Object constructor.
-        """
-        pass
-
-    def _loadSettings(self):
-        """
-        Load settings section from the configuration
-        file into a dictionary.
-        """
-        self._settings = {}
-        for settings in self._xml.findall("./settings"):
-            section = settings.get('name')
-            self._settings[section] = {}
-            for setting in settings.findall("./set"):
-                name = setting.get('name')
-                value = setting.text
-                self._settings[section][name] = value
-
-    def readfp(self, fp):
-        """
-        Read the XML config file from a file pointer.
-        :param fp: The XML file pointer.
-        """
-        try:
-            self._xml = ElementTree.parse(fp)
-        except Exception as e:
-            raise ConfigFileNotValid("%s" % e)
-
-        self._loadSettings()
-
-    def setXml(self, xml):
-        """
-        Read the xml config file from a string.
-        :param xml: The XML string.
-        """
-        self._xml = ElementTree.fromstring(xml)
-
-        self._loadSettings()
-
-    def get(self, section, setting=None, raw=False, dummy=False):
-        """
-        Return a configuration value as a string.
-        :param section: The configuration file section.
-        :param setting: The configuration file setting.
-        :param raw: kept for API parity with CfgConfigParser.get, ignored for XML configs
-        :return str
-        """
-        if setting is None:
-            # parse as xpath
-            return self._xml.findall(section)
-        else:
-            try:
-                data = self._settings[section][setting]
-                if data is None:
-                    return ''
-                else:
-                    return data
-            except KeyError:
-                raise configparser.NoOptionError(setting, section)
-
-    def getint(self, section, setting):
-        """
-        Return a configuration value as an integer.
-        :param section: The configuration file section.
-        :param setting: The configuration file setting.
-        :return int
-        """
-        value = self.get(section, setting)
-        if value is None:
-            raise ValueError("%s.%s : is not an integer" % (section, setting))
-        return int(self.get(section, setting))
-
-    def getfloat(self, section, setting):
-        """
-        Return a configuration value as a floating point number.
-        :param section: The configuration file section.
-        :param setting: The configuration file setting.
-        :return float
-        """
-        value = self.get(section, setting)
-        if value is None:
-            raise ValueError("%s.%s : is not a number" % (section, setting))
-        return float(self.get(section, setting))
-
-    def sections(self):
-        """
-        Return the list of sections of the configuration file.
-        :return list
-        """
-        return list(self._settings.keys())
-
-    def options(self, section):
-        """
-        Return the list of options in the given section.
-        :return list
-        """
-        return list(self._settings[section].keys())
-
-    def has_section(self, section):
-        """
-        Tells whether the given section exists in the configuration file.
-        :return True if the section exists, False otherwise.
-        """
-        try:
-            self._settings[section]
-        except KeyError:
-            return False
-        else:
-            return True
-
-    def has_option(self, section, setting):
-        """
-        Tells whether the given section/setting combination exists in the configuration file.
-        :return True if the section/settings combination exists, False otherwise.
-        """
-        try:
-            self._settings[section][setting]
-        except KeyError:
-            return False
-        else:
-            return True
-
-    def items(self, section):
-        """
-        Return all the elements of the given section.
-        """
-        return list(self._settings[section].items())
-
-    def load(self, filename):
-        """
-        Load a configuration file.
-        :param filename: The configuration file name.
-        """
-        if not os.path.isfile(filename):
-            raise ConfigFileNotFound(filename)
-
-        f = open(filename, 'r', encoding='utf-8', errors='surrogateescape')
-        self.readfp(f)
-        f.close()
-
-        self.fileName = filename
-        self.fileMtime = os.path.getmtime(self.fileName)
-        return True
-
-    def loadFromString(self, xmlstring):
-        """
-        Read the XML config from a string.
-        """
-        self.fileName = None
-        self.fileMtime = time.time()
-
-        try:
-            self._xml = ElementTree.XML(xmlstring)
-        except Exception as e:
-            raise ConfigFileNotValid("%s" % e)
-
-        self._loadSettings()
-        return True
-
-    def save(self):
-        # not implemented
-        return True
-
-    def set(self, section, option, value):
-        # not implemented
-        pass
 
 
 class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
@@ -408,49 +221,24 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
 
 def load(filename):
     """
-    Load a configuration file.
-    Will instantiate the correct configuration object parser.
+    Load an INI configuration file.
     """
-    if os.path.splitext(filename)[1].lower() == '.xml':
-        logging.getLogger('output').warning(
-            'XML configuration files are deprecated and will be removed in a future release: '
-            'convert %s to the INI format', filename)
-        config = XmlConfigParser()
-    else:
-        # allow the use of empty keys to support the new b3.ini configuration file
-        config = CfgConfigParser(allow_no_value=True)
-
+    # allow the use of empty keys to support the b3.ini configuration file
+    config = CfgConfigParser(allow_no_value=True)
     filename = b3.getAbsolutePath(filename, True)
-
-    # return the config if it can be loaded
     return config if config.load(filename) else None
 
 
 class MainConfig(B3ConfigParserMixin):
     """
     Class to use to parse the B3 main config file.
-    Responsible for reading the file either in xml or ini format.
     """
     def __init__(self, config_parser):
+        if not isinstance(config_parser, CfgConfigParser):
+            raise NotImplementedError("unexpected config type: %r" % config_parser.__class__)
         self._config_parser = config_parser
         self._plugins = []
-        if isinstance(self._config_parser, XmlConfigParser):
-            self._init_plugins_from_xml()
-        elif isinstance(self._config_parser, CfgConfigParser):
-            self._init_plugins_from_cfg()
-        else:
-            raise NotImplementedError("unexpected config type: %r" % self._config_parser.__class__)
-
-    def _init_plugins_from_xml(self):
-        self._plugins = []
-        for p in self._config_parser.get('plugins/plugin'):
-            x = p.get('disabled')
-            self._plugins.append({
-                'name': p.get('name'),
-                'conf': p.get('config'),
-                'path': p.get('path'),
-                'disabled':  x is not None and x not in MUST_HAVE_PLUGINS and x.lower() in ('yes', '1', 'on', 'true')
-            })
+        self._init_plugins_from_cfg()
 
     def _init_plugins_from_cfg(self):
         ## Load the list of disabled plugins
@@ -483,7 +271,7 @@ class MainConfig(B3ConfigParserMixin):
             I.E.:
             [
                 {'name': 'admin', 'conf': @conf/plugin_admin.ini, 'path': None, 'disabled': False},
-                {'name': 'adv', 'conf': @conf/plugin_adv.xml, 'path': None, 'disabled': False},
+                {'name': 'adv', 'conf': @conf/plugin_adv.ini, 'path': None, 'disabled': False},
             ]
         """
         return self._plugins
@@ -493,12 +281,7 @@ class MainConfig(B3ConfigParserMixin):
         the directory path (as a string) where additional plugin modules can be found
         :return: str or ConfigParser.NoOptionError
         """
-        if isinstance(self._config_parser, XmlConfigParser):
-            return self._config_parser.getpath("plugins", "external_dir")
-        elif isinstance(self._config_parser, CfgConfigParser):
-            return self._config_parser.getpath("b3", "external_plugins_dir")
-        else:
-            raise NotImplementedError("unexpected config type: %r" % self._config_parser.__class__)
+        return self._config_parser.getpath("b3", "external_plugins_dir")
 
     def get(self, *args, **kwargs):
         """

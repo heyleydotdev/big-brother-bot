@@ -32,7 +32,6 @@ import b3.plugin
 import b3.cron
 
 from b3 import B3_RSS
-from b3.config import XmlConfigParser
 from configparser import NoOptionError, NoSectionError
 
 
@@ -218,8 +217,8 @@ class AdvPlugin(b3.plugin.Plugin):
                     f.write(msg + "\n")
             f.close()
         else:
-            self.verbose('save to XML config not supported')
-            raise Exception('save to XML config not supported')
+            self.verbose('saving to the plugin config is not supported: set settings/ads to an ads file')
+            raise Exception('saving to the plugin config is not supported: set settings/ads to an ads file')
 
     def load_from_file(self, filename):
         """
@@ -234,18 +233,13 @@ class AdvPlugin(b3.plugin.Plugin):
 
     def load_from_config(self):
         """
-        Load advertisement from the plugin configuration file.
+        Load advertisement from the [ads] configuration section.
         """
-        if isinstance(self.config, XmlConfigParser):
-            items = [e.text for e in self.config.get('ads/ad')]
-        else:
-            try:
-                keys = self.config.options('ads')
-            except NoSectionError:
-                keys = []
-            items = [self.config.get('ads', key) for key in keys]
-
-        self.load(items)
+        try:
+            keys = self.config.options('ads')
+        except NoSectionError:
+            keys = []
+        self.load([self.config.get('ads', key) for key in keys])
 
     def load(self, items=None):
         """

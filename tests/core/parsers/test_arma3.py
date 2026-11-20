@@ -27,7 +27,7 @@ from unittest.mock import Mock, patch
 from mockito import when
 from b3.clients import Client
 from b3.parsers.arma3 import Arma3Parser
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from tests import logging_disabled
 from tests import assert_dict_contains_subset
 

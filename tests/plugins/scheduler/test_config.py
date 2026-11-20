@@ -24,7 +24,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from b3.config import CfgConfigParser, XmlConfigParser
+from b3.config import CfgConfigParser
 from b3.plugins.scheduler import SchedulerPlugin
 
 
@@ -41,39 +41,6 @@ class SchedulerTestCase(unittest.TestCase):
         plugin = SchedulerPlugin(self.console, config)
         plugin.onLoadConfig()
         return plugin
-
-
-class Test_xml_config(SchedulerTestCase):
-
-    def test_tasks(self):
-        conf = XmlConfigParser()
-        conf.setXml("""<configuration plugin="scheduler">
-            <daily name="daily1" hour="2" minutes="41">
-                <rcon>say hi</rcon>
-                <rcon>bigtext hello</rcon>
-                <enable_plugin plugin="tk"/>
-                <disable_plugin plugin="adv"/>
-            </daily>
-            <cron name="every3m" minutes="*/3">
-                <rcon>say every3m</rcon>
-            </cron>
-            <restart name="startup" delay="5m">
-                <rcon>say started</rcon>
-            </restart>
-            <hourly name="hourly" minutes="43">
-                <rcon>say hourly</rcon>
-            </hourly>
-        </configuration>""")
-        plugin = self.load(conf)
-
-        self.assertEqual(4, len(plugin._tasks))
-        daily = [t for t in plugin._tasks if t.name == 'daily1'][0]
-        self.assertEqual('41', daily.minutes)
-        self.assertEqual('2', daily.hour)
-        self.assertEqual(2, len(daily.config.findall('rcon')))
-        self.assertEqual(1, len(daily.config.findall('enable_plugin')))
-        self.assertEqual('tk', daily.config.findall('enable_plugin')[0].attrib['plugin'])
-        self.assertEqual(1, len(plugin._restart_tasks))
 
 
 class Test_ini_config(SchedulerTestCase):

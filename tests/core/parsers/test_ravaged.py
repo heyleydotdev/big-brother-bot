@@ -28,7 +28,8 @@ from unittest.mock import Mock, call, patch
 from mockito import when
 from b3 import TEAM_UNKNOWN
 from b3.clients import Client
-from b3.config import XmlConfigParser, CfgConfigParser
+from b3.config import CfgConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.fake import FakeClient
 from b3.parsers.ravaged import RavagedParser, TEAM_SCAVENGERS, TEAM_RESISTANCE
 from b3.plugins.admin import AdminPlugin

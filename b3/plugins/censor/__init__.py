@@ -32,7 +32,6 @@ import threading
 import b3.events
 import b3.plugin
 
-from b3.config import XmlConfigParser
 from b3 import functions
 from configparser import NoOptionError
 
@@ -125,47 +124,7 @@ class CensorPlugin(b3.plugin.Plugin):
             self.error('could not load settings/ignore_length config value: %s' % e)
             self.debug('using default value (%s) for settings/ignore_length' % self._ignoreLength)
 
-        if isinstance(self.config, XmlConfigParser):
-            self._load_xml_config()
-        else:
-            self._load_ini_config()
-
-    def _load_xml_config(self):
-        default_badwords_penalty_nodes = self.config.get('badwords/penalty')
-        if len(default_badwords_penalty_nodes):
-            self._defaultBadWordPenalty = self._penalty_from_xml(default_badwords_penalty_nodes[0])
-        else:
-            self.warning('no default badwords penalty found in configuration file: '
-                         'using default (%s)' % self._defaultBadNamePenalty)
-
-        default_badnames_penalty_nodes = self.config.get('badnames/penalty')
-        if len(default_badnames_penalty_nodes):
-            self._defaultBadNamePenalty = self._penalty_from_xml(default_badnames_penalty_nodes[0])
-        else:
-            self.warning('no default badnames penalty found in configuration file: '
-                         'using default (%s)', self._defaultBadNamePenalty)
-
-        # load bad words into memory
-        self._badWords = []
-        for e in self.config.get('badwords/badword'):
-            penalty_node = e.find('penalty')
-            word_node = e.find('word')
-            regexp_node = e.find('regexp')
-            self._add_bad_word(rulename=e.get('name'),
-                               penalty=self._penalty_from_xml(penalty_node) if penalty_node is not None else None,
-                               word=word_node.text if word_node is not None else None,
-                               regexp=regexp_node.text if regexp_node is not None else None)
-
-        # load bad names into memory
-        self._badNames = []
-        for e in self.config.get('badnames/badname'):
-            penalty_node = e.find('penalty')
-            word_node = e.find('word')
-            regexp_node = e.find('regexp')
-            self._add_bad_name(rulename=e.get('name'),
-                               penalty=self._penalty_from_xml(penalty_node) if penalty_node is not None else None,
-                               word=word_node.text if word_node is not None else None,
-                               regexp=regexp_node.text if regexp_node is not None else None)
+        self._load_ini_config()
 
     def _load_ini_config(self):
         if not self.config.has_section('badwords') or not self.config.has_option('badwords', 'penalty'):
@@ -187,12 +146,6 @@ class CensorPlugin(b3.plugin.Plugin):
                 self._add_ini_rule(section, self._add_bad_word)
             elif section.startswith('badname:'):
                 self._add_ini_rule(section, self._add_bad_name)
-
-    def _penalty_from_xml(self, node):
-        return PenaltyData(type=node.get('type'),
-                           reason=node.get('reason'),
-                           keyword=node.get('reasonkeyword'),
-                           duration=functions.time2minutes(node.get('duration')))
 
     def _penalty_from_section(self, section, fallback=None):
         if not self.config.has_section(section) or not self.config.has_option(section, 'penalty'):

@@ -62,7 +62,7 @@ class logging_disabled(object):
 def console():
     with logging_disabled():
         from b3.fake import FakeConsole
-        fake_console = FakeConsole('@b3/conf/b3.distribution.xml')
+        fake_console = FakeConsole('@b3/conf/b3.distribution.ini')
 
     # load the admin plugin
     if B3version(b3_version) >= B3version("1.10dev"):

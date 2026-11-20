@@ -25,7 +25,7 @@ import time
 import unittest
 from unittest.mock import Mock, patch
 from mockito import when
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.plugins.admin import AdminPlugin
 from tests import logging_disabled
 

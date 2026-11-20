@@ -20,7 +20,8 @@ import logging
 
 from unittest.mock import Mock
 from mockito.mockito import when
-from b3.config import XmlConfigParser, CfgConfigParser
+from b3.config import CfgConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.parsers.iourt41 import Iourt41Parser
 from b3.plugins.admin import AdminPlugin
 from b3 import __version__ as b3_version

@@ -27,7 +27,7 @@ import unittest
 from unittest.mock import Mock, patch, ANY
 from mockito import mock, when, any as anything
 from b3.clients import Client
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.fake import FakeClient
 from b3.parsers.cod4gr import Cod4grParser
 

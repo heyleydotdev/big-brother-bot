@@ -28,7 +28,7 @@ import unittest
 import logging
 logging.raiseExceptions = False  # get rid of 'No handlers could be found for logger output' message
 from b3 import TEAM_UNKNOWN
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.parsers.bf3 import Bf3Parser, __version__ as bf3_version
 from b3.plugins.admin import AdminPlugin
 from mockito import when

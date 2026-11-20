@@ -31,7 +31,8 @@ from mockito import when
 import unittest
 
 from b3.clients import Client
-from b3.config import CfgConfigParser, XmlConfigParser
+from b3.config import CfgConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.cvar import Cvar
 from b3.fake import FakeClient
 from b3.parsers.etpro import EtproParser

@@ -24,7 +24,7 @@
 from unittest.mock import Mock, call, patch
 import unittest
 from b3 import TEAM_BLUE, TEAM_RED, TEAM_UNKNOWN, TEAM_SPEC
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.fake import FakeClient
 from b3.parsers.chiv import ChivParser, Packet, MessageType
 

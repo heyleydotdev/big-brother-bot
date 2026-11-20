@@ -27,7 +27,7 @@ import sys
 import unittest
 from b3 import TEAM_BLUE, TEAM_RED, TEAM_UNKNOWN, TEAM_SPEC
 from b3.clients import Client
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.fake import FakeClient
 from b3.parsers.csgo import CsgoParser
 from tests import assert_dict_contains_subset
@@ -691,7 +691,7 @@ class Test_gamelog_parsing(CsgoTestCase):
             self.parser.parseLine('''L 08/26/2012 - 05:21:23: rcon from "78.207.134.100:15073": Bad Password''')
             # THEN
             self.assertTrue(error_mock.called)
-            error_mock.assert_has_calls([call('Bad RCON password, check your b3.xml file')])
+            error_mock.assert_has_calls([call('Bad RCON password, check your b3.ini file')])
 
 
     def test_clantag(self):

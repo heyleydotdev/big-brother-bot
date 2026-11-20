@@ -5,7 +5,6 @@ include b3/sql/*.sql
 include b3/sql/mysql/*.sql
 include b3/sql/postgresql/*.sql
 include b3/sql/sqlite/*.sql
-include b3/conf/*.xml
 include b3/conf/*.ini
 include b3/conf/templates/*.tpl
 include b3/conf/templates/autodoc/*.html

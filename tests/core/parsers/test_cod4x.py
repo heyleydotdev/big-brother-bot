@@ -26,7 +26,7 @@ import unittest
 from unittest.mock import Mock, call
 
 from b3.clients import Client
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.parsers.cod4x import Cod4XParser
 
 log = logging.getLogger("test")

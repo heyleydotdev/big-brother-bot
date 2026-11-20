@@ -1,5 +1,11 @@
-2.2.3 -> 2.3.0 (unreleased)
+2.2.3 -> 3.0.0
 ----
+
+Configuration (breaking):
+- XML configuration support is removed. `XmlConfigParser`, the XML branch of
+  `load()` and `MainConfig`, the command manager XML writer and `.xml` handling in
+  `finalize()` and `scripts/b3.sh` are gone. All shipped configs are INI; convert
+  existing XML files before upgrading. `status.xml` remains generated output.
 
 - XLRstats 3.0.0: the plugin leaves beta. All hardening from the 2.2.x series is
   included (schema upgrade on PostgreSQL, escaping, purge guard, top list,

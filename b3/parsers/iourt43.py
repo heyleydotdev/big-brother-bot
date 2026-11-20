@@ -642,7 +642,7 @@ class Iourt43Parser(Iourt41Parser):
 
     def load_conf_permban_with_frozensand(self):
         """
-        Load permban configuration from b3.xml.
+        Load permban configuration from b3.ini.
         """
         self._permban_with_frozensand = False
         if self.config.has_option('server', 'permban_with_frozensand'):
@@ -655,7 +655,7 @@ class Iourt43Parser(Iourt41Parser):
 
     def load_conf_tempban_with_frozensand(self):
         """
-        Load tempban configuration from b3.xml.
+        Load tempban configuration from b3.ini.
         """
         self._tempban_with_frozensand = False
         if self.config.has_option('server', 'tempban_with_frozensand'):

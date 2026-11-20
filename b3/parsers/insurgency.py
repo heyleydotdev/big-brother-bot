@@ -513,7 +513,7 @@ class InsurgencyParser(Parser):
     @ger.gameEvent(r'^rcon from "(?P<ip>.+):(?P<port>\d+)":\sBad Password$')
     def on_bad_rcon_password(self, ip, port):
         # L 08/26/2012 - 05:21:23: rcon from "78.207.134.100:15073": Bad Password
-        self.error("Bad RCON password, check your b3.xml file")
+        self.error("Bad RCON password, check your b3.ini file")
 
     @ger.gameEvent(r'^Molotov projectile spawned at (?P<coord>-?[\d.]+ -?[\d.]+ -?[\d.]+), velocity (?P<velocity>-?[\d.]+ -?[\d.]+ -?[\d.]+)$')
     def on_molotov_spawed(self, coord, velocity):

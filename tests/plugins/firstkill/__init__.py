@@ -28,7 +28,7 @@ from mockito import when
 from b3 import TEAM_BLUE, TEAM_RED
 from b3.cvar import Cvar
 from b3.config import MainConfig
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.config import CfgConfigParser
 from b3.parsers.iourt42 import Iourt42Parser
 from b3.plugins.admin import AdminPlugin

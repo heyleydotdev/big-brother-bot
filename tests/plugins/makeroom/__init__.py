@@ -27,7 +27,8 @@ import os
 import pytest
 from mockito import when
 from b3 import TEAM_UNKNOWN
-from b3.config import XmlConfigParser, CfgConfigParser
+from b3.config import CfgConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.plugins.admin import AdminPlugin
 from b3.plugins.makeroom import MakeroomPlugin
 
@@ -63,7 +64,7 @@ class logging_disabled(object):
 def console():
     with logging_disabled():
         from b3.fake import FakeConsole
-        fake_console = FakeConsole('@b3/conf/b3.distribution.xml')
+        fake_console = FakeConsole('@b3/conf/b3.distribution.ini')
 
     # load the admin plugin
     with logging_disabled():

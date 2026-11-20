@@ -99,7 +99,7 @@ class FtpytailPlugin(b3.plugin.Plugin):
         """
         Load plugin configuration.
         """
-        # These values go in b3 xml, so check them first
+        # These values go in b3.ini, so check them first
         try:
             self._use_windows_cache_fix = self.console.config.getboolean('server', 'use_windows_cache_fix')
             self.debug('loaded server/use_windows_cache_fix: %s' % self._use_windows_cache_fix)
@@ -331,24 +331,15 @@ if __name__ == '__main__':
     from b3.fake import fakeConsole
 
     print("------------------------------------")
-    config = b3.config.XmlConfigParser()
-    config.setXml("""
-    <configuration plugin="ftpytail">
-        <settings name="settings">
-            <!-- timeout to allow when connecting to FTP server -->
-            <set name="timeout">5</set>
-            <!-- how much bytes to read at most from game log file's tail (this is to avoid downloading megabytes) -->
-            <set name="maxGapBytes">1024</set>
-            <!-- The 3 settings below defines how aggressive will be B3 at 
-            trying to reconnect after loosing the FTP connection.
-            Before 'max_consecutive_failures' connections error, the bot will wait
-            'short_delay' seconds before retrying. Then it will wait 'long_delay'. -->
-            <set name="max_consecutive_failures">10</set>
-            <set name="short_delay">2</set>
-            <set name="long_delay">15</set>
-        </settings>
-    </configuration>
-    """)
+    config = b3.config.CfgConfigParser()
+    config.loadFromString("""
+[settings]
+timeout: 5
+maxGapBytes: 1024
+max_consecutive_failures: 10
+short_delay: 2
+long_delay: 15
+""")
     p = FtpytailPlugin(fakeConsole, config)
     p.onStartup()
 

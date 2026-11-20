@@ -93,7 +93,7 @@ class AltitudeParser(Parser):
         In Altitude, this is done by writing commands to be run on a new line
         of the command.txt file
         """
-        # check that the command file is provided in the b3.xml config file
+        # check that the command file is provided in the b3.ini config file
         if not self.config.has_option('server', 'command_file'):
             self.critical("the B3 config file for Altitude must provide the location of the command file")
             self.die()

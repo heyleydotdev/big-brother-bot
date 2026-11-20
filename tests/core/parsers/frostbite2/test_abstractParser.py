@@ -28,7 +28,7 @@ import unittest
 from unittest.mock import Mock, patch, call
 from b3.clients import Client
 from b3.plugins.admin import AdminPlugin
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from b3.parsers.frostbite2.protocol import CommandFailedError
 from b3.parsers.frostbite2.abstractParser import AbstractParser
 from functools import reduce

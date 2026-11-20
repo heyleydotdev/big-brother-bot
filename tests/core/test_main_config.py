@@ -29,7 +29,7 @@ from b3 import getAbsolutePath
 from b3.config import CfgConfigParser
 from b3.config import MainConfig
 from b3.config import load
-from b3.config import XmlConfigParser
+from tests.legacy_config import XmlConfigParser
 from textwrap import dedent
 
 class CommonDefaultTestMethodsMixin:
@@ -88,22 +88,6 @@ class CommonDefaultTestMethodsMixin:
             {'name': 'tk', 'conf': '@b3/conf/plugin_tk.ini', 'disabled': False, 'path': None},
             {'name': 'welcome', 'conf': '@b3/conf/plugin_welcome.ini', 'disabled': False, 'path': None},
         ], self.conf.get_plugins())
-
-
-class Test_XmlMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase):
-
-    def setUp(self):
-        self.conf = MainConfig(load(b3.getAbsolutePath('@b3/conf/b3.distribution.xml')))
-        log = logging.getLogger('output')
-        log.setLevel(logging.DEBUG)
-
-    def test_plugins_order(self):
-        """
-        Vefify that the plugins are return in the same order as found in the config file
-        """
-        self.assertListEqual(['admin', 'adv', 'censor', 'cmdmanager', 'pingwatch', 'pluginmanager', 'punkbuster', 'spamcontrol', 'stats',
-                              'status', 'tk', 'welcome'],
-                             [x.get('name') for x in self.conf._config_parser.get('plugins/plugin')])
 
 
 class Test_CfgMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase):

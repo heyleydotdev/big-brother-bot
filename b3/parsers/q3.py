@@ -50,7 +50,7 @@
 # 23/10/2010 - 0.9.3  - GrosBedo  - detect gametype and modname at startup
 #                                 - added flag_taken action
 #                                 - fix a small bug when triggering the flag return event
-# 07/11/2010 - 0.9.4  - GrosBedo  - ban and unban messages are now more generic and can be configured from b3.xml
+# 07/11/2010 - 0.9.4  - GrosBedo  - ban and unban messages are now more generic and can be configured from b3.ini
 #                                 - messages now support named $variables instead of %s
 # 08/11/2010 - 0.9.5  - GrosBedo  - messages can now be empty (no message broadcasted on kick/tempban/ban/unban)
 # 09/04/2011 - 0.9.6  - Courgette - reflect that cid are not converted to int anymore in the clients module
