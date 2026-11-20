@@ -1543,6 +1543,9 @@ class AdminPlugin(b3.plugin.Plugin):
             else:
                 sclient = self.findClientPrompt(cid, client)
                 if sclient:
+                    if sclient is not client and sclient.maxLevel >= client.maxLevel and client.maxLevel < 100:
+                        client.message("^7You can't change the group of a higher level player")
+                        return
                     if sclient.inGroup(group_reg):
                         sclient.remGroup(group_reg)
                         sclient.setGroup(group_user)
@@ -1573,6 +1576,9 @@ class AdminPlugin(b3.plugin.Plugin):
             else:
                 sclient = self.findClientPrompt(cid, client)
                 if sclient:
+                    if sclient is not client and sclient.maxLevel >= client.maxLevel and client.maxLevel < 100:
+                        client.message("^7You can't change the group of a higher level player")
+                        return
                     if sclient.inGroup(group):
                         client.message(self.getMessage('groups_already_in', sclient.exactName, group.name))
                     else:
@@ -1605,6 +1611,9 @@ class AdminPlugin(b3.plugin.Plugin):
             else:
                 sclient = self.findClientPrompt(cid, client)
                 if sclient:
+                    if sclient is not client and sclient.maxLevel >= client.maxLevel and client.maxLevel < 100:
+                        client.message("^7You can't change the group of a higher level player")
+                        return
                     if sclient.inGroup(group):
                         sclient.remGroup(group)
                         sclient.save()

@@ -956,6 +956,18 @@ group_beyond_reach: You can't assign players to group %(group_name)s
         self.assertListEqual(['Mike is already in group User'], self.joe.message_history)
         self.assertEqual('user', self.mike.maxGroup.keyword)
 
+    def test_cannot_change_group_of_higher_level(self):
+        # GIVEN a senioradmin and a superadmin
+        jack = FakeClient(self.console, name="Jack", guid="jackguid", groupBits=64, team=TEAM_RED)
+        jack.connects(3)
+        self.assertEqual('superadmin', self.joe.maxGroup.keyword)
+        # WHEN
+        jack.clearMessageHistory()
+        jack.says('!putgroup joe mod')
+        # THEN
+        self.assertListEqual(["You can't change the group of a higher level player"], jack.message_history)
+        self.assertEqual('superadmin', self.joe.maxGroup.keyword)
+
     def test_group_beyond_reach(self):
         # GIVEN
         jack = FakeClient(self.console, name="Jack", guid="jackguid", groupBits=40, team=TEAM_RED)
@@ -1152,6 +1164,23 @@ class Test_cmd_mask(Admin_functional_test):
         self._test_persistence_for_group("superadmin")
 
 
+class Test_cmd_ungroup(Admin_functional_test):
+
+    def setUp(self):
+        Admin_functional_test.setUp(self)
+        self.init()
+        self.joe.connects(0)
+
+    def test_cannot_ungroup_higher_level(self):
+        jack = FakeClient(self.console, name="Jack", guid="jackguid", groupBits=64, team=TEAM_RED)
+        jack.connects(3)
+        self.assertEqual('superadmin', self.joe.maxGroup.keyword)
+        jack.clearMessageHistory()
+        jack.says('!ungroup joe superadmin')
+        self.assertListEqual(["You can't change the group of a higher level player"], jack.message_history)
+        self.assertEqual('superadmin', self.joe.maxGroup.keyword)
+
+
 class Test_cmd_makereg_unreg(Admin_functional_test):
     def setUp(self):
         Admin_functional_test.setUp(self)
@@ -1179,6 +1208,18 @@ class Test_cmd_makereg_unreg(Admin_functional_test):
         self.assertFalse(self.mike.inGroup(self.group_reg))
         self.joe.message.assert_called_with('^7Mike^7^7 removed from group Regular')
 
+
+    def test_cannot_unreg_higher_level(self):
+        # GIVEN a senioradmin and a superadmin
+        jack = FakeClient(self.console, name="Jack", guid="jackguid", groupBits=64, team=TEAM_RED)
+        jack.connects(3)
+        self.assertEqual('superadmin', self.joe.maxGroup.keyword)
+        # WHEN
+        jack.clearMessageHistory()
+        jack.says('!unreg joe')
+        # THEN
+        self.assertListEqual(["You can't change the group of a higher level player"], jack.message_history)
+        self.assertEqual('superadmin', self.joe.maxGroup.keyword)
 
     def test_unreg_when_not_regular(self):
         # GIVEN
