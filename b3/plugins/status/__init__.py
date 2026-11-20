@@ -467,7 +467,7 @@ class StatusPlugin(b3.plugin.Plugin):
             k = esc(str(k))
             v = esc(str(v)[:255])  # length of the database varchar field
             try:
-                if self.console.storage.dsnDict['protocol'] == 'postgresql':
+                if self.console.storage.dsnDict['protocol'] in ('postgresql', 'sqlite'):
                     self.console.storage.query("""UPDATE %s SET value=%s WHERE name=%s;""" % (self._tables['svars'], v, k))
                     self.console.storage.query("""INSERT INTO %s (name, value) SELECT %s, %s WHERE NOT EXISTS (
                                                   SELECT 1 FROM %s WHERE name=%s);""" % (self._tables['svars'], k, v,
