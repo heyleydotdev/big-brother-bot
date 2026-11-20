@@ -334,6 +334,7 @@ class Cron(object):
         """
         Main cron loop.
         Will terminate when stop event is set.
+        Tabs are evaluated against UTC (time.gmtime), not local time.
         """
         self.console.info("Cron scheduler started")
         nexttime = self.getNextTime()
