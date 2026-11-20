@@ -48,10 +48,10 @@ except ImportError:
         no_mysql_reason = "no pymysql or mysql.connector module available"
 
 try:
-    import psycopg2
+    import psycopg
 except ImportError:
     is_postgresql_ready = False
-    no_postgresql_reason = "no psycopg2 module available"
+    no_postgresql_reason = "no psycopg module available"
 
 class Test_Storage(B3TestCase):
 
