@@ -75,7 +75,7 @@ def bench_parser(n_lines):
     Replay canned q3-family log lines through the real iourt42 parser, the
     same way the game log pump feeds it in production.
     """
-    from tests.legacy_config import XmlConfigParser
+    from b3.config import CfgConfigParser
     from b3.fake import FakeConsole
     from b3.parsers.q3a.abstractParser import AbstractParser
 
@@ -83,9 +83,11 @@ def bench_parser(n_lines):
     AbstractParser.__bases__ = (FakeConsole,)
     from b3.parsers.iourt42 import Iourt42Parser
 
-    conf = XmlConfigParser()
-    conf.loadFromString('<configuration><settings name="server">'
-                        '<set name="game_log"/></settings></configuration>')
+    conf = CfgConfigParser()
+    conf.loadFromString("""
+[server]
+game_log:
+""")
     parser = Iourt42Parser(conf)
 
     errors = 0
