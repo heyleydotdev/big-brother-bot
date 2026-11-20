@@ -22,16 +22,17 @@
 # ################################################################### #
 
 __author__ = 'Fenix, heyleydotdev'
-__version__ = '1.6'
+__version__ = '1.7'
 
 import b3
 import b3.clients
 import b3.plugin
 import b3.events
+import os
 import threading
 import time
 
-from .exceptions import GeolocalizationError
+from .exceptions import GeolocalizationError, InvalidDatabaseError
 from .geolocators import FreeIpApiGeolocator
 from .geolocators import IpApiGeolocator
 from .geolocators import IpWhoIsGeolocator
@@ -51,12 +52,19 @@ class GeolocationPlugin(b3.plugin.Plugin):
         b3.plugin.Plugin.__init__(self, console, config)
         # create geolocators instances
         self.info('creating geolocators object instances...')
-        self._geolocators = [IpApiGeolocator(), IpWhoIsGeolocator(), FreeIpApiGeolocator()]
+        self._geolocators = []
         try:
-            # append this one separately since db may be missing
+            # local database first: no network round trip, no rate limits
             self._geolocators.append(MaxMindGeolocator())
+        except InvalidDatabaseError as e:
+            self.warning('the MaxMind geolocation database is unusable: %s', e)
         except IOError as e:
-            self.debug('MaxMind geolocation not available: %s' % e)
+            self.debug('MaxMind geolocation not available: %s', e)
+            for path in MaxMindGeolocator._legacy_paths:
+                if os.path.isfile(path):
+                    self.warning('the MaxMind GeoIP Legacy database %s is not used anymore: see the plugin README', path)
+                    break
+        self._geolocators.extend([IpApiGeolocator(), IpWhoIsGeolocator(), FreeIpApiGeolocator()])
         # cache of already retrieved geolocation data: {ip address string: (timestamp, Location)}
         self._cache_lock = threading.Lock()
         self._cache = {}

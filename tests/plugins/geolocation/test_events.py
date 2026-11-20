@@ -25,8 +25,11 @@ import time
 
 from unittest.mock import Mock, patch
 from b3.events import Event
+from b3.plugins.geolocation.geolocators import MaxMindGeolocator
 from b3.plugins.geolocation.location import Location
 from tests.plugins.geolocation import GeolocationTestCase
+
+US_RECORD = {'country': {'iso_code': 'US', 'names': {'en': 'United States'}}}
 
 IP_API_RESPONSE = {
     'status': 'success',
@@ -71,6 +74,19 @@ class Test_events(GeolocationTestCase):
         self.mocked_get.return_value = self.response
         self.addCleanup(self.get_patcher.stop)
 
+    def install_local_database(self, record):
+        """
+        Put a MaxMind DB geolocator first in the chain, backed by the given record.
+        """
+        db = Mock()
+        db.get.return_value = record
+        with (
+            patch('b3.plugins.geolocation.geolocators.os.path.isfile', return_value=True),
+            patch('b3.plugins.geolocation.geolocators.maxminddb.open_database', return_value=db),
+        ):
+            geolocator = MaxMindGeolocator()
+        self.p._geolocators = [geolocator] + self.p._geolocators
+
     def test_event_client_geolocation_success(self):
         # GIVEN
         self.mike.ip = '8.8.8.8'
@@ -82,16 +98,27 @@ class Test_events(GeolocationTestCase):
         self.assertEqual('United States', self.mike.location.country)
         self.assertEqual(1, self.mocked_get.call_count)
 
-    def test_event_client_geolocation_http_failure_falls_back_to_maxmind(self):
-        # GIVEN: every http geolocator returns a malformed response
-        self.response.json.side_effect = ValueError('no json object could be decoded')
+    def test_event_client_geolocation_local_database_is_used_before_http(self):
+        # GIVEN: a local database that knows the ip
+        self.install_local_database(US_RECORD)
         self.mike.ip = '8.8.8.8'
         # WHEN
         self.mike.connects("1")
-        # THEN: the MaxMind local database is used as last resort
+        # THEN: no http request is needed
         self.assertTrue(wait_for(lambda: getattr(self.mike, 'location', None) is not None))
         self.assertEqual('United States', self.mike.location.country)
-        self.assertEqual(3, self.mocked_get.call_count)  # all the http geolocators have been tried
+        self.assertEqual(0, self.mocked_get.call_count)
+
+    def test_event_client_geolocation_unknown_ip_falls_back_to_http(self):
+        # GIVEN: the local database has no data for the ip
+        self.install_local_database(None)
+        self.mike.ip = '8.8.8.8'
+        # WHEN
+        self.mike.connects("1")
+        # THEN: the http geolocators are tried
+        self.assertTrue(wait_for(lambda: getattr(self.mike, 'location', None) is not None))
+        self.assertEqual('United States', self.mike.location.country)
+        self.assertEqual(1, self.mocked_get.call_count)
 
     def test_event_client_geolocation_failure_invalid_ip(self):
         # GIVEN
@@ -105,7 +132,8 @@ class Test_events(GeolocationTestCase):
 
     def test_event_client_geolocation_success_maxmind(self):
         # GIVEN: only the MaxMind geolocator is available (local database, no http request needed)
-        self.p._geolocators = [self.p._geolocators[-1]]
+        self.p._geolocators = []
+        self.install_local_database(US_RECORD)
         self.mike.ip = '8.8.8.8'
         # WHEN
         self.mike.connects("1")
@@ -118,7 +146,8 @@ class Test_events(GeolocationTestCase):
 
     def test_event_client_geolocation_success_maxmind_using_event_client_update(self):
         # GIVEN
-        self.p._geolocators = [self.p._geolocators[-1]]
+        self.p._geolocators = []
+        self.install_local_database(US_RECORD)
         self.mike.ip = ''
         self.mike.connects("1")
         # WHEN

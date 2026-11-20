@@ -7,10 +7,27 @@ A [BigBrotherBot][B3] plugin which introduces geolocation capabilities. This plu
 since it doesn't provide commands or visual reaction to B3 events. The plugin intercepts new clients connection and
 retrieve geolocation data using multiple data sources (tried in order until one succeeds):
 
+* a local MaxMind DB file, tried first: [DB-IP Lite City](https://db-ip.com/db/download/ip-to-city-lite) or
+  [GeoLite2 City](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) *(recommended)*
 * [IP api](http://ip-api.com/)
 * [IP WhoIs](https://ipwho.is/)
 * [Free IP API](https://freeipapi.com/)
-* [MaxMind GeoIP](http://dev.maxmind.com/geoip/legacy/install/country/)
+
+### Local database setup
+
+A local database is tried before the HTTP services: no network round trip for the players it knows, no rate limit,
+and no player IP sent to a third party.
+
+1. Download the free DB-IP Lite City database (CC BY 4.0, updated monthly) from
+   <https://download.db-ip.com/free/dbip-city-lite-YYYY-MM.mmdb.gz> and extract the `.mmdb` file. A GeoLite2 City
+   `.mmdb` file works too, it uses the same schema. The Country editions also work but hold no city, region,
+   coordinates nor time zone, so `!location` and `!distance` lose those values.
+2. Put it in `b3/plugins/geolocation/db/` as `dbip-city-lite.mmdb` (or `GeoLite2-City.mmdb`). The same file names are
+   also looked up in `/usr/local/share/GeoIP/` and `/usr/share/GeoIP/`.
+
+The database is re-read on every B3 start: replace the file to update the data. No local database provides an ISP
+name, so `client.location.isp` stays empty for the players answered from the file. When redistributing or displaying
+the data, DB-IP asks for the attribution "IP Geolocation by [DB-IP](https://db-ip.com)".
 
 Retrieved geolocation data is cached per ip address for 24 hours: reconnecting players won't generate new requests
 and the same client is never geolocated by two events at the same time.

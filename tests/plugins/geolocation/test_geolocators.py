@@ -21,6 +21,7 @@
 #                                                                     #
 # ################################################################### #
 
+import maxminddb
 import unittest
 
 from unittest.mock import Mock, patch
@@ -30,6 +31,7 @@ from b3.plugins.geolocation.geolocators import FreeIpApiGeolocator
 from b3.plugins.geolocation.geolocators import Geolocator
 from b3.plugins.geolocation.geolocators import IpApiGeolocator
 from b3.plugins.geolocation.geolocators import IpWhoIsGeolocator
+from b3.plugins.geolocation.geolocators import MaxMindGeolocator
 
 
 def mock_response(json_data):
@@ -64,6 +66,13 @@ class Test_getIp(unittest.TestCase):
     def test_client_with_valid_ip(self):
         client = Client(console=Mock(), ip='94.32.34.35')
         self.assertEqual('94.32.34.35', Geolocator._getIp(client))
+
+    def test_valid_ipv6_string(self):
+        self.assertEqual('2001:db8::1', Geolocator._getIp('2001:db8::1'))
+
+    def test_scoped_ipv6_string(self):
+        # a zone id cannot be used by maxminddb nor in the http service urls
+        self.assertRaises(GeolocalizationError, Geolocator._getIp, 'fe80::1%eth0')
 
     def test_invalid_type(self):
         self.assertRaises(GeolocalizationError, Geolocator._getIp, 123456)
@@ -213,3 +222,91 @@ class Test_FreeIpApiGeolocator(unittest.TestCase):
         with patch('b3.plugins.geolocation.geolocators.requests.get') as get:
             get.return_value = mock_response({'message': 'not found'})
             self.assertRaises(GeolocalizationError, self.geolocator.getLocation, '127.0.0.1')
+
+class FakeDatabase:
+
+    def __init__(self, record):
+        self.record = record
+        self.queried = []
+
+    def get(self, ip):
+        self.queried.append(ip)
+        return self.record
+
+
+class Test_MaxMindGeolocator(unittest.TestCase):
+
+    def build(self, record):
+        db = FakeDatabase(record)
+        with (
+            patch('b3.plugins.geolocation.geolocators.os.path.isfile', return_value=True),
+            patch('b3.plugins.geolocation.geolocators.maxminddb.open_database', return_value=db),
+        ):
+            geolocator = MaxMindGeolocator()
+        return geolocator, db
+
+    def test_getLocation(self):
+        # GIVEN a DB-IP / GeoLite2 Country record
+        geolocator, db = self.build({'country': {'iso_code': 'IT', 'names': {'en': 'Italy'}}})
+        # WHEN
+        location = geolocator.getLocation('94.32.34.35')
+        # THEN
+        self.assertEqual('Italy', location.country)
+        self.assertEqual('IT', location.cc)
+        self.assertEqual(['94.32.34.35'], db.queried)
+
+    def test_getLocation_ipv6(self):
+        geolocator, db = self.build({'country': {'iso_code': 'IT', 'names': {'en': 'Italy'}}})
+        location = geolocator.getLocation('2001:db8::1')
+        self.assertEqual('IT', location.cc)
+        self.assertEqual(['2001:db8::1'], db.queried)
+
+    def test_getLocation_city_fields(self):
+        # GIVEN a City edition record
+        geolocator, _ = self.build({
+            'country': {'iso_code': 'IT', 'names': {'en': 'Italy'}},
+            'subdivisions': [{'iso_code': '52', 'names': {'en': 'Tuscany'}}],
+            'city': {'names': {'en': 'Florence'}},
+            'location': {'latitude': 43.77, 'longitude': 11.25, 'time_zone': 'Europe/Rome'},
+            'postal': {'code': '50100'},
+        })
+        # WHEN
+        location = geolocator.getLocation('94.32.34.35')
+        # THEN
+        self.assertEqual('Italy', location.country)
+        self.assertEqual('IT', location.cc)
+        self.assertEqual('Tuscany', location.region)
+        self.assertEqual('52', location.rc)
+        self.assertEqual('Florence', location.city)
+        self.assertEqual('43.77', location.lat)
+        self.assertEqual('11.25', location.lon)
+        self.assertEqual('Europe/Rome', location.timezone)
+        self.assertEqual('50100', location.zipcode)
+
+    def test_getLocation_country_edition(self):
+        # GIVEN a Country edition record
+        geolocator, _ = self.build({'country': {'iso_code': 'IT', 'names': {'en': 'Italy'}}})
+        # WHEN
+        location = geolocator.getLocation('94.32.34.35')
+        # THEN
+        self.assertEqual('IT', location.cc)
+        self.assertIsNone(location.city)
+        self.assertIsNone(location.lat)
+
+    def test_getLocation_unknown_ip(self):
+        geolocator, _ = self.build(None)
+        with self.assertRaises(GeolocalizationError) as ctx:
+            geolocator.getLocation('94.32.34.35')
+        self.assertIn('no country data', str(ctx.exception))
+
+    def test_missing_database(self):
+        with patch('b3.plugins.geolocation.geolocators.os.path.isfile', return_value=False):
+            self.assertRaises(IOError, MaxMindGeolocator)
+
+    def test_invalid_database(self):
+        with (
+            patch('b3.plugins.geolocation.geolocators.os.path.isfile', return_value=True),
+            patch('b3.plugins.geolocation.geolocators.maxminddb.open_database',
+                  side_effect=maxminddb.InvalidDatabaseError('not a maxmind db')),
+        ):
+            self.assertRaises(IOError, MaxMindGeolocator)

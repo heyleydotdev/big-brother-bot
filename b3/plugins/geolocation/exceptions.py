@@ -25,8 +25,11 @@ class GeolocalizationError(Exception):
     """
     Raised when we are not able to geolocalize an IP address
     """
-    def __init__(self, message):
-        Exception.__init__(self, message)
+    # plain Exception: the py2-era __str__ read self.message, which raise never set
+    # (AttributeError as soon as the error was logged)
 
-    def __str__(self):
-        return repr(self.message)
+
+class InvalidDatabaseError(IOError):
+    """
+    Raised when a MaxMind DB file exists but cannot be read
+    """

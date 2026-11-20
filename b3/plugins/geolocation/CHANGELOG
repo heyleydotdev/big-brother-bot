@@ -5,3 +5,4 @@
 2015/03/26 - 1.4 - Fenix - make use of EVT_PUNKBUSTER_NEW_CONNECTION if we are running a Frostbite based game
 2015/07/16 - 1.5 - Fenix - catch a more broad exception when performing geolocation task
 2026/08/21 - 1.6 - heyleydotdev - removed defunct geolocation services (Telize, FreeGeoIP) - added IpWhoIs and FreeIpApi HTTPS geolocators as fallbacks - cache geolocation data per ip address (24 hours) to reduce number of requests - prevent concurrent geolocation of the same client - anchored the ip address validation regular expression
+2026/11/20 - 1.7 - read a MaxMind DB (MMDB) file instead of the retired MaxMind GeoIP Legacy .dat format: DB-IP Lite (City or Country) and GeoLite2 both work, city/region/coordinates are mapped for the location plugin, IPv6 is supported, the local database is tried before the HTTP services, a broken database and a leftover GeoIP.dat are reported, and the bundled 2018 GeoIP.dat with its vendored reader is gone

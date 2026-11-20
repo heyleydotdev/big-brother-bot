@@ -23,13 +23,13 @@
 
 import b3
 import b3.clients
-import re
+import ipaddress
+import maxminddb
 import os
 import os.path
 import requests
 
-from .exceptions import GeolocalizationError
-from .lib.geoip import GeoIP
+from .exceptions import GeolocalizationError, InvalidDatabaseError
 from .location import Location
 
 
@@ -52,19 +52,23 @@ class Geolocator(object):
         :return: string
         """
         if isinstance(data, str):
-            if not re.match(r'''^\d{1,3}(?:\.\d{1,3}){3}$''', str(data)):
-                raise GeolocalizationError('invalid ip address string supplied: %s' % data)
+            ip = data
         elif isinstance(data, b3.clients.Client):
-            client = data
-            if not client.ip:
+            ip = data.ip
+            if not ip:
                 raise GeolocalizationError('b3.clients.Client object instance has not ip attribute set')
-            elif not re.match(r'''^\d{1,3}(?:\.\d{1,3}){3}$''', client.ip):
-                raise GeolocalizationError('b3.clients.Client object instance has an invalid ip address string: %s' % client.ip)
         else:
             raise GeolocalizationError('invalid argument supplied: %s' % type(data).__name__)
 
+        try:
+            ipaddress.ip_address(ip)
+        except ValueError:
+            raise GeolocalizationError('invalid ip address supplied: %s' % ip)
 
-        return data if isinstance(data, str) else data.ip
+        if '%' in ip:  # zone id: no database nor http service can use it
+            raise GeolocalizationError('scoped ip address not supported: %s' % ip)
+
+        return ip
 
     def getLocation(self, data):
         """
@@ -150,9 +154,21 @@ class FreeIpApiGeolocator(Geolocator):
 
 
 class MaxMindGeolocator(Geolocator):
+    """
+    Geolocate through a MaxMind DB (MMDB) file: DB-IP Lite or GeoLite2 Country
+    share the same schema, so either file works.
+    """
 
-    _path = None
-    _geoip = None
+    # City editions first: they also hold city, region and coordinates
+    _db_names = ('dbip-city-lite.mmdb', 'dbip-country-lite.mmdb',
+                 'GeoLite2-City.mmdb', 'GeoLite2-Country.mmdb')
+    # the retired MaxMind GeoIP Legacy format, only used to warn about it
+    _legacy_paths = ('/usr/local/share/GeoIP/GeoIP.dat', '/usr/share/GeoIP/GeoIP.dat')
+    _db_dirs = (
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db'),
+        '/usr/local/share/GeoIP',
+        '/usr/share/GeoIP',
+    )
 
     def __init__(self, *args, **kwargs):
         """
@@ -160,15 +176,18 @@ class MaxMindGeolocator(Geolocator):
         :raise IOError: if the database is not available
         """
         super(MaxMindGeolocator, self).__init__(*args, **kwargs)
-        # prefer plugin relative path
-        self._path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib', 'geoip', 'db', 'GeoIP.dat')
-        if not os.path.isfile(self._path):
-            # search system wide (using system path according to installation
-            # instructions: http://dev.maxmind.com/geoip/legacy/install/country/
-            if not os.path.isfile('/usr/local/share/GeoIP/GeoIP.dat'):
-                raise IOError('no MaxMind GeoIP.dat database available: put the database file in %s' % self._path)
-            self._path = '/usr/local/share/GeoIP/GeoIP.dat'
-        self.geoip = GeoIP.open(self._path, GeoIP.GEOIP_STANDARD)
+        for directory in self._db_dirs:
+            for name in self._db_names:
+                path = os.path.join(directory, name)
+                if not os.path.isfile(path):
+                    continue
+                try:
+                    self._db = maxminddb.open_database(path)
+                except (OSError, maxminddb.InvalidDatabaseError) as e:
+                    raise InvalidDatabaseError('invalid MaxMind DB file %s: %s' % (path, e))
+                return
+        raise IOError('no MaxMind DB file found: put %s in %s'
+                      % (self._db_names[0], self._db_dirs[0]))
 
     def getLocation(self, data):
         """
@@ -177,5 +196,25 @@ class MaxMindGeolocator(Geolocator):
         :raise GeolocalizationError: When we are not able to retrieve location information
         :return: A Location object initialized with location data
         """
-        country_id = self.geoip.id_by_addr(self._getIp(data))
-        return Location(country=GeoIP.id_to_country_name(country_id), cc=GeoIP.id_to_country_code(country_id))
+        ip = self._getIp(data)
+        record = self._db.get(ip) or {}
+        country = record.get('country') or {}
+        cc = country.get('iso_code')
+        name = (country.get('names') or {}).get('en')
+        if not cc and not name:
+            raise GeolocalizationError('no country data for ip %s' % ip)
+        # Country editions stop here, City editions also fill the fields of the location plugin
+        subdivisions = record.get('subdivisions') or []
+        region = subdivisions[0] if subdivisions else {}
+        location = record.get('location') or {}
+        return Location(
+            country=name,
+            cc=cc,
+            city=((record.get('city') or {}).get('names') or {}).get('en'),
+            region=(region.get('names') or {}).get('en'),
+            rc=region.get('iso_code'),
+            lat=location.get('latitude'),
+            lon=location.get('longitude'),
+            timezone=location.get('time_zone'),
+            zipcode=(record.get('postal') or {}).get('code'),
+        )
