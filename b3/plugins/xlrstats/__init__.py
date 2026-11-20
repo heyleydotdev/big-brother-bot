@@ -358,7 +358,7 @@ class XlrstatsPlugin(b3.plugin.Plugin):
                 'playerstats-update-3.0.0.sql': self.playerstats_table,
             },
             'postgresql': {
-                # NO UPDATE NEEDED FOR THE MOMENT
+                'playerstats-update-3.0.0.sql': self.playerstats_table,
             }
         }
 
@@ -376,6 +376,12 @@ class XlrstatsPlugin(b3.plugin.Plugin):
                             # DONT LOG HERE!!! (schema might have already changed so executing the update query will
                             # raise an exception without actually changing the database table structure (which is OK!)
                             pass
+
+        # the update above is allowed to fail: verify that it actually worked
+        try:
+            self.console.storage._query("SELECT id_token FROM %s LIMIT 1" % self.playerstats_table).close()
+        except Exception as e:
+            self.error("database schema update failed: missing column id_token on '%s': %s", self.playerstats_table, e)
 
     def load_config_tables(self):
         """
@@ -1546,6 +1552,9 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         if cursor and not cursor.EOF:
             while not cursor.EOF:
                 r = cursor.getRow()
+                if r['client_id'] == self._world_clientid:
+                    cursor.moveNext()
+                    continue
                 self.verbose(r)
                 self.purgePlayerStats(r['player_id'])
                 self.purgeAssociated(self.playeractions_table, r['player_id'])
@@ -1746,8 +1755,12 @@ class XlrstatsPlugin(b3.plugin.Plugin):
 
     def cmd_xlrinit(self, data, client, cmd=None):
         """
-        - initialize XLRstats database schema (!!!will remove all the collected stats!!!)
+        yes - initialize XLRstats database schema (!!!will remove all the collected stats!!!)
         """
+        if not data or data.strip().lower() != 'yes':
+            client.message('^3XLRstats database schema not initialized: use !xlrinit yes')
+            return
+
         xlr_tables = []
         for attr in dir(self):
             attr_val = getattr(self, attr)

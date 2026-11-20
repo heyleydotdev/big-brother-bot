@@ -25,6 +25,7 @@ import inspect
 import unittest
 import logging
 import os
+import time
 from textwrap import dedent
 
 from unittest.mock import Mock
@@ -114,6 +115,14 @@ class Test_schema_update(XlrstatsTestCase):
         self.assertFalse([e for e in errors if 'ALTER TABLE' in str(e)], errors)
 
 
+    def test_missing_id_token_is_added(self):
+        # simulate a 2.x database and check the schema update adds the column
+        self.init()
+        self.console.storage.query("ALTER TABLE xlr_playerstats DROP COLUMN id_token")
+        self.p.build_database_schema()
+        self.console.storage.query("SELECT id_token FROM xlr_playerstats LIMIT 1").close()
+
+
 class Test_toplist(XlrstatsTestCase):
 
     def test_thread_is_daemon(self):
@@ -164,6 +173,147 @@ webfronturl: http://127.0.0.1:1/
             urlopen.return_value.readline.return_value = '1,2,3'
             self.p.getWebsiteVariables()
         urlopen.assert_called_once_with('http://example.com/?config=0&func=pluginreq', timeout=5)
+
+
+class Test_background_jobs(XlrstatsTestCase):
+
+    def setUp(self):
+        XlrstatsTestCase.setUp(self)
+        self.init()
+
+    def _client(self, name, guid):
+        client = FakeClient(console=self.console, name=name, guid=guid)
+        client.connects("1")
+        client.says("!register")
+        return client
+
+    def _world_client(self):
+        world = FakeClient(console=self.console, name="WORLD", guid="Server")
+        world.connects("0")
+        self.p._world_clientid = world.id
+        return world
+
+    def _save_stats(self, client, skill=1000, kills=100, deaths=100):
+        stats = self.p.get_PlayerStats(client)
+        stats.skill = skill
+        stats.kills = kills
+        stats.deaths = deaths
+        stats.fixed_name = client.name
+        self.p.save_Stat(stats)
+
+    def _save_world_stats(self, skill=2000):
+        stats = self.p.get_PlayerStats()
+        stats.skill = skill
+        stats.kills = 100
+        stats.deaths = 100
+        self.p.save_Stat(stats)
+
+    def _age(self, client, days):
+        self.console.storage.query("UPDATE clients SET time_edit = %s WHERE id = %s" % (
+            int(time.time()) - days * 86400, client.id))
+
+    def _count(self, client_id):
+        cursor = self.console.storage.query(
+            "SELECT COUNT(id) AS c FROM xlr_playerstats WHERE client_id = %s" % client_id)
+        return cursor.getValue('c', 0)
+
+    def test_correctStats_scales_the_pool_and_keeps_the_world_client(self):
+        world = self._world_client()
+        p1 = self._client("P1", "P1_GUID")
+        p2 = self._client("P2", "P2_GUID")
+        self._save_stats(p1, skill=2000)
+        self._save_stats(p2, skill=2000)
+        self._save_world_stats(skill=2000)
+
+        self.p.auto_correct = True
+        self.p.correctStats()
+
+        self.assertAlmostEqual(1100, self.p.get_PlayerStats(p1).skill)
+        self.assertAlmostEqual(1100, self.p.get_PlayerStats(p2).skill)
+        self.assertEqual(2000, self.p.get_PlayerStats().skill)
+        self.assertEqual(world.id, self.p._world_clientid)
+
+    def test_correctStats_does_nothing_when_disabled(self):
+        p1 = self._client("P1", "P1_GUID")
+        self._save_stats(p1, skill=2000)
+        self.p.auto_correct = False
+        self.p.correctStats()
+        self.assertEqual(2000, self.p.get_PlayerStats(p1).skill)
+
+    def test_purgePlayers_keeps_the_world_client_and_recent_players(self):
+        world = self._world_client()
+        old = self._client("Old", "OLD_GUID")
+        recent = self._client("Recent", "RECENT_GUID")
+        self._save_stats(old)
+        self._save_stats(recent)
+        self._save_world_stats()
+        self._age(old, 400)
+        self._age(world, 400)
+
+        self.p.auto_purge = True
+        self.p._purge_player_days = 365
+        self.p.purgePlayers()
+
+        self.assertEqual(0, self._count(old.id))
+        self.assertEqual(1, self._count(recent.id))
+        self.assertEqual(1, self._count(world.id))
+
+    def test_purgePlayers_does_nothing_when_disabled(self):
+        old = self._client("Old", "OLD_GUID")
+        self._save_stats(old)
+        self._age(old, 400)
+        self.p.auto_purge = False
+        self.p.purgePlayers()
+        self.assertEqual(1, self._count(old.id))
+
+    def test_calculateKillBonus_without_stats(self):
+        self.p.calculateKillBonus()
+        self.assertEqual(1.5, self.p.kill_bonus)
+
+    def test_calculateKillBonus_for_a_high_pool(self):
+        p1 = self._client("P1", "P1_GUID")
+        self._save_stats(p1, skill=1500)
+        self.p.calculateKillBonus()
+        self.assertEqual(1.4, self.p.kill_bonus)
+        self.assertAlmostEqual(1.4 / 3, self.p.assist_bonus)
+
+    def test_calculateKillBonus_for_a_low_pool(self):
+        p1 = self._client("P1", "P1_GUID")
+        self._save_stats(p1, skill=900)
+        self.p.calculateKillBonus()
+        self.assertEqual(2.0, self.p.kill_bonus)
+
+
+class Test_cmd_xlrinit(XlrstatsTestCase):
+
+    def setUp(self):
+        XlrstatsTestCase.setUp(self)
+        self.init()
+        self.admin = FakeClient(console=self.console, name="Admin", guid="ADMIN_GUID", groupBits=128)
+        self.admin.connects("0")
+        self.assertEqual(100, self.admin.maxLevel)
+        self.client = FakeClient(console=self.console, name="P1", guid="P1_GUID")
+        self.client.connects("1")
+        self.client.says("!register")
+        stats = self.p.get_PlayerStats(self.client)
+        stats.fixed_name = self.client.name
+        self.p.save_Stat(stats)
+
+    def _count(self):
+        cursor = self.console.storage.query("SELECT COUNT(id) AS c FROM xlr_playerstats")
+        return cursor.getValue('c', 0)
+
+    def test_needs_confirmation(self):
+        self.admin.clearMessageHistory()
+        self.admin.says("!xlrinit")
+        self.assertEqual(1, self._count())
+        self.assertIn('use !xlrinit yes', self.admin.message_history[0])
+
+    def test_with_confirmation(self):
+        self.admin.clearMessageHistory()
+        self.admin.says("!xlrinit yes")
+        self.assertEqual(0, self._count())
+        self.assertIn('initialized', self.admin.message_history[0])
 
 
 class Test_get_PlayerAnon(XlrstatsTestCase):
