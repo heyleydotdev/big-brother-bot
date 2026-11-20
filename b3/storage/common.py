@@ -153,7 +153,10 @@ class DatabaseStorage(Storage):
             return client
 
         except Exception:
-            # query failed, try local cache
+            # the local cache is only a fallback for an unreachable database;
+            # a query error must not silently grant the cached level
+            if self.status():
+                raise
             if self.console.config.has_option('admins_cache', client.guid):
                 data = self.console.config.get('admins_cache', client.guid, raw=True)
                 self.console.debug('pulling user form admins_cache %s' % data)
@@ -518,29 +521,25 @@ class DatabaseStorage(Storage):
         cursor.close()
         return value
 
-    _groups = None
-
     def getGroups(self):
         """
         Return a list of available client groups.
         """
-        if not self._groups:
-            cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'groups', None, 'level'))
-            self._groups = []
-            while not cursor.EOF:
-                row = cursor.getRow()
-                group = b3.clients.Group()
-                group.id = int(row['id'])
-                group.name = row['name']
-                group.keyword = row['keyword']
-                group.level = int(row['level'])
-                group.timeAdd = int(row['time_add'])
-                group.timeEdit = int(row['time_edit'])
-                self._groups.append(group)
-                cursor.moveNext()
-            cursor.close()
-
-        return self._groups
+        cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'groups', None, 'level'))
+        groups = []
+        while not cursor.EOF:
+            row = cursor.getRow()
+            group = b3.clients.Group()
+            group.id = int(row['id'])
+            group.name = row['name']
+            group.keyword = row['keyword']
+            group.level = int(row['level'])
+            group.timeAdd = int(row['time_add'])
+            group.timeEdit = int(row['time_edit'])
+            groups.append(group)
+            cursor.moveNext()
+        cursor.close()
+        return groups
 
     def getGroup(self, group):
         """

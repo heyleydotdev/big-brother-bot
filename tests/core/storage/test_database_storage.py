@@ -49,6 +49,7 @@ class Test_DatabaseStorage(unittest.TestCase):
         mock_storage = Mock(spec=MysqlStorage)
         mock_storage.getClient = MysqlStorage.getClient
         mock_storage.db = None
+        mock_storage.status = Mock(return_value=False)  # connection is down
         mock_storage.query = Mock(return_value=None)
         mock_storage.console = Mock()
         mock_storage.console.config = Mock()

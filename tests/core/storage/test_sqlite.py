@@ -21,7 +21,9 @@
 #                                                                     #
 # ################################################################### #
 
+from b3.clients import Client
 from b3.functions import splitDSN
+from mockito import when, ANY
 from b3.storage.sqlite import SqliteStorage
 from tests import B3TestCase
 from tests.core.storage.common import StorageAPITest
@@ -46,6 +48,21 @@ class Test_sqlite(B3TestCase, StorageAPITest):
     def test_status_after_shutdown(self):
         self.storage.shutdown()
         self.assertFalse(self.storage.status())
+
+    def test_getGroups_is_read_from_storage_every_time(self):
+        # the group list used to be cached for the life of the process, so a
+        # group added by an external tool was unknown until restart
+        self.storage.getGroups()
+        self.storage.query("INSERT INTO `groups` (id, name, keyword, level) VALUES (99, 'Test', 'test', 3)")
+        self.assertIn('test', [g.keyword for g in self.storage.getGroups()])
+
+    def test_getClient_does_not_fall_back_to_cache_when_the_query_fails(self):
+        # the admins_cache is for a database that is down: a query error while
+        # connected must not silently grant the cached level
+        when(self.storage).query(ANY).thenRaise(RuntimeError('query failed'))
+        when(self.console.config).has_option('admins_cache', 'someguid').thenReturn(True)
+        when(self.console.config).get('admins_cache', 'someguid', raw=True).thenReturn('7, cached, 100')
+        self.assertRaises(RuntimeError, self.storage.getClient, Client(guid='someguid'))
 
     def test_getTables(self):
         self.assertSetEqual(set(
