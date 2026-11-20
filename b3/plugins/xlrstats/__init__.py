@@ -22,7 +22,7 @@
 # ################################################################### #
 
 __author__ = 'xlr8or & ttlogic'
-__version__ = '3.0.0-beta.17'
+__version__ = '3.0.0'
 
 import b3
 import b3.events

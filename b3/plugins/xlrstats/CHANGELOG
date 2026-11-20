@@ -1,5 +1,14 @@
 CHANGELOG (see xlrstats-v2-changelog.txt for v1 and v2 history and credits)
 
+20-11-2026 - 3.0.0        - B3 contributors - first stable release on Python 3:
+                                            - per-dialect name escaping (SQLite, MySQL, PostgreSQL)
+                                            - PostgreSQL schema upgrade adds id_token; schema errors are no longer silent
+                                            - world client protected from auto purge; active-only kill bonus and valid PostgreSQL query
+                                            - webfront thread is a daemon with a timeout; webfrontversion is an int
+                                            - portable top-list SQL; !xlrinit requires 'yes'
+                                            - all 11 settings shipped in plugin_xlrstats.ini
+                                            - tests for the background jobs and the MySQL/PostgreSQL SQL paths
+
 22-11-2012 - 3.0.0b1       - Mark Weirath   - preparations for version 3.0 of XLRstats
 11-08-2013 - 3.0.0b2       - Mark Weirath   - purging of the history tables added, compatibility fixes for v2-v3, draft
                                               of BattleLog subPlugin, comment headers
