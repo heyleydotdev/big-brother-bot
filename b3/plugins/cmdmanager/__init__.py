@@ -32,7 +32,6 @@ import types
 import os
 import re
 
-from configparser import ConfigParser
 from configparser import NoOptionError
 from configparser import NoSectionError
 from b3.functions import getCmd
@@ -165,11 +164,8 @@ class CmdmanagerPlugin(b3.plugin.Plugin):
         """
         Write the new command configuration in the plugin configuration file
         """
-        # read the config file
-        config = ConfigParser()
-        config.read(command.plugin.config.fileName)
+        config = command.plugin.config
 
-        # if there is no commands section
         if not config.has_section('commands'):
             raise NoSectionError('could not find <commands> section in plugin <%s> config file' % data['plugin_name'])
 
@@ -186,9 +182,9 @@ class CmdmanagerPlugin(b3.plugin.Plugin):
         self.debug('%s command <%s> in plugin <%s> config file', 'updated' if found else 'created new entry for',
                                                                  command.command, data['plugin_name'])
 
-        # write the updated configuration file
-        with open(command.plugin.config.fileName, 'wb') as configfile:
-            config.write(configfile)
+        # CfgConfigParser.save writes text with the file's encoding; writing str
+        # to a 'wb' handle failed with TypeError
+        config.save()
 
     def write_config_file(self, command, client):
         """
