@@ -96,6 +96,9 @@ class Test_xlrstats_postgresql(XlrstatsTestCase):
         connection = _connect('postgres')
         connection.autocommit = True
         with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
+                "WHERE datname = %s AND pid <> pg_backend_pid()", (XLRSTATS_TEST_DB,))
             cursor.execute('DROP DATABASE IF EXISTS "%s"' % XLRSTATS_TEST_DB)
             cursor.execute("CREATE DATABASE \"%s\" ENCODING 'utf8'" % XLRSTATS_TEST_DB)
         connection.close()
@@ -104,6 +107,9 @@ class Test_xlrstats_postgresql(XlrstatsTestCase):
         connection = _connect('postgres')
         connection.autocommit = True
         with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
+                "WHERE datname = %s AND pid <> pg_backend_pid()", (XLRSTATS_TEST_DB,))
             cursor.execute('DROP DATABASE IF EXISTS "%s"' % XLRSTATS_TEST_DB)
         connection.close()
 
