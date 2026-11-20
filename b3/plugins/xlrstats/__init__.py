@@ -33,7 +33,6 @@ import datetime
 import time
 import os
 import re
-import _thread
 import threading
 import urllib.request, urllib.error, urllib.parse
 
@@ -41,7 +40,7 @@ import b3.functions
 from b3.querybuilder import QueryBuilder
 from b3.functions import getCmd
 from b3.functions import right_cut
-from configparser import NoOptionError
+from configparser import NoOptionError, NoSectionError
 
 KILLER = "killer"
 VICTIM = "victim"
@@ -74,6 +73,8 @@ class XlrstatsPlugin(b3.plugin.Plugin):
     webfront_version = 2                 # maintain backward compatibility
     webfront_url = ''
     webfront_config_nr = 0
+    _webfront_timeout = 5                # seconds to wait for the webfront, then use the defaults
+    _webfront_thread = None
 
     _minKills = 100
     _minRounds = 10
@@ -248,8 +249,9 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         # let's try and get some variables from our webfront installation
         if self.webfront_url and self.webfront_url != '':
             self.debug('webfront set to: %s' % self.webfront_url)
-            thread1 = threading.Thread(target=self.getWebsiteVariables)
-            thread1.start()
+            # daemon: a webfront that hangs must not keep the bot alive at shutdown
+            self._webfront_thread = threading.Thread(target=self.getWebsiteVariables, daemon=True)
+            self._webfront_thread.start()
         else:
             self.debug('no webfront url available: using default')
 
@@ -269,10 +271,6 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         if self.keep_time:
             self._ctimePlugin = CtimePlugin(self.console, self.ctime_table)
             self._ctimePlugin.onStartup()
-
-        #start the xlrstats controller
-        #p = XlrstatscontrollerPlugin(self.console, self.min_players, self.silent)
-        #p.onStartup()
 
         # get the map we're in, in case this is a new map and we need to create a db record for it.
         mapstats = self.get_MapStats(self.console.game.mapName)
@@ -302,7 +300,7 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         self.hide_bots = self.getSetting('settings', 'hide_bots', b3.BOOL, self.hide_bots)
         self.exclude_bots = self.getSetting('settings', 'exclude_bots', b3.BOOL, self.exclude_bots)
         self.min_players = self.getSetting('settings', 'minplayers', b3.INT, self.min_players, lambda x: int(max(x, 0)))
-        self.webfront_version = self.getSetting('settings', 'webfrontversion', b3.STR, self.webfront_version)
+        self.webfront_version = self.getSetting('settings', 'webfrontversion', b3.INT, self.webfront_version)
         self.webfront_url = self.getSetting('settings', 'webfronturl', b3.STR, self.webfront_url)
         self.webfront_config_nr = self.getSetting('settings', 'servernumber', b3.INT, self.webfront_config_nr, validate_server_nr)
         self.keep_history = self.getSetting('settings', 'keep_history', b3.BOOL, self.keep_history)
@@ -485,7 +483,7 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         else:
             req = str(self.webfront_url.rstrip('/')) + '/' + str(self.webfront_config_nr) + '/pluginreq/index'
         try:
-            f = urllib.request.urlopen(req)
+            f = urllib.request.urlopen(req, timeout=self._webfront_timeout)
             res = f.readline().split(',')
             # Our webfront will present us 3 values ie.: 200,20,30 -> minKills,minRounds,maxDays
             if len(res) == 3:
@@ -788,7 +786,7 @@ class XlrstatsPlugin(b3.plugin.Plugin):
 
         try:
             ainfo = target._attackers
-        except:
+        except AttributeError:
             target._attackers = {}
             ainfo = target._attackers
 
@@ -835,14 +833,14 @@ class XlrstatsPlugin(b3.plugin.Plugin):
                 actualweapon = data[1]
                 for r in data:
                     try:
-                        actualweapon = self.config.get('replacements', r)
-                    except:
+                        actualweapon = self.config.get('replacements', str(r))
+                    except (NoSectionError, NoOptionError):
                         pass
 
                 # get applicable weapon multiplier
                 try:
-                    weapon_factor = self.config.getfloat('weapons', actualweapon)
-                except:
+                    weapon_factor = self.config.getfloat('weapons', str(actualweapon))
+                except (NoSectionError, NoOptionError, ValueError):
                     weapon_factor = 1.0
 
                 # calculate new skill for the assister
@@ -947,14 +945,14 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         actualweapon = data[1]
         for r in data:
             try:
-                actualweapon = self.config.get('replacements', r)
-            except:
+                actualweapon = self.config.get('replacements', str(r))
+            except (NoSectionError, NoOptionError):
                 pass
 
         # get applicable weapon multiplier
         try:
-            weapon_factor = self.config.getfloat('weapons', actualweapon)
-        except:
+            weapon_factor = self.config.getfloat('weapons', str(actualweapon))
+        except (NoSectionError, NoOptionError, ValueError):
             weapon_factor = 1.0
 
         # calculate new stats for the killer
@@ -1142,7 +1140,7 @@ class XlrstatsPlugin(b3.plugin.Plugin):
 
         try:
             target._attackers[client.cid] = time.time()
-        except:
+        except AttributeError:
             target._attackers = {client.cid: time.time()}
 
         self.verbose('----> XLRstats: onDamage: attacker added: %s (%s) damaged %s (%s)',
@@ -1187,8 +1185,8 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         actualweapon = data[1]
         for r in data:
             try:
-                actualweapon = self.config.get('replacements', r)
-            except:
+                actualweapon = self.config.get('replacements', str(r))
+            except (NoSectionError, NoOptionError):
                 pass
 
         # update weapon stats
@@ -1284,8 +1282,8 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         actualweapon = data[1]
         for r in data:
             try:
-                actualweapon = self.config.get('replacements', r)
-            except:
+                actualweapon = self.config.get('replacements', str(r))
+            except (NoSectionError, NoOptionError):
                 pass
 
         # adjust weapon statistics
@@ -1422,7 +1420,7 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         try:
             _action_bonus = self.config.getfloat('actions', action.name)
             #self.verbose('----> XLRstats: Found a bonus for %s: %s' %(action.name, action_bonus))
-        except:
+        except (NoSectionError, NoOptionError, ValueError):
             _action_bonus = self.action_bonus
 
         if _action_bonus:
@@ -1432,48 +1430,6 @@ class XlrstatsPlugin(b3.plugin.Plugin):
             self.save_Stat(playerstats)
 
         return
-
-    def showTables(self, xlrstats=False):
-        _tables = []
-        for table in self.console.storage.getTables():
-            if xlrstats and table not in self._xlrstatstables:
-                pass
-            else:
-                _tables.append(table)
-        if xlrstats:
-            self.console.verbose('available XLRstats tables in this database: %s', _tables)
-        else:
-            self.console.verbose('available tables in this database: %s', _tables)
-        return _tables
-
-    def optimizeTables(self, t=None):
-        if not t:
-            t = self.showTables()
-        if isinstance(t, str):
-            _tables = str(t)
-        else:
-            _tables = ', '.join(t)
-        self.debug('optimizing table(s): %s', _tables)
-        try:
-            self.query('OPTIMIZE TABLE %s' % _tables)
-            self.debug('optimize success')
-        except Exception as msg:
-            self.error('optimizing table(s) failed: %s: trying to repair...', msg)
-            self.repairTables(t)
-
-    def repairTables(self, t=None):
-        if not t:
-            t = self.showTables()
-        if isinstance(t, str):
-            _tables = str(t)
-        else:
-            _tables = ', '.join(t)
-        self.debug('repairing table(s): %s' % _tables)
-        try:
-            self.query('REPAIR TABLE %s' % _tables)
-            self.debug('repair success')
-        except Exception as msg:
-            self.error('repairing table(s) failed: %s' % msg)
 
     def calculateKillBonus(self):
         self.debug('calculating kill_bonus')
@@ -1646,7 +1602,8 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         """
         [<#>] - list the top # players of the last 14 days.
         """
-        _thread.start_new_thread(self.doTopList, (data, client, cmd, ext))
+        # daemon: the top list sleeps 1s per line and must not block shutdown
+        threading.Thread(target=self.doTopList, args=(data, client, cmd, ext), daemon=True).start()
 
     def doTopList(self, data, client, cmd=None, ext=False):
         """
@@ -1668,8 +1625,8 @@ class XlrstatsPlugin(b3.plugin.Plugin):
                  AND (%s - %s.time_edit  <= %s * 60 * 60 * 24) \
                  AND %s.id NOT IN \
                      ( SELECT distinct(target.id) FROM %s as penalties, %s as target \
-                     WHERE (penalties.type = "Ban" \
-                     OR penalties.type = "TempBan") \
+                     WHERE (penalties.type = \'Ban\' \
+                     OR penalties.type = \'TempBan\') \
                      AND inactive = 0 \
                      AND penalties.client_id = target.id \
                      AND ( penalties.time_expire = -1 \
@@ -1810,65 +1767,6 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         client.message('^3XLRstats database schema initialized')
 
 ########################################################################################################################
-#                                                                                                                      #
-#   SUB PLUGIN CONTROLLER - CONTROLS STARTING AND STOPPING OF MAIN XLRSTATS PLUGIN BASED ON PLAYERCOUNT                #
-#   OBSOLETE! REMOVED SINCE IT ALSO AFFECTED THE COMMANDS BEING UNAVAILABLE WHEN INACTIVE                              #
-#                                                                                                                      #
-########################################################################################################################
-
-# class XlrstatscontrollerPlugin(b3.plugin.Plugin):
-#     """This is a helper class/plugin that enables and disables the main XLRstats plugin
-#     It can not be called directly or separately from the XLRstats plugin!"""
-#
-#     def __init__(self, console, min_players=3, silent=False):
-#         self.console = console
-#         self.console.debug('Initializing SubPlugin: XlrstatsControllerPlugin')
-#         self.min_players = min_players
-#         self.silent = silent
-#         # empty message cache
-#         self._messages = {}
-#         self.registerEvent(b3.events.EVT_STOP)
-#         self.registerEvent(b3.events.EVT_EXIT)
-#
-#     def onStartup(self):
-#         self.console.debug('Starting SubPlugin: XlrstatsControllerPlugin')
-#         #get a reference to the main Xlrstats plugin
-#         self._xlrstatsPlugin = self.console.getPlugin('xlrstats')
-#         # register the events we're interested in.
-#         self.registerEvent(b3.events.EVT_CLIENT_JOIN)
-#         self.registerEvent(b3.events.EVT_GAME_ROUND_START)
-#
-#     def onEvent(self, event):
-#         if event.type == b3.events.EVT_CLIENT_JOIN:
-#             self.checkMinPlayers()
-#         elif event.type == b3.events.EVT_GAME_ROUND_START:
-#             self.checkMinPlayers(_roundstart=True)
-#
-#     def checkMinPlayers(self, _roundstart=False):
-#         """Checks if minimum amount of players are present
-#         if minimum amount of players is reached will enable stats collecting
-#         and if not it disables stats counting on next roundstart"""
-#         self._current_nr_players = len(self.console.clients.getList())
-#         self.debug(
-#             'Checking number of players online. Minimum = %s, Current = %s' % (self.min_players, self._current_nr_players))
-#         if self._current_nr_players < self.min_players and self._xlrstatsPlugin.isEnabled() and _roundstart:
-#             self.info('Disabling XLRstats: Not enough players online')
-#             if not self.silent:
-#                 self.console.say('XLRstats Disabled: Not enough players online!')
-#             self._xlrstatsPlugin.disable()
-#         elif self._current_nr_players >= self.min_players and not self._xlrstatsPlugin.isEnabled():
-#             self.info('Enabling XLRstats: Collecting Stats')
-#             if not self.silent:
-#                 self.console.say('XLRstats Enabled: Now collecting stats!')
-#             self._xlrstatsPlugin.enable()
-#         else:
-#             if self._xlrstatsPlugin.isEnabled():
-#                 _status = 'Enabled'
-#             else:
-#                 _status = 'Disabled'
-#             self.debug('Nothing to do at the moment. XLRstats is already %s' % _status)
-
-########################################################################################################################
 ##                                                                                                                    ##
 ##  SUB PLUGIN HISTORY - SAVES HISTORY SNAPSHOTS, WEEKLY AND/OR MONTHLY                                               ##
 ##                                                                                                                    ##
@@ -1927,15 +1825,9 @@ class XlrstatshistoryPlugin(b3.plugin.Plugin):
         self.debug('starting subplugin...')
         self.verbose('installing history crontabs')
 
-        # remove existing crontabs
-        try:
-            self.console.cron - self._cronTabMonth
-        except:
-            pass
-        try:
-            self.console.cron - self._cronTabWeek
-        except:
-            pass
+        # remove existing crontabs (Cron.cancel already ignores a missing tab)
+        self.console.cron - self._cronTabMonth
+        self.console.cron - self._cronTabWeek
         try:
             # install crontabs
             self._cronTabMonth = b3.cron.PluginCronTab(self, self.snapshot_month, 0, 0, 0, 1, '*', '*')

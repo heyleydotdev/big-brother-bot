@@ -23,6 +23,7 @@
 
 import logging
 import os
+from unittest.mock import patch
 
 from b3.config import CfgConfigParser
 from b3.plugins.xlrstats import XlrstatsPlugin
@@ -107,6 +108,22 @@ class Test_conf(XlrstatsTestCase):
         self.assertEqual('xlr_history_monthly', self.p.history_monthly_table)
         self.assertEqual('xlr_history_weekly', self.p.history_weekly_table)
         self.assertEqual('ctime', self.p.ctime_table)
+
+    def test_shipped_config_provides_every_setting(self):
+        # every missing setting logs a warning at startup: the shipped ini
+        # used to omit 11 of them
+        self.conf.load(DEFAULT_XLRSTATS_CONFIG_FILE)
+        with patch.object(self.p, 'warning') as warning:
+            self.p.onLoadConfig()
+        missing = [c for c in warning.call_args_list
+                   if len(c.args) >= 2 and c.args[1] == 'settings' and 'could not find' in str(c.args[0])]
+        self.assertEqual([], missing)
+
+    def test_webfront_version_is_an_integer(self):
+        # loaded as a string, '2' != 2 sent webfront v2 users to the v3 endpoint
+        self.conf.load(DEFAULT_XLRSTATS_CONFIG_FILE)
+        self.p.onLoadConfig()
+        self.assertEqual(2, self.p.webfront_version)
 
     def test_default_conf(self):
         """

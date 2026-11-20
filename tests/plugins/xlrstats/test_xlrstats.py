@@ -21,6 +21,8 @@
 #                                                                     #
 # ################################################################### #
 
+import inspect
+import unittest
 import logging
 import os
 from textwrap import dedent
@@ -34,6 +36,7 @@ from b3 import __file__ as b3_module__file__
 from b3 import TEAM_RED
 from b3 import TEAM_BLUE
 from b3.config import CfgConfigParser
+import b3.plugins.xlrstats as xlrstats_module
 from b3.plugins.xlrstats import XlrstatsPlugin
 from b3.fake import FakeClient
 from b3.plugins.admin import AdminPlugin
@@ -109,6 +112,58 @@ class Test_schema_update(XlrstatsTestCase):
         # used to log 'Query failed [ALTER TABLE ...]' at ERROR on every start
         self.p.build_database_schema()
         self.assertFalse([e for e in errors if 'ALTER TABLE' in str(e)], errors)
+
+
+class Test_toplist(XlrstatsTestCase):
+
+    def test_thread_is_daemon(self):
+        self.init()
+        with patch('b3.plugins.xlrstats.threading.Thread') as thread_cls:
+            self.p.cmd_xlrtopstats('3', Mock(), Mock())
+        self.assertTrue(thread_cls.call_args.kwargs['daemon'])
+
+    def test_query_is_portable_sql(self):
+        self.init()
+        cursor = Mock()
+        cursor.EOF = True
+        self.p.query = Mock(return_value=cursor)
+        # a double-quoted literal is an identifier on PostgreSQL, so the
+        # top list failed there with 'column "Ban" does not exist'
+        self.p.doTopList(None, Mock(), Mock())
+        query = self.p.query.call_args[0][0]
+        self.assertNotIn('"Ban"', query)
+        self.assertNotIn('"TempBan"', query)
+        self.assertIn("'Ban'", query)
+        self.assertIn("'TempBan'", query)
+
+
+class Test_module_health(unittest.TestCase):
+
+    def test_no_bare_except(self):
+        # bare excepts hid stat-write and config errors; a failed save must
+        # reach the log with the player and the error
+        source = inspect.getsource(xlrstats_module)
+        self.assertNotRegex(source, r'(?m)^\s*except:\s*$')
+
+
+class Test_webfront(XlrstatsTestCase):
+
+    def test_thread_is_daemon(self):
+        # a hung webfront request must not keep the process alive at shutdown
+        with patch.object(self.p, 'getWebsiteVariables'):
+            self.init("""[settings]
+webfronturl: http://127.0.0.1:1/
+""")
+        self.assertIsNotNone(self.p._webfront_thread)
+        self.assertTrue(self.p._webfront_thread.daemon)
+
+    def test_request_has_a_timeout(self):
+        self.init()
+        self.p.webfront_url = 'http://example.com'
+        with patch('b3.plugins.xlrstats.urllib.request.urlopen') as urlopen:
+            urlopen.return_value.readline.return_value = '1,2,3'
+            self.p.getWebsiteVariables()
+        urlopen.assert_called_once_with('http://example.com/?config=0&func=pluginreq', timeout=5)
 
 
 class Test_get_PlayerAnon(XlrstatsTestCase):
