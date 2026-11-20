@@ -24,11 +24,9 @@
 import os
 import unittest
 
-from b3.fake import FakeClient
 from b3.functions import splitDSN
 from b3.storage.postgresql import PostgresqlStorage
-from tests import B3TestCase
-from tests.plugins.xlrstats.test_xlrstats import XlrstatsTestCase
+from tests.plugins.xlrstats.backend import XlrstatsBackendTestCase
 
 POSTGRESQL_TEST_HOST = os.environ.get('POSTGRESQL_TEST_HOST', 'localhost')
 POSTGRESQL_TEST_USER = os.environ.get('POSTGRESQL_TEST_USER', 'b3test')
@@ -68,27 +66,13 @@ def _connect(dbname):
 
 
 @unittest.skipUnless(is_postgresql_ready, no_postgresql_reason)
-class Test_xlrstats_postgresql(XlrstatsTestCase):
+class Test_xlrstats_postgresql(XlrstatsBackendTestCase):
 
-    def setUp(self):
-        self._create_database()
-        XlrstatsTestCase.setUp(self)
-        self._sqlite_storage = self.console.storage
+    __test__ = True
+
+    def _new_storage(self):
         dsn = f"postgresql://{POSTGRESQL_TEST_USER}:{POSTGRESQL_TEST_PASSWORD}@{POSTGRESQL_TEST_HOST}/{XLRSTATS_TEST_DB}"
-        self.storage = PostgresqlStorage(dsn, splitDSN(dsn), self.console)
-        self.storage.connect()
-        self.console.storage = self.storage
-        self.init()
-
-    def tearDown(self):
-        XlrstatsTestCase.tearDown(self)
-        # stop the cron before closing the connections it may still use
-        B3TestCase.tearDown(self)
-        if getattr(self, 'storage', None):
-            self.storage.shutdown()
-        if getattr(self, '_sqlite_storage', None):
-            self._sqlite_storage.shutdown()
-        self._drop_database()
+        return PostgresqlStorage(dsn, splitDSN(dsn), self.console)
 
     def _create_database(self):
         connection = _connect('postgres')
@@ -110,19 +94,3 @@ class Test_xlrstats_postgresql(XlrstatsTestCase):
                 "WHERE datname = %s AND pid <> pg_backend_pid()", (XLRSTATS_TEST_DB,))
             cursor.execute(f'DROP DATABASE IF EXISTS "{XLRSTATS_TEST_DB}"')
         connection.close()
-
-    def test_schema_update_adds_id_token_to_a_2x_database(self):
-        # a 2.x database has the table but not the column
-        self.storage.query(f"ALTER TABLE {self.p.playerstats_table} DROP COLUMN id_token")
-        self.p.build_database_schema()
-        self.storage.query(f"SELECT id_token FROM {self.p.playerstats_table} LIMIT 1").close()
-
-    def test_stats_are_saved_with_a_quote_in_the_name(self):
-        # xlr_playerstats has a foreign key on clients.id in the PostgreSQL schema
-        client = FakeClient(console=self.console, name="P1", guid="P1_GUID")
-        client.id = self.storage.setClient(client)
-        client.groupBits = 1
-        stats = self.p.get_PlayerStats(client)
-        stats.fixed_name = "O'Neil"
-        self.p.save_Stat(stats)
-        self.assertEqual("O'Neil", self.p.get_PlayerStats(client).fixed_name)
