@@ -227,3 +227,24 @@ class TestConfig(unittest.TestCase):
         ]
         self.assertListEqual(expected_result, conf_xml.get_plugins())
         self.assertListEqual(expected_result, conf_cfg.get_plugins())
+
+
+class Test_analyze(unittest.TestCase):
+
+    def test_parser_import_error_names_the_missing_module(self):
+        # a missing dependency used to be reported as "invalid parser"
+        config = CfgConfigParser(allow_no_value=True)
+        config.loadFromString(dedent("""
+            [b3]
+            parser: nosuchparser
+            database: sqlite://:memory:
+            bot_name: b3
+
+            [plugins]
+            admin: @b3/conf/plugin_admin.ini
+        """))
+        analysis = MainConfig(config).analyze()
+
+        self.assertEqual(1, len(analysis), analysis)
+        self.assertIn("invalid parser specified in b3::parser (nosuchparser)", analysis[0])
+        self.assertIn("No module named", analysis[0])

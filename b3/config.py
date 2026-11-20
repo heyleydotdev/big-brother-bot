@@ -524,8 +524,9 @@ class MainConfig(B3ConfigParserMixin):
         if self.has_option('b3', 'parser'):
             try:
                 b3.functions.getModule('b3.parsers.%s' % self.get('b3', 'parser'))
-            except ImportError:
-                analysis.append('invalid parser specified in b3::parser (%s)' % self.get('b3', 'parser'))
+            except ImportError as err:
+                analysis.append('invalid parser specified in b3::parser (%s): %s'
+                                % (self.get('b3', 'parser'), err))
 
         ## DSN DICT
         if self.has_option('b3', 'database'):
