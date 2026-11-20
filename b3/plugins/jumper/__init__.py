@@ -258,7 +258,7 @@ class JumpRun(object):
         Update the jumprun in the storage.
         """
         self.p.console.storage.query(QueryBuilder(self.p.console.storage.db).UpdateQuery(
-            {'way_time': self.way_time, 'time_edit': self.time_add, 'demo': self.demo},
+            {'way_time': self.way_time, 'time_edit': self.p.console.time(), 'demo': self.demo},
             'jumpruns',
             {'client_id': self.client.id, 'mapname': self.mapname, 'way_id': self.way_id}))
         self.p.debug('updated jumprun : %r' % self)
