@@ -99,6 +99,18 @@ class XlrstatsTestCase(B3TestCase):
         self.p.minlevel = 1  # tests in this module assume unregistered players aren't considered by Xlrstats
         self.p.onStartup()
 
+class Test_schema_update(XlrstatsTestCase):
+
+    def test_already_applied_update_is_not_logged_as_an_error(self):
+        self.init()
+        errors = []
+        self.console.error = lambda msg, *args: errors.append(msg % args if args else msg)
+        # the id_token column was added by the first run: re-running the update
+        # used to log 'Query failed [ALTER TABLE ...]' at ERROR on every start
+        self.p.build_database_schema()
+        self.assertFalse([e for e in errors if 'ALTER TABLE' in str(e)], errors)
+
+
 class Test_get_PlayerAnon(XlrstatsTestCase):
 
     def setUp(self):
@@ -354,6 +366,16 @@ class Test_storage(XlrstatsTestCase):
     def setUp(self):
         XlrstatsTestCase.setUp(self)
         self.init()
+
+    def test_PlayerStats_name_with_a_quote(self):
+        # a nickname with a quote used to generate a broken INSERT on sqlite
+        client = mock()
+        client.id = 44
+        client.maxLevel = 1
+        s = self.p.get_PlayerStats(client)
+        s.fixed_name = "O'Neil"
+        self.p.save_Stat(s)
+        self.assertEqual("O'Neil", self.p.get_PlayerStats(client).fixed_name)
 
     def test_PlayerStats(self):
         # GIVEN

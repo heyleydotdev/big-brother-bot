@@ -37,7 +37,8 @@ import _thread
 import threading
 import urllib.request, urllib.error, urllib.parse
 
-from b3.functions import escape
+import b3.functions
+from b3.querybuilder import QueryBuilder
 from b3.functions import getCmd
 from b3.functions import right_cut
 from configparser import NoOptionError
@@ -370,7 +371,9 @@ class XlrstatsPlugin(b3.plugin.Plugin):
                     # execute statements separately since we need to substitute the table name
                     for q in self.console.storage.getQueriesFromFile(sql_file):
                         try:
-                            self.console.storage.query(q % v)
+                            # _query: a failed update is expected here (column already added)
+                            # and query() would log it as an error on every start
+                            self.console.storage._query(q % v)
                         except Exception:
                             # DONT LOG HERE!!! (schema might have already changed so executing the update query will
                             # raise an exception without actually changing the database table structure (which is OK!)
@@ -756,6 +759,7 @@ class XlrstatsPlugin(b3.plugin.Plugin):
     def save_Stat(self, stat):
         #self.verbose('*----> XLRstats: saving statistics for %s' % type(stat))
         #self.verbose('*----> Contents: %s' %stat)
+        stat._qb = QueryBuilder(self.console.storage.db)
         if hasattr(stat, '_new'):
             q = stat._insertquery()
             #self.debug('Inserting using: %r', q)
@@ -1428,38 +1432,6 @@ class XlrstatsPlugin(b3.plugin.Plugin):
             self.save_Stat(playerstats)
 
         return
-
-    def updateTableColumns(self):
-        self.verbose('checking if we need to update tables for version 2.0.0')
-        # v2.0.0 additions to the playerstats table:
-        self._addTableColumn('assists', PlayerStats._table, 'MEDIUMINT( 8 ) NOT NULL DEFAULT "0" AFTER `skill`')
-        self._addTableColumn('assistskill', PlayerStats._table, 'FLOAT NOT NULL DEFAULT "0" AFTER `assists`')
-        # alterations to columns in existing tables:
-        self._updateTableColumns()
-        return None
-        # end of update check
-
-    def _addTableColumn(self, c1, t1, specs):
-        try:
-            self.query("""SELECT %s FROM %s limit 1;""" % (c1, t1))
-        except Exception as e:
-            if e[0] == 1054:
-                self.console.debug('column does not yet exist: %s' % e)
-                self.query("""ALTER TABLE %s ADD %s %s ;""" % (t1, c1, specs))
-                self.console.info('created new column `%s` on %s' % (c1, t1))
-            else:
-                self.console.error('query failed - %s: %s' % (type(e), e))
-
-    def _updateTableColumns(self):
-        try:
-            # need to update the weapon-identifier columns in these tables for cod7.
-            # This game knows over 255 weapons/variations
-            self.query("""ALTER TABLE %s
-                          CHANGE id  id SMALLINT(5) UNSIGNED NOT NULL AUTO_INCREMENT;""" % WeaponStats._table)
-            self.query("""ALTER TABLE %s
-                          CHANGE weapon_id weapon_id SMALLINT(5) UNSIGNED NOT NULL DEFAULT  "0";""" % WeaponUsage._table)
-        except:
-            pass
 
     def showTables(self, xlrstats=False):
         _tables = []
@@ -2286,6 +2258,17 @@ class BattlestatsPlugin(b3.plugin.Plugin):
 class StatObject(object):
 
     _table = None
+    _qb = None  # QueryBuilder of the storage in use, set when saving
+
+    def _escape(self, value):
+        """Escape a string value for the storage dialect (returns the inner
+        value: the queries already wrap it in single quotes)."""
+        if self._qb is not None:
+            quoted = self._qb.escape(value)
+            if len(quoted) >= 2 and quoted[0] == quoted[-1] and quoted[0] in "'\"":
+                return quoted[1:-1]
+            return quoted
+        return b3.functions.escape(str(value), "'")
 
     def _insertquery(self):
         return None
@@ -2331,7 +2314,7 @@ class PlayerStats(StatObject):
                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '%s', '%s')""" % (self._table, self.client_id, self.kills,
                self.deaths, self.teamkills, self.teamdeaths, self.suicides, self.ratio, self.skill, self.assists,
                self.assistskill, self.curstreak, self.winstreak, self.losestreak, self.rounds, self.hide,
-               escape(self.fixed_name, "'"), self.id_token)
+               self._escape(self.fixed_name), self.id_token)
         return q
 
     def _updatequery(self):
@@ -2339,7 +2322,7 @@ class PlayerStats(StatObject):
                skill=%s, assists=%s, assistskill=%s, curstreak=%s, winstreak=%s, losestreak=%s, rounds=%s, hide=%s,
                fixed_name='%s', id_token='%s' WHERE id= %s""" % (self._table, self.client_id, self.kills, self.deaths,
                self.teamkills, self.teamdeaths, self.suicides, self.ratio, self.skill, self.assists, self.assistskill,
-               self.curstreak, self.winstreak, self.losestreak, self.rounds, self.hide, escape(self.fixed_name, "'"),
+               self.curstreak, self.winstreak, self.losestreak, self.rounds, self.hide, self._escape(self.fixed_name),
                self.id_token, self.id)
         return q
 
@@ -2358,12 +2341,12 @@ class WeaponStats(StatObject):
 
     def _insertquery(self):
         q = """INSERT INTO %s (name, kills, suicides, teamkills) VALUES ('%s', %s, %s, %s)""" % (
-            self._table, escape(self.name, "'"), self.kills, self.suicides, self.teamkills)
+            self._table, self._escape(self.name), self.kills, self.suicides, self.teamkills)
         return q
 
     def _updatequery(self):
         q = """UPDATE %s SET name='%s', kills=%s, suicides=%s, teamkills=%s WHERE id=%s""" % (
-            self._table, escape(self.name, "'"), self.kills, self.suicides, self.teamkills, self.id)
+            self._table, self._escape(self.name), self.kills, self.suicides, self.teamkills, self.id)
         return q
 
 
@@ -2409,12 +2392,12 @@ class Bodyparts(StatObject):
 
     def _insertquery(self):
         q = """INSERT INTO %s (name, kills, suicides, teamkills) VALUES ('%s', %s, %s, %s)""" % (
-            self._table, escape(self.name, "'"), self.kills, self.suicides, self.teamkills)
+            self._table, self._escape(self.name), self.kills, self.suicides, self.teamkills)
         return q
 
     def _updatequery(self):
         q = """UPDATE %s SET name='%s', kills=%s, suicides=%s, teamkills=%s WHERE id=%s""" % (
-            self._table, escape(self.name, "'"), self.kills, self.suicides, self.teamkills, self.id)
+            self._table, self._escape(self.name), self.kills, self.suicides, self.teamkills, self.id)
         return q
 
 
@@ -2433,12 +2416,12 @@ class MapStats(StatObject):
 
     def _insertquery(self):
         q = """INSERT INTO %s (name, kills, suicides, teamkills, rounds) VALUES ('%s', %s, %s, %s, %s)""" % (
-            self._table, escape(self.name, "'"), self.kills, self.suicides, self.teamkills, self.rounds)
+            self._table, self._escape(self.name), self.kills, self.suicides, self.teamkills, self.rounds)
         return q
 
     def _updatequery(self):
         q = """UPDATE %s SET name='%s', kills=%s, suicides=%s, teamkills=%s, rounds=%s WHERE id=%s""" % (
-            self._table, escape(self.name, "'"), self.kills, self.suicides, self.teamkills, self.rounds, self.id)
+            self._table, self._escape(self.name), self.kills, self.suicides, self.teamkills, self.rounds, self.id)
         return q
 
 
@@ -2533,11 +2516,11 @@ class ActionStats(StatObject):
     count = 0
 
     def _insertquery(self):
-        q = """INSERT INTO %s (name, count) VALUES ('%s', %s)""" % (self._table, escape(self.name, "'"), self.count)
+        q = """INSERT INTO %s (name, count) VALUES ('%s', %s)""" % (self._table, self._escape(self.name), self.count)
         return q
 
     def _updatequery(self):
-        q = """UPDATE %s SET name='%s', count=%s WHERE id=%s""" % (self._table, escape(self.name, "'"), self.count, self.id)
+        q = """UPDATE %s SET name='%s', count=%s WHERE id=%s""" % (self._table, self._escape(self.name), self.count, self.id)
         return q
 
 
