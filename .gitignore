@@ -28,3 +28,10 @@ __pycache__/
 
 # opencode session state
 .opencode/
+
+# local b3 configuration and generated files (may contain credentials)
+b3/conf/b3.ini
+b3/conf/*.db
+b3/conf/*.db-journal
+b3/conf/status.xml
+b3/conf/b3doc.html

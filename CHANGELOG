@@ -114,7 +114,7 @@ Dependencies
 - PyMySQL 1.x (was 0.6.6), psycopg 3 (was psycopg2 2.6), paramiko 3 (was 1.15),
   feedparser 6 (was 5.1), requests 2.32+, python-dateutil 2.9+.
 
-Performance (see `bench/BASELINE.md`)
+Performance (benchmark numbers in the 2.0.0 CI run)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Parser log hot loop: 12,904 -> 19,602 lines/sec (+33%).
 - Idle memory 29-33 MB with the admin plugin loaded; startup ~0.15 s.
