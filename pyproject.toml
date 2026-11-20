@@ -85,6 +85,13 @@ b3 = [
 ]
 "b3.plugins.adv" = ["CHANGELOG"]
 "b3.plugins.banlist" = ["example/*.xml"]
+"b3.plugins.xlrstats" = [
+    "CHANGELOG",
+    "README.md",
+    "sql/mysql/*.sql",
+    "sql/postgresql/*.sql",
+    "sql/sqlite/*.sql",
+]
 
 [tool.ruff]
 target-version = "py311"
