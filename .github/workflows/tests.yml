@@ -22,11 +22,11 @@ jobs:
         python-version: ['3.11', '3.12', '3.13']
 
     env:
-      MYSQL_TEST_HOST: mysql
+      MYSQL_TEST_HOST: 127.0.0.1
       MYSQL_TEST_USER: root
       MYSQL_TEST_PASSWORD: root
       MYSQL_TEST_DB: b3_test
-      POSTGRESQL_TEST_HOST: postgres
+      POSTGRESQL_TEST_HOST: 127.0.0.1
       POSTGRESQL_TEST_USER: postgres
       POSTGRESQL_TEST_PASSWORD: ''
       POSTGRESQL_TEST_DB: b3_test
@@ -39,6 +39,8 @@ jobs:
         image: mysql:8
         env:
           MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
         options: >-
           --health-cmd="mysqladmin ping -proot"
           --health-interval=10s
@@ -49,6 +51,8 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd="pg_isready -U postgres"
           --health-interval=10s
