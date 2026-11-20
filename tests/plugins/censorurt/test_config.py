@@ -26,6 +26,22 @@ import b3
 from tests.plugins.censorurt import CensorurtTestCase
 
 
+class Test_shipped_config(CensorurtTestCase):
+
+    def test_shipped_ini(self):
+        with open(b3.getAbsolutePath('@b3/conf/plugin_censorurt.ini')) as f:
+            self.init_plugin(f.read())
+        self.assertEqual(39, self.p._maxLevel)
+        self.assertTrue(self.p._mute)
+        self.assertFalse(self.p._slap)
+        self.assertEqual(0.5, self.p._muteduration1)
+        self.assertEqual(1.5, self.p._muteduration2)
+        self.assertEqual(5, self.p._muteduration3)
+        self.assertEqual(2, self.p._warnafter)
+        self.assertEqual(76, len(self.p._badWords))
+        self.assertEqual(7, len(self.p._badNames))
+
+
 class Test_urbanterror_mute(CensorurtTestCase):
     def test_missing(self):
         self.init_plugin("""

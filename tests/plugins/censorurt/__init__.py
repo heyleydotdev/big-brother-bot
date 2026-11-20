@@ -29,7 +29,7 @@ from unittest.mock import Mock, patch
 from b3.fake import FakeClient
 from tests import B3TestCase
 from b3.plugins.censorurt import CensorurtPlugin
-from b3.config import XmlConfigParser
+from b3.config import XmlConfigParser, CfgConfigParser
 
 
 class CensorurtTestCase(B3TestCase):
@@ -61,7 +61,13 @@ class CensorurtTestCase(B3TestCase):
         logging.getLogger('output').setLevel(logging.WARNING)
 
     def init_plugin(self, config_content):
-        self.conf.setXml(config_content)
+        if config_content.lstrip().startswith('<'):
+            self.conf = XmlConfigParser()
+            self.conf.setXml(config_content)
+        else:
+            self.conf = CfgConfigParser()
+            self.conf.loadFromString(config_content)
+        self.p = CensorurtPlugin(self.console, self.conf)
         self.log.setLevel(logging.DEBUG)
         self.log.info("============================= Censor plugin: loading config ============================")
         self.p.onLoadConfig()

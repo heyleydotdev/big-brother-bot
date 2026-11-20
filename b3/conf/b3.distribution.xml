@@ -121,7 +121,7 @@
         <!-- <plugin name="afk" config="@b3/conf/plugin_afk.ini" /> -->
         <!-- <plugin name="banlist" config="@b3/conf/plugin_banlist.xml" /> -->
         <!-- <plugin name="callvote" config="@b3/conf/plugin_callvote.ini" /> -->
-        <!-- <plugin name="censorurt" config="@b3/conf/plugin_censorurt.xml" /> -->
+        <!-- <plugin name="censorurt" config="@b3/conf/plugin_censorurt.ini" /> -->
         <!-- <plugin name="chatlogger" config="@b3/conf/plugin_chatlogger.ini" /> -->
         <!-- <plugin name="countryfilter" config="@b3/conf/plugin_countryfilter.ini" /> -->
         <!-- <plugin name="customcommands" config="@b3/conf/plugin_customcommands.ini" /> -->
