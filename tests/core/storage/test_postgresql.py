@@ -101,6 +101,11 @@ class Test_PostgreSQL(B3TestCase, StorageAPITest):
         """this method is called before each test"""
         B3TestCase.setUp(self)
 
+        # keep the storage errors: 'lost connection' hides the real cause
+        storage_errors = []
+        self.console.error = lambda msg, *a, **kw: storage_errors.append(msg % a if a else msg)
+        self.console.critical = lambda msg, *a, **kw: storage_errors.append(msg % a if a else msg)
+
         try:
             # create a fresh database like Test_MySQL does, since the PostgreSQL server
             # may not have the test database ready (e.g., fresh CI service container)
@@ -127,7 +132,7 @@ class Test_PostgreSQL(B3TestCase, StorageAPITest):
                 tables.remove('groups')
                 self.storage.truncateTable(tables)
         except Exception as e:
-            self.fail("Error: %s" % e)
+            self.fail("Error: %s; storage log: %s" % (e, storage_errors))
 
     def tearDown(self):
         """this method is called after each test"""
