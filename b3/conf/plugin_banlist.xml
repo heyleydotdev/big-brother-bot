@@ -1,3 +1,4 @@
+<!-- DEPRECATED: use plugin_banlist.ini -->
 <configuration plugin="banlist">
 
     <settings name="global_settings">

@@ -38,6 +38,7 @@ import _thread
 import time
 import urllib.request, urllib.error, urllib.parse
 
+from b3.config import XmlConfigParser
 from b3.functions import getCmd
 from configparser import NoOptionError
 
@@ -45,8 +46,26 @@ from configparser import NoOptionError
 user_agent =  "B3 Banlist plugin/%s" % __version__
 
 
-class BanlistPlugin(b3.plugin.Plugin):
+class IniBanlistConfig:
+    """Adapt an INI section to the Element-like API the Banlist classes use."""
 
+    def __init__(self, config, section):
+        self.config = config
+        self.section = section
+
+    def find(self, name):
+        if self.config.has_option(self.section, name):
+            return IniBanlistNode(self.config.get(self.section, name))
+        return None
+
+
+class IniBanlistNode:
+
+    def __init__(self, text):
+        self.text = text
+
+
+class BanlistPlugin(b3.plugin.Plugin):
     _adminPlugin = None
     _banlists = None
     _whitelists = None
@@ -93,6 +112,13 @@ class BanlistPlugin(b3.plugin.Plugin):
                     # remove existing crontab
                     self.console.cron - whitelist._cronTab
 
+    def _iter_configs(self, name):
+        if isinstance(self.config, XmlConfigParser):
+            return self.config.get(name)
+        prefix = name + ':'
+        return [IniBanlistConfig(self.config, section)
+                for section in self.config.sections() if section.startswith(prefix)]
+
     def onLoadConfig(self):
         """
         Load plugin configuration.
@@ -112,7 +138,7 @@ class BanlistPlugin(b3.plugin.Plugin):
 
         # load banlists from config
         self._banlists = []
-        for banlistconfig in self.config.get('ip_banlist'):
+        for banlistconfig in self._iter_configs('ip_banlist'):
             try:
                 b = IpBanlist(self, banlistconfig)
                 self._banlists.append(b)
@@ -120,7 +146,7 @@ class BanlistPlugin(b3.plugin.Plugin):
             except Exception as e:
                 self.error(e)
 
-        for banlistconfig in self.config.get('guid_banlist'):
+        for banlistconfig in self._iter_configs('guid_banlist'):
             try:
                 b = GuidBanlist(self, banlistconfig)
                 self._banlists.append(b)
@@ -128,7 +154,7 @@ class BanlistPlugin(b3.plugin.Plugin):
             except Exception as e:
                 self.error(e)
 
-        for banlistconfig in self.config.get('pbid_banlist'):
+        for banlistconfig in self._iter_configs('pbid_banlist'):
             try:
                 b = PbidBanlist(self, banlistconfig)
                 self._banlists.append(b)
@@ -136,7 +162,7 @@ class BanlistPlugin(b3.plugin.Plugin):
             except Exception as e:
                 self.error(e)
 
-        for banlistconfig in self.config.get('rules_of_combat'):
+        for banlistconfig in self._iter_configs('rules_of_combat'):
             try:
                 b = RocBanlist(self, banlistconfig)
                 self._banlists.append(b)
@@ -148,7 +174,7 @@ class BanlistPlugin(b3.plugin.Plugin):
 
         # load whitelists from config
         self._whitelists = []
-        for whitelistconfig in self.config.get('ip_whitelist'):
+        for whitelistconfig in self._iter_configs('ip_whitelist'):
             try:
                 b = IpBanlist(self, whitelistconfig)
                 self._whitelists.append(b)
@@ -156,7 +182,7 @@ class BanlistPlugin(b3.plugin.Plugin):
             except Exception as e:
                 self.error(e)
 
-        for whitelistconfig in self.config.get('guid_whitelist'):
+        for whitelistconfig in self._iter_configs('guid_whitelist'):
             try:
                 b = GuidBanlist(self, whitelistconfig)
                 self._whitelists.append(b)
@@ -164,7 +190,7 @@ class BanlistPlugin(b3.plugin.Plugin):
             except Exception as e:
                 self.error(e)
 
-        for whitelistconfig in self.config.get('pbid_whitelist'):
+        for whitelistconfig in self._iter_configs('pbid_whitelist'):
             try:
                 b = PbidBanlist(self, whitelistconfig)
                 self._whitelists.append(b)
