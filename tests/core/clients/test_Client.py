@@ -48,6 +48,24 @@ class Test_Client(B3TestCase):
         self.assertEqual(c.greeting, '')
         self.assertEqual(c.pbid, '')
 
+    def test_message_formats_its_arguments(self):
+        # GIVEN a parser whose message() takes no substitution arguments (q3 family)
+        calls = []
+        console = Mock()
+        console.message = lambda client, text: calls.append((client, text))
+        client = Client(console=console)
+        # WHEN
+        client.message('^7%s alias for ^3%s', 'added', 'help')
+        # THEN
+        self.assertEqual([(client, '^7added alias for ^3help')], calls)
+
+    def test_message_without_arguments_is_not_formatted(self):
+        calls = []
+        console = Mock()
+        console.message = lambda client, text: calls.append(text)
+        Client(console=console).message('100% ready')
+        self.assertEqual(['100% ready'], calls)
+
     def test_team(self):
         m = Mock()
         self.client.team = m

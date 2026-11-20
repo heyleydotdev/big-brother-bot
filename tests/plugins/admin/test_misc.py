@@ -23,7 +23,7 @@
 
 import unittest
 
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from tests.plugins.admin import Admin_TestCase, Admin_functional_test
 
 
@@ -135,3 +135,23 @@ class Test_spell_checker(Admin_functional_test):
     def test_unrecognized_command_private(self):
         self.joe.says('/qfsmlkjazemlrkjazemrlkj')
         self.assertEqual(['Unrecognized command qfsmlkjazemlrkjazemrlkj'], self.joe.message_history)
+
+class Test_sayLoudOrPM(Admin_TestCase):
+
+    def setUp(self):
+        Admin_TestCase.setUp(self)
+        self.init()
+        self.cmd = self.p._commands['help']
+        self.client = Mock()
+
+    def test_private_message_formats_its_arguments(self):
+        # the q3-family parsers' message() takes no substitution arguments
+        self.client.message.side_effect = lambda text: None
+        self.cmd.sayLoudOrPM(self.client, '^7%s alias for ^3%s', 'added', 'help')
+        self.client.message.assert_called_once_with('^7added alias for ^3help')
+
+    def test_loud_say_formats_its_arguments(self):
+        self.cmd.loud = True
+        with patch.object(self.console, 'say', side_effect=lambda text: None) as say:
+            self.cmd.sayLoudOrPM(self.client, '^7%s alias for ^3%s', 'added', 'help')
+        say.assert_called_once_with('^7added alias for ^3help')

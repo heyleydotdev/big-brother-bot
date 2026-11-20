@@ -2483,12 +2483,14 @@ class Command(object):
         :param client: The client on who to send the message
         :param message: The message to be sent
         """
+        if args:
+            message = message % args
         if self.loud:
-            self.plugin.console.say(message, *args)
+            self.plugin.console.say(message)
         elif self.big:
-            self.plugin.console.saybig(message, *args)
+            self.plugin.console.saybig(message)
         else:
-            client.message(message, *args)
+            client.message(message)
 
     def parseData(self, data, *args):
         """
