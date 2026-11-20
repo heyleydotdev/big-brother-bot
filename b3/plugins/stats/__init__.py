@@ -81,7 +81,7 @@ class StatsPlugin(b3.plugin.Plugin):
                 option_name = matching_options[0]
             else:
                 option_name = cmd_name
-            return self.config.getint('commands', option_name)
+            return self.console.getGroupLevel(self.config.get('commands', option_name))
 
         try:
             self.mapstatslevel = load_command_level('mapstats')

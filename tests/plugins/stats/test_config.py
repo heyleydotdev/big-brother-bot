@@ -78,3 +78,20 @@ class Test_config(B3TestCase):
         self.assertTrue(self.p.resetxp)
         self.assertTrue(self.p.show_awards)
         self.assertTrue(self.p.show_awards_xp)
+
+    def test_group_keyword_levels(self):
+        # levels given as group keywords used to raise ValueError and fall back to the defaults
+        conf = CfgConfigParser()
+        conf.loadFromString(dedent(r"""
+            [commands]
+            mapstats: guest
+            testscore: mod
+            topstats: admin
+            topxp: reg
+        """))
+        self.p = StatsPlugin(self.console, conf)
+        self.p.onLoadConfig()
+        self.assertEqual(0, self.p.mapstatslevel)
+        self.assertEqual(20, self.p.testscorelevel)
+        self.assertEqual(40, self.p.topstatslevel)
+        self.assertEqual(2, self.p.topxplevel)
