@@ -23,6 +23,8 @@
 
 import logging
 import queue
+import os
+import tempfile
 import threading
 import time
 import unittest
@@ -254,3 +256,27 @@ class Test_dispatcher_is_shared(unittest.TestCase):
         # a private copy of the dispatch loop is how time.clock() shipped dead
         from b3.fake import FakeConsole
         self.assertIs(Parser._dispatch, FakeConsole._dispatch)
+
+
+class Test_read_chunk(unittest.TestCase):
+
+    def test_read_is_bounded(self):
+        fd, path = tempfile.mkstemp()
+        try:
+            with os.fdopen(fd, 'w') as f:
+                for i in range(2000):
+                    f.write(('%099d' % i) + chr(10))
+            parser = DummyParser()
+            with open(path, 'r') as f:
+                parser.input = f
+                first = parser.read()
+                total = len(first)
+                while True:
+                    chunk = parser.read()
+                    if not chunk:
+                        break
+                    total += len(chunk)
+            self.assertLess(len(first), 2000)
+            self.assertEqual(2000, total)
+        finally:
+            os.unlink(path)

@@ -1337,7 +1337,16 @@ class Parser(object):
         Read lines from the log file
         :param game_log: The gamelog file pointer
         """
-        return game_log.readlines()
+        # bounded read: a replay or a long pause must not load the whole file
+        lines = []
+        budget = 65536
+        while budget > 0:
+            line = game_log.readline()
+            if not line:
+                break
+            lines.append(line)
+            budget -= len(line)
+        return lines
 
     def ___read_input_darwin(self, game_log):
         """
